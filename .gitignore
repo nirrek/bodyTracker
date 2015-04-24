@@ -1,0 +1,26 @@
+# Java Class Files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Gradle Stuff
+.gradle
+/build
+!gradle-wrapper.jar  # don't ignore the gradle wrapper jar
+
+# Intellij IDEA Configuration Files
+.idea
+*.iml
+
+# Eclipse Configuration Files
+.project
+.classpath
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# OSX Stuff
+.DS_Store
