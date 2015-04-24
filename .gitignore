@@ -11,13 +11,23 @@
 /build
 !gradle-wrapper.jar
 
-# Intellij IDEA Configuration Files
+# Intellij IDEA Stuff
 .idea
 *.iml
 
-# Eclipse Configuration Files
+# Eclipse Stuff
 .project
 .classpath
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
