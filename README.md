@@ -40,4 +40,5 @@ Gradle should be used for all this stuff.
 ./gradlew test
 ```
 
+Note that we are using `./gradlew build` rather than `gradle build`. This is because we are using the __gradle wrapper__ this ensures that everyone will be executing the build script using the same version of gradle (rather than whatever the version of their system-installed binary is)
 
