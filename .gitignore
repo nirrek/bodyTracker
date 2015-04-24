@@ -9,7 +9,7 @@
 # Gradle Stuff
 .gradle
 /build
-!gradle-wrapper.jar  # don't ignore the gradle wrapper jar
+!gradle-wrapper.jar
 
 # Intellij IDEA Configuration Files
 .idea
