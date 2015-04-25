@@ -23,9 +23,9 @@ cd bodyTracker
 
 `Note for Windows users`: You need to use the `gradlew.bat` file rather than the `gradlew` file. I don't use Windows, but I assume .bat files are just a file you can easily execute on the command line.
 
-An example of doing this for eclipse is shown below:
+An example of doing this for eclipse is shown below:  
 ![Setup an eclipse project](https://s3.amazonaws.com/f.cl.ly/items/2o0d1u1w0G0o1r0k1r0r/Image%202015-04-24%20at%209.43.03%20pm.png)
-
+  
 ### Step 3: Project Import
 Import the project into your IDE in the way you typically would.
 
