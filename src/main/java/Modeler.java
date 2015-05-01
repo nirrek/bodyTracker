@@ -5,4 +5,13 @@
  * model produced by the Modeler will be consumed by the Renderer.
  */
 public class Modeler {
+	
+	private Arm leftArm;
+	private Arm rightArm;
+	
+	//takes an input of some kind and outputs the arm positions
+	public Modeler(Arm la, Arm ra){
+		leftArm = la;
+		rightArm = ra;
+	}
 }
