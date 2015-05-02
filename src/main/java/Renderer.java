@@ -1,9 +1,5 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.HashSet;
-
+import java.io.*;
+import java.util.*;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -25,8 +21,13 @@ public class Renderer {
 	
 	private RendererView rendererView;
     private Modeler modeler;
+    SerialPort serialPort;
+    private static final int TIME_OUT = 2000;
+	private static final int DATA_RATE = 9600;
+	private CommPortIdentifier portIdentifier;
+	private InputStream in;
       
-    private String portName = "COM3";
+    private String portName = "/dev/cu.usbmodem1451";  //Lisa's iMac port.
     
     public Renderer(Stage primaryStage, Modeler model, RendererView view) {
     	rendererView = view;
@@ -45,32 +46,30 @@ public class Renderer {
     }
     
     private void connect() throws Exception {
-    	CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+    	portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
         
     	if (portIdentifier.isCurrentlyOwned()) {
             System.out.println("Error: Port is currently in use");
         } else {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(),2000);
-            
+            CommPort commPort = portIdentifier.open(this.getClass().getName(), 
+            		TIME_OUT);        
             if ( commPort instanceof SerialPort ) {
-                SerialPort serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
-                
-                InputStream in = serialPort.getInputStream();
-                OutputStream out = serialPort.getOutputStream();
-                               
-                (new Thread(new SerialWriter(out))).start();
-                
-                serialPort.addEventListener(new SerialReader(in));
-                serialPort.notifyOnDataAvailable(true);
+                serialPort = (SerialPort) commPort;
+                serialPort.setSerialPortParams(DATA_RATE,SerialPort.DATABITS_8,
+                		SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
 
+               OutputStream out = serialPort.getOutputStream();
+                               
+                (new Thread(new SerialWriter(out))).start();        
             }
-            else
-            {
-                System.out.println("Error: Only serial ports are handled by this example.");
+            else {
+                System.out.println("Error: Only serial ports are handled by "
+                		+ "this example.");
             }
         }     
     }
+   
+
     
     /**
      * Handles the input coming from the serial port. A new line character
@@ -79,6 +78,7 @@ public class Renderer {
     public static class SerialReader implements SerialPortEventListener {
         private InputStream in;
         private byte[] buffer = new byte[1024];
+        
         
         public SerialReader ( InputStream in ) {
             this.in = in;
@@ -101,12 +101,11 @@ public class Renderer {
                 e.printStackTrace();
                 System.exit(-1);
             }             
-        }
-
+        } 
     }
     
     /**
-     * Open a new thread. sends message to the Arduino
+     * Open a new thread. Sends message(s) to the Arduino
      */
     public static class SerialWriter implements Runnable {
         OutputStream out;
@@ -131,7 +130,7 @@ public class Renderer {
     
     private class ConnectButtonHandler implements EventHandler<ActionEvent> {
 
-		@Override
+		//@Override
 		public void handle(ActionEvent e) {
 			boolean connectionIsSuccessful = true;
 
@@ -141,9 +140,6 @@ public class Renderer {
             	 exception.printStackTrace();
             	 rendererView.displayError(exception.getMessage());
              }
-        	 
-            
-        	// TODO: ESTABLISH CONNECTION WITH ARDUINO
         	
         	if (connectionIsSuccessful) {
         		rendererView.toggleControlPaneForArduinoConnected(true);
@@ -154,16 +150,24 @@ public class Renderer {
 
     private class CloseConnectionButtonHandler implements EventHandler<ActionEvent> {
 
-		@Override
+		//@Override
 		public void handle(ActionEvent arg0) {
-			boolean closeConnectionIsSuccessful = true;
+			boolean closeConnectionIsSuccessful = false;
         	String error = "";
         	
-        	// TODO: CLOSE CONNECTION WITH ARDUINO
+        	/* Close connection with Arduino */
+        	if (serialPort != null) {
+        		serialPort.removeEventListener();
+        		serialPort.close();
+        		closeConnectionIsSuccessful = true;
+        	} else if (serialPort == null) {
+        		closeConnectionIsSuccessful = true;
+        	}
         	
         	if (closeConnectionIsSuccessful) {
         		rendererView.toggleControlPaneForArduinoConnected(false);
         	}
+        	
         	rendererView.displayError(error);
 		}
     	
@@ -171,7 +175,7 @@ public class Renderer {
     
     private class FetchButtonHandler implements EventHandler<ActionEvent> {
 
-		@Override
+		//@Override
 		public void handle(ActionEvent arg0) {
 			String error = "";
 			
@@ -182,31 +186,58 @@ public class Renderer {
     	
     }
     
-    private class StreamButtonHandler implements EventHandler<ActionEvent> {
+    private void listenForInput() throws Exception{
+      	 in = serialPort.getInputStream();
+      	    serialPort.addEventListener(new SerialReader(in));
+      	    serialPort.notifyOnDataAvailable(true);
+      }
 
-		@Override
+    
+    private class StreamButtonHandler implements EventHandler<ActionEvent> {
+    	
+        //@Override
 		public void handle(ActionEvent arg0) {
+		    try {
+				listenForInput();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		  
 			String error = "";
 			
-			// TODO: STREAM DATA FROM ARDUINO
+			Thread t=new Thread() {
+			public void run() {
+				//listens to input for 1000 seconds & prints to console.
+				try {						
+					Thread.sleep(1000000);
+				} catch (InterruptedException ie) 
+				{	
+				}
+			}
+		};
 			
+			t.start();
+	
 			rendererView.displayError(error);
-		}
-    	
+		}	
     }
     
     private class CloseWindowHandler implements EventHandler<WindowEvent> {
 
-		@Override
+		/* Close connection with arduino */
 		public void handle(WindowEvent e) {
-			// TODO: close Arduino connection
+	    	if (serialPort != null) {
+        		serialPort.removeEventListener();
+        		serialPort.close();
+        	}
 		}
 
 		
 	}
     
     /**
-     * @return    A HashSet containing the CommPortIdentifier for all serial ports that are not currently being used.
+     * @return    A HashSet containing the CommPortIdentifier for all 
+     * 			  serial ports that are not currently being used.
      */
     public static HashSet<CommPortIdentifier> getAvailableSerialPorts() {
         HashSet<CommPortIdentifier> h = new HashSet<CommPortIdentifier>();

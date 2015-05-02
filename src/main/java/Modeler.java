@@ -9,9 +9,17 @@ public class Modeler {
 	private Arm leftArm;
 	private Arm rightArm;
 	
-	//takes an input of some kind and outputs the arm positions
-	public Modeler(Arm la, Arm ra){
-		leftArm = la;
-		rightArm = ra;
+	
+	public Modeler() {
+		
 	}
+	
+	/** Please don't push unfinished code, or code that will not make the 
+	 * project copmile */
+	//takes an input of some kind and outputs the arm positions
+//	public Modeler(Arm la, Arm ra){
+//		leftArm = la;
+//		rightArm = ra;
+//	} 
+	
 }
