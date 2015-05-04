@@ -12,6 +12,7 @@ public class Modeler {
 	private ArrayList<BothArms> pastArms = new ArrayList<BothArms>();
 	private float secondsBetweenSamples = 0.25;//Currently four samples per second
 	
+<<<<<<< HEAD
 	//takes an input of some kind and outputs the arm positions
 	//currently assuming arms start relaxed
 	public Modeler(){
@@ -37,5 +38,19 @@ public class Modeler {
 		public Arm getRightArm(){
 			return rightArm;
 		}
+=======
+	
+	public Modeler() {
+		
+>>>>>>> 831a874af5e723d0edfc1308cf811c7bf1121d29
 	}
+	
+	/** Please don't push unfinished code, or code that will not make the 
+	 * project copmile */
+	//takes an input of some kind and outputs the arm positions
+//	public Modeler(Arm la, Arm ra){
+//		leftArm = la;
+//		rightArm = ra;
+//	} 
+	
 }
