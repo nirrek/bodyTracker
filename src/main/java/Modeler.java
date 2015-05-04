@@ -1,3 +1,5 @@
+
+
 /**
  * The Modeler is responsible for consuming a stream of data produced by
  * the Arduino. This data stream will be used to produce a 3-dimensional
@@ -6,12 +8,34 @@
  */
 public class Modeler {
 	
-	private Arm leftArm;
-	private Arm rightArm;
+	private BothArms currentArms;
+	private ArrayList<BothArms> pastArms = new ArrayList<BothArms>();
+	private float secondsBetweenSamples = 0.25;//Currently four samples per second
 	
 	//takes an input of some kind and outputs the arm positions
-	public Modeler(Arm la, Arm ra){
-		leftArm = la;
-		rightArm = ra;
+	//currently assuming arms start relaxed
+	public Modeler(){
+		currentArms = new BothArms(new Arm(true), new Arm(false));//Create arms at rest
+	}
+	
+	/**
+	 * Basic wrapper class for two arms
+	 */
+	public class BothArms{
+		private Arm leftArm;
+		private Arm rightArm;
+		
+		public BothArms(Arm leftArm, Arm rightArm){
+			this.leftArm = leftArm;
+			this.rightArm = rightArm;
+		}
+		
+		public Arm getLeftArm(){
+			return leftArm;
+		}
+		
+		public Arm getRightArm(){
+			return rightArm;
+		}
 	}
 }
