@@ -1,29 +1,31 @@
+import java.math.BigDecimal;
+
 /**
  * This arm class contains the position of an individual arm
  */
 public class Arm {
 	
-	private float shoulderFirstDegree;
-	private float shoulderSecondDegree;
-	private float elbowFirstDegree;
-	private float elbowSecondDegree;
+	private BigDecimal shoulderFirstDegree;
+	private BigDecimal shoulderSecondDegree;
+	private BigDecimal elbowFirstDegree;
+	private BigDecimal elbowSecondDegree;
 	private boolean leftArm;
 	
 	/**
-	 * Initialise the Arm object
+	 * Initialize the Arm object
 	 */
 	public Arm(boolean left){
-		this.shoulderFirstDegree = 0;
-		this.shoulderSecondDegree = 0;
-		this.elbowFirstDegree = 0;
-		this.elbowSecondDegree = 0;
+		this.shoulderFirstDegree = new BigDecimal("0");
+		this.shoulderSecondDegree = new BigDecimal("0");
+		this.elbowFirstDegree = new BigDecimal("0");
+		this.elbowSecondDegree = new BigDecimal("0");
 		this.leftArm = left;
 	}
 	
 	/**
-	 * Initialise the Arm object with known positions
+	 * Initialize the Arm object with known positions
 	 */
-	public Arm(float sf, float ss, float ef, float es, boolean left){
+	public Arm(BigDecimal sf, BigDecimal ss, BigDecimal ef, BigDecimal es, boolean left){
 		shoulderFirstDegree = sf;
 		shoulderSecondDegree = ss;
 		elbowFirstDegree = ef;
@@ -32,49 +34,49 @@ public class Arm {
 	}
 	
 	/**
-	 * Initialise the Arm object as an altered version of an eariler arm
+	 * Initialize the Arm object as an altered version of an earlier arm
 	 */
-	public Arm(Arm initialArm, float sf, float ss, float ef, float es){
-		shoulderFirstDegree = initialArm.shoulderFirstDegree() + sf;
-		shoulderSecondDegree = initialArm.shoulderSecondDegree() + ss;
-		elbowFirstDegree = initialArm.elbowFirstDegree() + ef;
-		elbowSecondDegree = initialArm.elbowSecondDegree() + es;
+	public Arm(Arm initialArm, BigDecimal sf, BigDecimal ss, BigDecimal ef, BigDecimal es){
+		shoulderFirstDegree = initialArm.shoulderFirstDegree().add(sf);
+		shoulderSecondDegree = initialArm.shoulderSecondDegree().add(ss);
+		elbowFirstDegree = initialArm.elbowFirstDegree().add(ef);
+		elbowSecondDegree = initialArm.elbowSecondDegree().add(es);
 		this.leftArm = initialArm.isLeftArm();
 	}
 	
 	/**
-	 * Reprort the angle of the shoulder in the back-and-forth axis.
+	 * Report the angle of the shoulder in the back-and-forth axis.
 	 * 0 means the arm is pointing straight down, 90 mean the arm is pointing straight forward, and -90 is straight back
 	 */
-	public float shoulderFirstDegree(){
+	public BigDecimal shoulderFirstDegree(){
 		return shoulderFirstDegree;
 	}
 	
 	/**
-	 * Reprort the angle of the shoulder in the side-to-side axis.
-	 * 0 means the elbow is pointing straight down, 90 mean the elbow is pointing right, parrallel to the ground,
-	 *  and -90 is pointing left, parralell to the ground (from the wearer's POV)
+	 * Report the angle of the shoulder in the side-to-side axis.
+	 * 0 means the elbow is pointing straight down, 90 mean the elbow is pointing right, parallel to the ground,
+	 *  and -90 is pointing left, parallel to the ground (from the wearer's POV)
 	 */
-	public float shoulderSecondDegree(){
+	public BigDecimal shoulderSecondDegree(){
 		return shoulderSecondDegree;
 	}
 	
 	/**
-	 * Reprort the angle of the elbow in the back-and-forth axis.
-	 * 0 means the arm is completly straight, 90 mean the arm is forming a 90 degree turn,
+	 * Report the angle of the elbow in the back-and-forth axis.
+	 * 0 means the arm is completely straight, 90 mean the arm is forming a 90 degree turn,
 	 *  and 180 means the arm is resting against itself
 	 */
-	public float elbowFirstDegree(){
+	public BigDecimal elbowFirstDegree(){
 		return elbowFirstDegree;
 	}
 	
 	/**
-	 * Reprort the angle of the elbow in the back-and-forth axis.
+	 * Report the angle of the elbow in the back-and-forth axis.
 	 * (The following examples assume a shoulderFirstDegree and shoulderSecondDegree of 0, and an elbowFirstDegree of 90)
 	 * 0 means the fist is pointing forward, 90 mean the fist is pointing right,
 	 *  and -90 means the fist is pointing left
 	 */
-	public float elbowSecondDegree(){
+	public BigDecimal elbowSecondDegree(){
 		return elbowSecondDegree;
 	}
 	
