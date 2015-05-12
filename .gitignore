@@ -13,6 +13,8 @@
 
 # Intellij IDEA Stuff
 .idea
+*.ipr
+*.iws
 *.iml
 
 # Eclipse Stuff

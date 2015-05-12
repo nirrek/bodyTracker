@@ -1,16 +1,12 @@
 import java.io.*;
 import java.util.*;
+
+import gnu.io.*;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
-import gnu.io.PortInUseException;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -44,33 +40,59 @@ public class Renderer {
     	
     	getAvailableSerialPorts();
     }
-    
-    private void connect() throws Exception {
-    	portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
-        
-    	if (portIdentifier.isCurrentlyOwned()) {
+
+
+    /**
+     * This function is called when user press the "Connect" button.
+     * @throws Exception
+     */
+    private void connect() throws Exception, NoSuchPortException {
+        portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+
+        if (portIdentifier.isCurrentlyOwned()) {
             System.out.println("Error: Port is currently in use");
         } else {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(), 
-            		TIME_OUT);        
+            CommPort commPort = portIdentifier.open(this.getClass().getName(),
+                    TIME_OUT);
             if ( commPort instanceof SerialPort ) {
                 serialPort = (SerialPort) commPort;
                 serialPort.setSerialPortParams(DATA_RATE,SerialPort.DATABITS_8,
-                		SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+                        SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
 
-               OutputStream out = serialPort.getOutputStream();
-                               
-                (new Thread(new SerialWriter(out))).start();        
+                OutputStream out = serialPort.getOutputStream();
+
+                (new Thread(new SerialWriter(out))).start();
             }
             else {
                 System.out.println("Error: Only serial ports are handled by "
-                		+ "this example.");
+                        + "this example.");
             }
-        }     
+        }
     }
-   
 
-    
+
+    private void closeConnection() {
+        if (serialPort != null) {
+            serialPort.removeEventListener();
+            serialPort.close();
+        }
+    }
+
+    /**
+     * This function is called when user press the "Stream" button
+     * @throws Exception
+     */
+    private void listenForInput() throws Exception{
+        in = serialPort.getInputStream();
+        serialPort.addEventListener(new SerialReader(in));
+        serialPort.notifyOnDataAvailable(true);
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////
+    ////////////// COMMUNICATION TO/FROM ARDUINO ////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+
     /**
      * Handles the input coming from the serial port. A new line character
      * is treated as the end of a block in this example. 
@@ -127,7 +149,11 @@ public class Renderer {
             }            
         }
     }
-    
+
+    //////////////////////////////////////////////////////////////////////////
+    /////////////////////////// BUTTONS LISTENER /////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     private class ConnectButtonHandler implements EventHandler<ActionEvent> {
 
 		//@Override
@@ -137,8 +163,8 @@ public class Renderer {
         	 try {
                  connect();
              } catch (Exception exception) {
-            	 exception.printStackTrace();
-            	 rendererView.displayError(exception.getMessage());
+            	 rendererView.displayError(exception.toString());
+                 connectionIsSuccessful = false;
              }
         	
         	if (connectionIsSuccessful) {
@@ -152,23 +178,8 @@ public class Renderer {
 
 		//@Override
 		public void handle(ActionEvent arg0) {
-			boolean closeConnectionIsSuccessful = false;
-        	String error = "";
-        	
-        	/* Close connection with Arduino */
-        	if (serialPort != null) {
-        		serialPort.removeEventListener();
-        		serialPort.close();
-        		closeConnectionIsSuccessful = true;
-        	} else if (serialPort == null) {
-        		closeConnectionIsSuccessful = true;
-        	}
-        	
-        	if (closeConnectionIsSuccessful) {
-        		rendererView.toggleControlPaneForArduinoConnected(false);
-        	}
-        	
-        	rendererView.displayError(error);
+        	closeConnection();
+            rendererView.toggleControlPaneForArduinoConnected(false);
 		}
     	
     }
@@ -185,12 +196,6 @@ public class Renderer {
 		}
     	
     }
-    
-    private void listenForInput() throws Exception{
-      	 in = serialPort.getInputStream();
-      	    serialPort.addEventListener(new SerialReader(in));
-      	    serialPort.notifyOnDataAvailable(true);
-      }
 
     
     private class StreamButtonHandler implements EventHandler<ActionEvent> {
@@ -221,20 +226,22 @@ public class Renderer {
 			rendererView.displayError(error);
 		}	
     }
-    
+
+    /**
+     * The handle() method is called when user closes the application window.
+     * Closes the connection with the Arduino
+     */
     private class CloseWindowHandler implements EventHandler<WindowEvent> {
 
 		/* Close connection with arduino */
 		public void handle(WindowEvent e) {
-	    	if (serialPort != null) {
-        		serialPort.removeEventListener();
-        		serialPort.close();
-        	}
+	    	closeConnection();
 		}
 
 		
 	}
-    
+
+
     /**
      * @return    A HashSet containing the CommPortIdentifier for all 
      * 			  serial ports that are not currently being used.
