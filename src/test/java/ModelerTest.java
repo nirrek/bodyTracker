@@ -1,5 +1,3 @@
-import java.math.BigDecimal;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +20,11 @@ public class ModelerTest {
     
     @Test
     public void doesTimePass() throws Exception{
-    	testModeler.advanceIteration();
-    	testModeler.advanceIteration();
+    	testModeler.advanceIteration(0, 0, 0, 0, 0, 0);
+    	testModeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	Arm sampleArm = testModeler.getPastLeftArm(1);
-    	assertTrue("That's weird...", sampleArm.elbowSecondDegree().compareTo(new BigDecimal("0")) == 0);
+    	assertTrue("That's weird...", sampleArm.elbowPos().X() - 0.3 < 0.0001);
+    	assertTrue("That's weird...", sampleArm.wristPos().X() - 0.6 < 0.0001);
     }
 
     @After
