@@ -8,6 +8,8 @@ import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+
+
 /**
  * The Application's Controller (Or the Renderer Controller...).
  * Connects to the Arduino via serial USB. Fetch/Stream data from the Arduino,
