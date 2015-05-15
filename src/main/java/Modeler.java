@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The Modeler is responsible for consuming a stream of data produced by
@@ -6,9 +8,9 @@ import java.util.ArrayList;
  * model of the user's limb in space during each time-slice. The 3-dimensional
  * model produced by the Modeler will be consumed by the Renderer.
  */
-public class Modeler {
+public class Modeler implements Iterable<BothArms>{
 	
-	private ArrayList<BothArms> pastArms = new ArrayList<BothArms>();
+	private List<BothArms> pastArms = new ArrayList<BothArms>();
 	private double secondsBetweenSamples = 0.25;//Currently four samples per second
 	private double elbowToWrist;
 	private double shoulderToElbow;
@@ -104,5 +106,10 @@ public class Modeler {
 		return armsInQuestion.getRightArm();
 	}
 	
-		
+	/**
+	 * Returns an iterator for the past arms, with the most recent arms at the end of the array
+	 */
+	public Iterator<BothArms> iterator(){
+		return pastArms.iterator();
+	}
 }
