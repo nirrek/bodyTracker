@@ -6,22 +6,32 @@ import processing.serial.Serial;
  * Connects to the Arduino via serial USB. Fetch/Stream data from the Arduino,
  * and display it in an artistic manner after conversion by the Modeler.
  */
-public class RenderR {
+public class RenderR extends PApplet {
     Serial port;
     int inputPin = 0;
     int outputPin = 2;
 
     public static void main(String args[]) {
-    	 PApplet pa = new PApplet();
-         pa.size(200,200);
-
-    }
-
+        PApplet.main(new String[] { "--present", "RenderR" });
+      }
+    
     public void setup() {
-        //
-    }
+        size(200,200);
+        background(0);
+      }
 
-    public void draw() {
-        //
-    }
+      public void draw() {
+        stroke(255);
+        if (mousePressed) {
+          line(mouseX,mouseY,pmouseX,pmouseY);
+        }
+      }
+
+//    public void setup() {
+//        //
+//    }
+//
+//    public void draw() {
+//        //
+//    }
 }
