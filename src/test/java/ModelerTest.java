@@ -15,16 +15,17 @@ public class ModelerTest {
     @Test
     public void doWeEvenHaveArms() throws Exception {
     	Arm sampleArm = testModeler.getPastRightArm(0);
-    	assertFalse("We failed already!", sampleArm.isLeftArm());
+    	assertFalse("Arm initulisation failed", sampleArm.isLeftArm());
     }
     
     @Test
     public void doesTimePass() throws Exception{
     	testModeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	testModeler.advanceIteration(0, 0, 0, 0, 0, 0);
-    	Arm sampleArm = testModeler.getPastLeftArm(1);
-    	assertTrue("That's weird...", sampleArm.elbowPos().X() - 0.3 < 0.0001);
-    	assertTrue("That's weird...", sampleArm.wristPos().X() - 0.6 < 0.0001);
+    	testModeler.advanceIteration(24, 80, 23, 0, 0, 0);
+    	Arm sampleArm = testModeler.getPastLeftArm(2);
+    	assertTrue("Elbow position calculation failed", sampleArm.elbowPos().X() - 30 < 0.0001);
+    	assertTrue("Wrist position calculation failed", sampleArm.wristPos().X() - 60 < 0.0001);
     }
 
     @After
