@@ -1,5 +1,7 @@
+import javafx.scene.Node;
 import processing.core.PApplet;
 import processing.serial.Serial;
+import g4p_controls.*;
 
 /**
  * The application's GUI.
@@ -29,10 +31,12 @@ public class RenderR extends PApplet {
         if (mousePressed) {
           line(mouseX,mouseY,pmouseX,pmouseY);
         }
+          GButton button = new GButton(this, 0,0,80,20, "Click Me!");
       }
 
     private void processingConnect() throws Exception {
         String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
         myPort = new Serial(this, portName, 9600);
     }
+
 }

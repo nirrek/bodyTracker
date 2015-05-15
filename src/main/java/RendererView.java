@@ -11,7 +11,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import processing.core.PApplet;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -49,7 +51,7 @@ public class RendererView {
 		
 		controlBox = new VBox(4);
 		initControlBox();
-		
+
 		container.getChildren().addAll(displayBox, controlBox);
 	}
 	

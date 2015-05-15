@@ -1,19 +1,33 @@
 import javafx.application.Application;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import processing.core.PApplet;
+
+import javax.swing.*;
 
 
 public class BodyTracker extends Application {
-    	
+
+	private PApplet applet = new RenderR();
+
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	@Override
+	public void init() {
+		applet.init();
+	}
+
+	@Override
 	public void start(Stage stage) throws Exception {
+
 		stage.setTitle("Body Tracker");
 		
 		// The model for the renderer
@@ -26,8 +40,22 @@ public class BodyTracker extends Application {
 		VBox layout = new VBox();
 		createTabs(layout, rendererView, historyView);
 		
-        Scene scene = new Scene(layout, 800, 600);
-        stage.setScene(scene);
+
+
+		JPanel panel = new JPanel();
+		panel.add(applet);
+		SwingNode node = new SwingNode();
+		node.setContent(panel);
+
+		Group root = new Group();
+		Scene scene = new Scene(root, 500, 500, Color.WHITE);
+		root.getChildren().addAll(node, layout);
+
+
+		//Scene scene = new Scene(layout);
+		//Scene scene = new Scene(new Group(node), 200, 200, Color.BLACK);
+
+		stage.setScene(scene);
         
         // The controller for the renderer (needs to be initialize here as it is initial view)
         new Renderer(stage, modeler, rendererView);
@@ -44,7 +72,6 @@ public class BodyTracker extends Application {
         rendererTab.setContent(rendererView.getNode());
 		Tab historyTab = new Tab("History");
 		historyTab.setContent(historyView.getNode());
-		
 		tabs.getTabs().addAll(rendererTab, historyTab);
         tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
