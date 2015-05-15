@@ -8,6 +8,8 @@ import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import processing.core.PApplet;
+import processing.serial.Serial;
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -15,7 +17,7 @@ import javafx.stage.WindowEvent;
  * and display it in an artistic manner after conversion by the Modeler.
  */
 public class Renderer {
-	
+
 	private RendererView rendererView;
     private Modeler modeler;
     SerialPort serialPort;
@@ -44,7 +46,6 @@ public class Renderer {
         ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
         rendererView.showPortsInUse(portsInUse);
     }
-
 
     /**
      * This function is called when user press the "Start" button.

@@ -6,6 +6,9 @@
 *.war
 *.ear
 
+# 3rd party libs
+!lib/G4P.jar
+
 # Gradle Stuff
 .gradle
 /build

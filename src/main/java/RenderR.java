@@ -11,6 +11,10 @@ public class RenderR extends PApplet {
     int inputPin = 0;
     int outputPin = 2;
 
+    // PROCESSING
+    Serial myPort;  // Create object from Serial class
+    String val;     // Data received from the serial port
+
     public static void main(String args[]) {
         PApplet.main(new String[] { "--present", "RenderR" });
       }
@@ -27,4 +31,8 @@ public class RenderR extends PApplet {
         }
       }
 
+    private void processingConnect() throws Exception {
+        String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
+        myPort = new Serial(this, portName, 9600);
+    }
 }
