@@ -24,9 +24,11 @@ public class Renderer {
 	private static final int DATA_RATE = 9600;
 	private CommPortIdentifier portIdentifier;
 	private InputStream in;
-      
-    private String portName = "/dev/cu.usbmodem1451";  //Lisa's iMac port.
-    
+
+    // TODO: Remove if everything works correctly
+    //private String portName = "/dev/cu.usbmodem1451";  //Lisa's iMac port.
+    private String portName;  //Lisa's iMac port.
+
     public Renderer(Stage primaryStage, Modeler model, RendererView view) {
     	rendererView = view;
     	modeler = model;
@@ -39,13 +41,14 @@ public class Renderer {
     	// We might want to make sure the connection with arduino is closed
     	// before user closes the application window
     	primaryStage.setOnCloseRequest(new CloseWindowHandler());
-    	
-    	getAvailableSerialPorts();
+
+        ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
+        rendererView.showPortsInUse(portsInUse);
     }
 
 
     /**
-     * This function is called when user press the "Connect" button.
+     * This function is called when user press the "Start" button.
      * @throws Exception
      */
     private void connect() throws Exception, NoSuchPortException {
@@ -163,9 +166,15 @@ public class Renderer {
 			boolean connectionIsSuccessful = true;
 
         	 try {
-                 connect();
+                 portName = rendererView.getSelectedPort();
+                 if ((portName = rendererView.getSelectedPort()) != null) {
+                     connect();
+                 } else {
+                     rendererView.displayError("Please select a port to connect to Arduino");
+                     connectionIsSuccessful = false;
+                 }
              } catch (Exception exception) {
-            	 rendererView.displayError(exception.toString());
+                 rendererView.displayError("Can not connect to port " + portName);
                  connectionIsSuccessful = false;
              }
         	
@@ -245,11 +254,11 @@ public class Renderer {
 
 
     /**
-     * @return    A HashSet containing the CommPortIdentifier for all 
-     * 			  serial ports that are not currently being used.
+     * @return    An ArrayList containing the CommPortIdentifier for all
+     * 			  serial ports that are currently being used.
      */
-    public static HashSet<CommPortIdentifier> getAvailableSerialPorts() {
-        HashSet<CommPortIdentifier> h = new HashSet<CommPortIdentifier>();
+    public static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
+        ArrayList<CommPortIdentifier> h = new ArrayList<CommPortIdentifier>();
         Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
         while (thePorts.hasMoreElements()) {
             CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
@@ -258,8 +267,8 @@ public class Renderer {
                 try {
                     CommPort thePort = com.open("CommUtil", 50);
                     thePort.close();
-                    h.add(com);
                 } catch (PortInUseException e) {
+                    h.add(com);
                     System.out.println("Port, "  + com.getName() + ", is in use.");
                 } catch (Exception e) {
                     System.err.println("Failed to open port " +  com.getName());
