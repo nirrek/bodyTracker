@@ -27,8 +27,8 @@ public class Modeler implements Iterable<BothArms>{
 		BothArms currentArms = new BothArms(new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
 				new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
 		pastArms.add(currentArms);
-		elbowToWrist = 0.3;
-		shoulderToElbow = 0.3;//TODO:Make this dynamic
+		elbowToWrist = 30;
+		shoulderToElbow = 30;//TODO:Make this dynamic
 		startLeftPitch = 0;//TODO: Make these inputs!
 		startLeftRoll = -90;
 		//startLeftYaw = 0;
@@ -78,6 +78,22 @@ public class Modeler implements Iterable<BothArms>{
 	 */
 	public double degreesTurned(double dps){
 		return (dps * secondsBetweenSamples);
+	}
+	
+	/**
+	 * Identical to getPastLeftArm(0)
+	 * @return the most recent left arm object
+	 */
+	public Arm getMostRecentLeftArm(){
+		return getPastLeftArm(0);
+	}
+	
+	/**
+	 * Identical to getPastRightArm(0)
+	 * @return the most recent right arm object
+	 */
+	public Arm getMostRecentRightArm(){
+		return getPastRightArm(0);
 	}
 	
 	/**
