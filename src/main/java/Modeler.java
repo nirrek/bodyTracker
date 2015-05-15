@@ -1,4 +1,3 @@
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -11,20 +10,61 @@ public class Modeler {
 	
 	private ArrayList<BothArms> pastArms = new ArrayList<BothArms>();
 	private double secondsBetweenSamples = 0.25;//Currently four samples per second
+	private double elbowToWrist;
+	private double shoulderToElbow;
+	private double startLeftPitch;
+	private double startLeftRoll;
+	//private double startLeftYaw;
+	private double startRightPitch;
+	private double startRightRoll;
+	//private double startRightYaw;
 	
 	//takes an input of some kind and outputs the arm positions
 	//currently assuming arms start relaxed
 	public Modeler(){
-		BothArms currentArms = new BothArms(new Arm(true), new Arm(false));//Create arms at rest
+		BothArms currentArms = new BothArms(new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
+				new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
 		pastArms.add(currentArms);
+		elbowToWrist = 0.3;
+		shoulderToElbow = 0.3;//TODO:Make this dynamic
+		startLeftPitch = 0;//TODO: Make these inputs!
+		startLeftRoll = -90;
+		//startLeftYaw = 0;
+		startRightPitch = 0;//Shoulder forwards/backwards
+		startRightRoll = -90;//Shoulder up/down
+		//startRightYaw = 0;//Theoretically unused
 	}
 	
-	public void advanceIteration(){
-		BigDecimal zero = new BigDecimal("0");
-		Arm pastLeftArm = getPastLeftArm(0);
-		Arm pastRightArm = getPastRightArm(0);
-		Arm newLeftArm = new Arm(pastLeftArm, zero, zero, zero, zero);//Currently working on actual position changes
-		Arm newRightArm = new Arm(pastRightArm, zero, zero, zero, zero);
+	//TODO calibration step
+	//TODO work out position from orientation of sensors
+	
+	public void advanceIteration(double leftPitch, double leftRoll, double leftYaw, double rightPitch,
+			double rightRoll, double rightYaw){
+		double currentLeftPitch = leftPitch - startLeftPitch;
+		double currentLeftRoll = leftRoll - startLeftRoll;
+		//double currentLeftYaw = leftYaw - startLeftYaw;
+		double currentRightPitch = rightPitch - startRightPitch;
+		double currentRightRoll = rightRoll - startRightRoll;
+		//double currentRightYaw = rightYaw - startRightYaw;
+		
+		double lEX = shoulderToElbow * Math.sin(currentLeftRoll) * Math.cos(currentLeftPitch);//Forwards/back
+		double lEY = shoulderToElbow * Math.sin(currentLeftRoll) * Math.sin(currentLeftPitch);//Up down
+		double lEZ = -shoulderToElbow * Math.cos(currentLeftRoll);//Z being left/right
+		
+		double rEX = shoulderToElbow * Math.sin(currentRightRoll) * Math.cos(currentRightPitch);
+		double rEY = shoulderToElbow * Math.sin(currentRightRoll) * Math.sin(currentRightPitch);
+		double rEZ = shoulderToElbow * Math.cos(currentRightRoll);
+		
+		double lWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
+		double lWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
+		double lWZ = -elbowToWrist * Math.cos(-Math.PI);
+		
+		double rWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
+		double rWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
+		double rWZ = elbowToWrist * Math.cos(-Math.PI);
+
+		Arm newLeftArm = new Arm(lEX, lEY, lEZ, lWX, lWY, lWZ, true);
+		Arm newRightArm = new Arm(rEX, rEY, rEZ, rWX, rWY, rWZ, false);
 		BothArms currentArms = new BothArms(newLeftArm, newRightArm);
 		pastArms.add(currentArms);
 	}
