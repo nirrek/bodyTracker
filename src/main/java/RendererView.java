@@ -1,14 +1,19 @@
+import gnu.io.CommPortIdentifier;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class RendererView {
@@ -22,7 +27,8 @@ public class RendererView {
 	private VBox displayBox;
 	// The control-panel
 	private VBox controlBox;
-	
+
+	private ComboBox<String> portsComboBox;
 	private Label instructionLabel;
 	private Button connectButton;
 	private Button closeConnectionButton;
@@ -59,10 +65,21 @@ public class RendererView {
 		controlBox.setAlignment(Pos.CENTER);
 		controlBox.setMaxWidth(350);
 		controlBox.setSpacing(10);
-		controlBox.setPadding(new Insets(10, 10, 10, 10));
-		
+		controlBox.setPadding(new Insets(5, 5, 5, 5));
+
+		Label portLabel = new Label("Select port: ");
+		portLabel.setFont(new Font("", 12));
+
+		portsComboBox = new ComboBox<String>();
+
+		HBox portSelectionWrapper = new HBox(2);
+		portSelectionWrapper.getChildren().addAll(portLabel, portsComboBox);
+		portSelectionWrapper.setSpacing(5);
+		portSelectionWrapper.setPadding(new Insets(5, 5, 5, 5));
+		portSelectionWrapper.setAlignment(Pos.BASELINE_LEFT);
+
 		instructionLabel = new Label("Click Start to connect with your Arduino");
-		instructionLabel.setFont(new Font("", 14));
+		instructionLabel.setFont(new Font("", 12));
 		
 		connectButton = new Button("Start");
 		connectButton.setMinWidth(100);
@@ -107,7 +124,7 @@ public class RendererView {
 		logs.setWrapText(true);
 		
 		controlBox.getChildren().addAll(
-				instructionLabel, connectionButtonWrapper, getDataButtonWrapper, logs);
+				portSelectionWrapper, instructionLabel, connectionButtonWrapper, getDataButtonWrapper, logs);
 	}
 	
 	
@@ -135,7 +152,17 @@ public class RendererView {
 			instructionLabel.setText("Click Start to connect with your Arduino");
 		}
 	}
-	
+
+	public String getSelectedPort() {
+		return portsComboBox.getValue();
+	}
+
+	public void showPortsInUse(ArrayList<CommPortIdentifier> portsInUse) {
+		for (CommPortIdentifier port : portsInUse) {
+			portsComboBox.getItems().add(port.getName());
+		}
+	}
+
 	public void displayError(String errorMessage) {
 		logs.setText(errorMessage);
 	}
