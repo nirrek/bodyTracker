@@ -24,8 +24,10 @@ public class ModelerTest {
     	testModeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	testModeler.advanceIteration(24, 80, 23, 0, 0, 0);
     	Arm sampleArm = testModeler.getPastLeftArm(2);
-    	assertTrue("Elbow position calculation failed", sampleArm.elbowPos().X() - 30 < 0.0001);
-    	assertTrue("Wrist position calculation failed", sampleArm.wristPos().X() - 60 < 0.0001);
+    	assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().X()) - 0 < 0.0001);
+    	assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().Y()) - 30.2 < 0.0001);
+    	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().X()) - 0 < 0.0001);
+    	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().Y()) - 60.2 < 0.0001);
     }
 
     @After

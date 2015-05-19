@@ -17,6 +17,15 @@ public class Arm {
 	}
 	
 	/**
+	 * Initialize the Arm object with known positions
+	 */
+	public Arm(PointInSpace shoulder, double EX, double EY, double EZ, double WX, double WY, double WZ, boolean left){
+		elbow = new PointInSpace(EX + shoulder.X(), EY + shoulder.Y(), EZ + shoulder.Z());
+		wrist = new PointInSpace(EX + WX + shoulder.X(), EY + WY + shoulder.Y(), EZ + WZ + shoulder.Z());
+		this.leftArm = left;
+	}
+	
+	/**
 	 * Returns true if this is a left arm, false if a right arm
 	 */
 	public boolean isLeftArm(){

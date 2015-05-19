@@ -20,21 +20,25 @@ public class Modeler implements Iterable<BothArms>{
 	private double startRightPitch;
 	private double startRightRoll;
 	//private double startRightYaw;
+	private PointInSpace leftShoulder;
+	private PointInSpace rightShoulder;
 	
 	//takes an input of some kind and outputs the arm positions
 	//currently assuming arms start relaxed
 	public Modeler(){
-		BothArms currentArms = new BothArms(new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
-				new Arm(0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
-		pastArms.add(currentArms);
 		elbowToWrist = 30;
 		shoulderToElbow = 30;//TODO:Make this dynamic
 		startLeftPitch = 0;//TODO: Make these inputs!
-		startLeftRoll = -90;
+		startLeftRoll = 0;
 		//startLeftYaw = 0;
 		startRightPitch = 0;//Shoulder forwards/backwards
-		startRightRoll = -90;//Shoulder up/down
+		startRightRoll = 0;//Shoulder up/down
 		//startRightYaw = 0;//Theoretically unused
+		leftShoulder = new PointInSpace(0, 0.2, -0.1);//TODO: Dynamic again
+		rightShoulder = new PointInSpace(0, 0.2, 0.1);
+		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
+				new Arm(rightShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
+		pastArms.add(currentArms);
 	}
 	
 	//TODO calibration step
@@ -65,8 +69,8 @@ public class Modeler implements Iterable<BothArms>{
 		double rWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
 		double rWZ = elbowToWrist * Math.cos(-Math.PI);
 
-		Arm newLeftArm = new Arm(lEX, lEY, lEZ, lWX, lWY, lWZ, true);
-		Arm newRightArm = new Arm(rEX, rEY, rEZ, rWX, rWY, rWZ, false);
+		Arm newLeftArm = new Arm(leftShoulder, lEX, lEY, lEZ, lWX, lWY, lWZ, true);
+		Arm newRightArm = new Arm(rightShoulder, rEX, rEY, rEZ, rWX, rWY, rWZ, false);
 		BothArms currentArms = new BothArms(newLeftArm, newRightArm);
 		pastArms.add(currentArms);
 	}
