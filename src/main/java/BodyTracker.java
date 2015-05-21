@@ -13,56 +13,41 @@ import javax.swing.*;
 
 
 public class BodyTracker extends Application {
-
-	private PApplet applet = new RenderR();
-
 	public static void main(String[] args) {
 		launch(args);
-	}
-
-	@Override
-	public void init() {
-		applet.init();
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
 
 		stage.setTitle("Body Tracker");
-		
+
 		// The model for the renderer
 		Modeler modeler = new Modeler();
 		// The view for the renderer
 		RendererView rendererView = new RendererView(modeler);
 		// TODO : REMOVE OR IMPLEMENT
 		HistoryView historyView = new HistoryView();
-		
+
 		VBox layout = new VBox();
 		createTabs(layout, rendererView, historyView);
-		
-
-
-		JPanel panel = new JPanel();
-		panel.add(applet);
-		SwingNode node = new SwingNode();
-		node.setContent(panel);
 
 		Group root = new Group();
 		Scene scene = new Scene(root, 500, 500, Color.WHITE);
-		root.getChildren().addAll(node, layout);
+		root.getChildren().addAll(layout);
 
 
 		//Scene scene = new Scene(layout);
 		//Scene scene = new Scene(new Group(node), 200, 200, Color.BLACK);
 
 		stage.setScene(scene);
-        
+
         // The controller for the renderer (needs to be initialize here as it is initial view)
         new Renderer(stage, modeler, rendererView);
-        
+
         stage.show();
 	}
-	
+
 	// Can be useful to have a separate tab to review history/previous drawings
 	// A good place to archive screenshots etc...
 	// TODO : REMOVE OR IMPLEMENT HISTORY VIEW
@@ -74,8 +59,8 @@ public class BodyTracker extends Application {
 		historyTab.setContent(historyView.getNode());
 		tabs.getTabs().addAll(rendererTab, historyTab);
         tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-        
+
         layout.getChildren().addAll(tabs);
 	}
-	
+
 }
