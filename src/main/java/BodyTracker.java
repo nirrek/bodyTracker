@@ -33,7 +33,7 @@ public class BodyTracker extends Application {
 		createTabs(layout, rendererView, historyView);
 
 		Group root = new Group();
-		Scene scene = new Scene(root, 500, 500, Color.WHITE);
+		Scene scene = new Scene(root, Color.WHITE);
 		root.getChildren().addAll(layout);
 
 
