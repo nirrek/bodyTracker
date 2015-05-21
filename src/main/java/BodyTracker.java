@@ -20,7 +20,6 @@ public class BodyTracker extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 
-		stage.setTitle("Body Tracker");
 
 		// The model for the renderer
 		Modeler modeler = new Modeler();
@@ -36,16 +35,18 @@ public class BodyTracker extends Application {
 		Scene scene = new Scene(root, Color.WHITE);
 		root.getChildren().addAll(layout);
 
-
-		//Scene scene = new Scene(layout);
-		//Scene scene = new Scene(new Group(node), 200, 200, Color.BLACK);
-
-		stage.setScene(scene);
-
         // The controller for the renderer (needs to be initialize here as it is initial view)
-        new Renderer(stage, modeler, rendererView);
+        Renderer rendererController = new Renderer(modeler, rendererView);
 
-        stage.show();
+        // Configure scene
+        stage.setOnCloseRequest(event -> {
+            // Unmount the Renderer before app closure.
+            // TODO track the actual current view.
+            rendererController.unmount();
+        });
+        stage.setTitle("ClothMotion");
+        stage.setScene(scene);
+		stage.show();
 	}
 
 	// Can be useful to have a separate tab to review history/previous drawings

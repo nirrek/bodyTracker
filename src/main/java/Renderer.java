@@ -30,18 +30,14 @@ public class Renderer {
     //private String portName = "/dev/cu.usbmodem1451";  //Lisa's iMac port.
     private String portName;  //Lisa's iMac port.
 
-    public Renderer(Stage primaryStage, Modeler model, RendererView view) {
+    public Renderer(Modeler model, RendererView view) {
     	rendererView = view;
     	modeler = model;
-    	
-    	rendererView.addConnectionButtonsHandler(new ConnectButtonHandler(), 
+
+    	rendererView.addConnectionButtonsHandler(new ConnectButtonHandler(),
     			new CloseConnectionButtonHandler());
-    	rendererView.addFetchStreamButtonsHandler(new FetchButtonHandler(), 
+    	rendererView.addFetchStreamButtonsHandler(new FetchButtonHandler(),
     			new StreamButtonHandler());
-    	
-    	// We might want to make sure the connection with arduino is closed
-    	// before user closes the application window
-    	primaryStage.setOnCloseRequest(new CloseWindowHandler());
 
         ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
         rendererView.showPortsInUse(portsInUse);
@@ -75,6 +71,13 @@ public class Renderer {
         }
     }
 
+    /**
+     * Lifecycle method to be called before the Renderer is unmounted to
+     * clean-up necessary state.
+     */
+    public void unmount() {
+        closeConnection();
+    }
 
     private void closeConnection() {
         if (serialPort != null) {
@@ -100,20 +103,20 @@ public class Renderer {
 
     /**
      * Handles the input coming from the serial port. A new line character
-     * is treated as the end of a block in this example. 
+     * is treated as the end of a block in this example.
      */
     public static class SerialReader implements SerialPortEventListener {
         private InputStream in;
         private byte[] buffer = new byte[1024];
-        
-        
+
+
         public SerialReader ( InputStream in ) {
             this.in = in;
         }
-        
+
         public void serialEvent(SerialPortEvent arg0) {
             int data;
-          
+
             try {
                 int len = 0;
                 while ( ( data = in.read()) > -1 ) {
@@ -123,35 +126,35 @@ public class Renderer {
                     buffer[len++] = (byte) data;
                 }
                 System.out.print(new String(buffer,0,len));
-                
+
             } catch ( IOException e ) {
                 e.printStackTrace();
                 System.exit(-1);
-            }             
-        } 
+            }
+        }
     }
-    
+
     /**
      * Open a new thread. Sends message(s) to the Arduino
      */
     public static class SerialWriter implements Runnable {
         OutputStream out;
-        
+
         public SerialWriter ( OutputStream out ) {
             this.out = out;
         }
-        
+
         public void run () {
-            try {                
+            try {
                 int c = 0;
                 while ( ( c = System.in.read()) > -1 ) {
                     this.out.write(c);
-                }   
-                
+                }
+
             } catch ( IOException e ) {
                 e.printStackTrace();
                 System.exit(-1);
-            }            
+            }
         }
     }
 
@@ -177,12 +180,12 @@ public class Renderer {
                  rendererView.displayError("Can not connect to port " + portName);
                  connectionIsSuccessful = false;
              }
-        	
+
         	if (connectionIsSuccessful) {
         		rendererView.toggleControlPaneForArduinoConnected(true);
         	}
 		}
-    	
+
     }
 
     private class CloseConnectionButtonHandler implements EventHandler<ActionEvent> {
@@ -192,25 +195,25 @@ public class Renderer {
         	closeConnection();
             rendererView.toggleControlPaneForArduinoConnected(false);
 		}
-    	
+
     }
-    
+
     private class FetchButtonHandler implements EventHandler<ActionEvent> {
 
 		//@Override
 		public void handle(ActionEvent arg0) {
 			String error = "";
-			
+
 			// TODO: FETCH DATA STORED IN ARDUINO
-			
+
 			rendererView.displayError(error);
 		}
-    	
+
     }
 
-    
+
     private class StreamButtonHandler implements EventHandler<ActionEvent> {
-    	
+
         //@Override
 		public void handle(ActionEvent arg0) {
 		    try {
@@ -218,39 +221,25 @@ public class Renderer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		  
+
 			String error = "";
-			
+
 			Thread t=new Thread() {
 			public void run() {
 				//listens to input for 1000 seconds & prints to console.
-				try {						
+				try {
 					Thread.sleep(1000000);
-				} catch (InterruptedException ie) 
-				{	
+				} catch (InterruptedException ie)
+				{
 				}
 			}
 		};
-			
+
 			t.start();
-	
+
 			rendererView.displayError(error);
-		}	
-    }
-
-    /**
-     * The handle() method is called when user closes the application window.
-     * Closes the connection with the Arduino
-     */
-    private class CloseWindowHandler implements EventHandler<WindowEvent> {
-
-		/* Close connection with arduino */
-		public void handle(WindowEvent e) {
-	    	closeConnection();
 		}
-
-		
-	}
+    }
 
 
     /**
