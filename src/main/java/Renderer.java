@@ -1,15 +1,12 @@
-import java.io.*;
-import java.util.*;
-
 import gnu.io.*;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-import processing.core.PApplet;
-import processing.serial.Serial;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -17,9 +14,8 @@ import processing.serial.Serial;
  * and display it in an artistic manner after conversion by the Modeler.
  */
 public class Renderer {
-
-	private RendererView rendererView;
-    private Modeler modeler;
+	private RendererView view;
+    private Modeler model;
     SerialPort serialPort;
     private static final int TIME_OUT = 2000;
 	private static final int DATA_RATE = 9600;
@@ -31,16 +27,17 @@ public class Renderer {
     private String portName;  //Lisa's iMac port.
 
     public Renderer(Modeler model, RendererView view) {
-    	rendererView = view;
-    	modeler = model;
+        this.model = model;
+        this.view = view;
 
-    	rendererView.addConnectionButtonsHandler(new ConnectButtonHandler(),
+
+    	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
     			new CloseConnectionButtonHandler());
-    	rendererView.addFetchStreamButtonsHandler(new FetchButtonHandler(),
+    	view.addFetchStreamButtonsHandler(new FetchButtonHandler(),
     			new StreamButtonHandler());
 
         ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
-        rendererView.showPortsInUse(portsInUse);
+        view.showPortsInUse(portsInUse);
     }
 
     /**
@@ -169,20 +166,20 @@ public class Renderer {
 			boolean connectionIsSuccessful = true;
 
         	 try {
-                 portName = rendererView.getSelectedPort();
-                 if ((portName = rendererView.getSelectedPort()) != null) {
+                 portName = view.getSelectedPort();
+                 if ((portName = view.getSelectedPort()) != null) {
                      connect();
                  } else {
-                     rendererView.displayError("Please select a port to connect to Arduino");
+                     view.displayError("Please select a port to connect to Arduino");
                      connectionIsSuccessful = false;
                  }
              } catch (Exception exception) {
-                 rendererView.displayError("Can not connect to port " + portName);
+                 view.displayError("Can not connect to port " + portName);
                  connectionIsSuccessful = false;
              }
 
         	if (connectionIsSuccessful) {
-        		rendererView.toggleControlPaneForArduinoConnected(true);
+        		view.toggleControlPaneForArduinoConnected(true);
         	}
 		}
 
@@ -193,7 +190,7 @@ public class Renderer {
 		//@Override
 		public void handle(ActionEvent arg0) {
         	closeConnection();
-            rendererView.toggleControlPaneForArduinoConnected(false);
+            view.toggleControlPaneForArduinoConnected(false);
 		}
 
     }
@@ -206,7 +203,7 @@ public class Renderer {
 
 			// TODO: FETCH DATA STORED IN ARDUINO
 
-			rendererView.displayError(error);
+			view.displayError(error);
 		}
 
     }
@@ -237,7 +234,7 @@ public class Renderer {
 
 			t.start();
 
-			rendererView.displayError(error);
+			view.displayError(error);
 		}
     }
 
