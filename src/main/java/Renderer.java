@@ -245,19 +245,19 @@ public class Renderer {
      */
     public static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
         ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
-        Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
-        while (thePorts.hasMoreElements()) {
-            CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
-            switch (com.getPortType()) {
+        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+        while (ports.hasMoreElements()) {
+            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
+            switch (port.getPortType()) {
                 case CommPortIdentifier.PORT_SERIAL:
                     try {
-                        CommPort thePort = com.open("CommUtil", 50);
+                        CommPort thePort = port.open("CommUtil", 50);
                         thePort.close();
                     } catch (PortInUseException e) {
-                        availablePorts.add(com);
-                        System.out.println("Port, "  + com.getName() + ", is in use.");
+                        availablePorts.add(port);
+                        System.out.println("Port, "  + port.getName() + ", is in use.");
                     } catch (Exception e) {
-                        System.err.println("Failed to open port " +  com.getName());
+                        System.err.println("Failed to open port " +  port.getName());
                         e.printStackTrace();
                     }
             }
