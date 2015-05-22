@@ -7,7 +7,6 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import processing.core.PApplet;
 
 import javax.swing.*;
 
