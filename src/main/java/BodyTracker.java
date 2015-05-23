@@ -25,10 +25,13 @@ public class BodyTracker extends Application {
 		// TODO : REMOVE OR IMPLEMENT
 		HistoryView historyView = new HistoryView();
 
-		VBox layout = new VBox();
-		createTabs(layout, rendererView, historyView);
+		VBox rootNode = new VBox();
+		rootNode.getStyleClass().add("Root");
 
-		Scene scene = new Scene(layout);
+		TabPane tabPane = createTabs(rendererView, historyView);
+		rootNode.getChildren().add(tabPane);
+
+		Scene scene = new Scene(rootNode);
 		String cssUrl = this.getClass().getResource("style.css").toExternalForm();
 		scene.getStylesheets().add(cssUrl);
 
@@ -64,16 +67,18 @@ public class BodyTracker extends Application {
 	// Can be useful to have a separate tab to review history/previous drawings
 	// A good place to archive screenshots etc...
 	// TODO : REMOVE OR IMPLEMENT HISTORY VIEW
-	private void createTabs(VBox layout, RendererView rendererView, HistoryView historyView) {
-		TabPane tabs = new TabPane();
-        Tab rendererTab = new Tab("Renderer");
-        rendererTab.setContent(rendererView.getNode());
+	private TabPane createTabs(RendererView rendererView, HistoryView historyView) {
+		TabPane tabPane = new TabPane();
+		tabPane.getStyleClass().add("TabPane");
+		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+
+		Tab rendererTab = new Tab("Renderer");
+		rendererTab.setContent(rendererView.getNode());
 		Tab historyTab = new Tab("History");
 		historyTab.setContent(historyView.getNode());
-		tabs.getTabs().addAll(rendererTab, historyTab);
-        tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-        layout.getChildren().addAll(tabs);
+		tabPane.getTabs().addAll(rendererTab, historyTab);
+		return tabPane;
 	}
 
 }
