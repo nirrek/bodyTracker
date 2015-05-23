@@ -30,10 +30,7 @@ public class BodyTracker extends Application {
 		VBox layout = new VBox();
 		createTabs(layout, rendererView, historyView);
 
-
-		Group root = new Group();
-		Scene scene = new Scene(root, Color.WHITE);
-		root.getChildren().addAll(layout);
+		Scene scene = new Scene(layout);
 
         // The controller for the renderer (needs to be initialize here as it is initial view)
         Renderer rendererController = new Renderer(modeler, rendererView);
