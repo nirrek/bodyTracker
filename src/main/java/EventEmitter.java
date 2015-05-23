@@ -4,6 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * An EventEmitter is responsible for managing a set of listeners and publishing
+ * events to those listeners when it is informed that the particular event
+ * has occurred. The publication works in a simple multicast fashion.
+ */
 public class EventEmitter {
     private Map<String, List<Consumer<Payload>>> _listeners = new HashMap<>();
 
