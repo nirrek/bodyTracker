@@ -52,6 +52,7 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 
 	public void advanceIteration(double leftPitch, double leftRoll, double leftYaw, double rightPitch,
 			double rightRoll, double rightYaw){
+
 		double currentLeftPitch = leftPitch - startLeftPitch;
 		double currentLeftRoll = leftRoll - startLeftRoll;
 		//double currentLeftYaw = leftYaw - startLeftYaw;
@@ -59,14 +60,20 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		double currentRightRoll = rightRoll - startRightRoll;
 		//double currentRightYaw = rightYaw - startRightYaw;
 
+		// Kerrin:
+		// These should probably be factored into a function such as
+		// Arm leftArm = computeUpperArmPosition(sample, isLeft)
 		double lEX = shoulderToElbow * Math.sin(currentLeftRoll) * Math.cos(currentLeftPitch);//Forwards/back
 		double lEY = shoulderToElbow * Math.sin(currentLeftRoll) * Math.sin(currentLeftPitch);//Up down
 		double lEZ = -shoulderToElbow * Math.cos(currentLeftRoll);//Z being left/right
 
+		// And this can become:
+		// Arm rightArm = computeUpperArmPosition(sample, !isLeft)
 		double rEX = shoulderToElbow * Math.sin(currentRightRoll) * Math.cos(currentRightPitch);
 		double rEY = shoulderToElbow * Math.sin(currentRightRoll) * Math.sin(currentRightPitch);
 		double rEZ = shoulderToElbow * Math.cos(currentRightRoll);
 
+		// Same deal with these guys. Most of this is repetition.
 		double lWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
 		double lWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
 		double lWZ = -elbowToWrist * Math.cos(-Math.PI);
@@ -81,6 +88,23 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		pastArms.add(currentArms);
 
 		this.emit(NEW_SAMPLE);
+	}
+
+	// TODO: (Kerrin) might be better to rename Sample => SensorReading
+
+	// Right now I only have one arm working with the sensor. So we need to be
+	// able to have the Modeler either work for a single arm, or both arms.
+	public void newSensorReading(Sample leftArm) {
+
+		this.emit(NEW_SAMPLE);
+	}
+
+	// Kerrin: How should we determine which one is left and which is right?
+	// Just wanna do something lame and have (sensorId == 1) ==> left
+	//                                       (sensorId == 2) ==> right
+	// and just hardcode this in the arduino software....
+	public void newSensorReading(Sample leftArm, Sample rightArm) {
+
 	}
 
 	/**
