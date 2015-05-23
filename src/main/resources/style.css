@@ -1,0 +1,8 @@
+.Container {
+    -fx-font-family: "Helvetica Neue";
+}
+
+.Sidebar {
+    -fx-border-left: 1px solid #eee;
+    /* F4F4F4 */
+}

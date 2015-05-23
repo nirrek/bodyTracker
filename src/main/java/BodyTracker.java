@@ -29,8 +29,10 @@ public class BodyTracker extends Application {
 		createTabs(layout, rendererView, historyView);
 
 		Scene scene = new Scene(layout);
+		String cssUrl = this.getClass().getResource("style.css").toExternalForm();
+		scene.getStylesheets().add(cssUrl);
 
-        // The controller for the renderer (needs to be initialize here as it is initial view)
+		// The controller for the renderer (needs to be initialize here as it is initial view)
         Renderer rendererController = new Renderer(modeler, rendererView);
 
         // Configure stage
