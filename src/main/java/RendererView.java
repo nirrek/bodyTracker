@@ -1,4 +1,5 @@
 import gnu.io.CommPortIdentifier;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 
 public class RendererView {
 
+
 	// TODO : REMOVE IF UNNECESSARRY
 	private Modeler model;
 
@@ -30,6 +32,7 @@ public class RendererView {
 	private VBox controlBox;
 
 	private ComboBox<String> portsComboBox;
+	private Button refreshButton;
 	private Label instructionLabel;
 	private Button connectButton;
 	private Button closeConnectionButton;
@@ -37,6 +40,7 @@ public class RendererView {
 	private Button fetchButton;
 	private Button streamButton;
 	private TextArea logs;
+
 
 	public RendererView(Modeler model) {
 		this.model = model;
@@ -63,8 +67,7 @@ public class RendererView {
 	}
 
 	private void initControlBox() {
-		controlBox.setAlignment(Pos.CENTER);
-		controlBox.setMaxWidth(350);
+		controlBox.setAlignment(Pos.TOP_LEFT);
 		controlBox.setSpacing(10);
 		controlBox.setPadding(new Insets(5, 5, 5, 5));
 
@@ -73,32 +76,33 @@ public class RendererView {
 
 		portsComboBox = new ComboBox<String>();
 
-		HBox portSelectionWrapper = new HBox(2);
-		portSelectionWrapper.getChildren().addAll(portLabel, portsComboBox);
+		refreshButton = new Button("Refresh");
+		refreshButton.setFont(new Font("", 13));
+
+		HBox portSelectionWrapper = new HBox(3);
+		portSelectionWrapper.getChildren().addAll(portLabel, portsComboBox, refreshButton);
 		portSelectionWrapper.setSpacing(5);
-		portSelectionWrapper.setPadding(new Insets(5, 5, 5, 5));
+		portSelectionWrapper.setPadding(new Insets(5, 5, 5, 0));
 		portSelectionWrapper.setAlignment(Pos.BASELINE_LEFT);
 
 		instructionLabel = new Label("Click Start to connect with your Arduino");
 		instructionLabel.setFont(new Font("", 12));
 
 		connectButton = new Button("Start");
-		connectButton.setMinWidth(100);
-		connectButton.setMinHeight(40);
-		connectButton.setFont(new Font("", 20));
+		connectButton.setMinWidth(75);
+		connectButton.setFont(new Font("", 13));
 
 		closeConnectionButton = new Button("Stop");
-		closeConnectionButton.setMinWidth(100);
-		closeConnectionButton.setMinHeight(40);
-		closeConnectionButton.setFont(new Font("", 20));
+		closeConnectionButton.setMinWidth(75);
+		closeConnectionButton.setFont(new Font("", 13));
 		//this button is disabled before a connection is established
 		closeConnectionButton.setDisable(true);
 
-		HBox connectionButtonWrapper = new HBox(2);
-		connectionButtonWrapper.getChildren().addAll(connectButton, closeConnectionButton);
-		connectionButtonWrapper.setSpacing(20);
-		connectionButtonWrapper.setPadding(new Insets(10, 10, 10, 10));
-		connectionButtonWrapper.setAlignment(Pos.CENTER);
+		HBox connectionButtonWrapper = new HBox(3);
+		connectionButtonWrapper.getChildren().addAll(instructionLabel, connectButton, closeConnectionButton);
+		connectionButtonWrapper.setSpacing(5);
+		connectionButtonWrapper.setPadding(new Insets(5, 5, 0, 0));
+		connectionButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
 
 		fetchButton = new Button("Fetch");
 		fetchButton.setMinWidth(100);
@@ -113,21 +117,26 @@ public class RendererView {
 		getDataButtonWrapper = new HBox(2);
 		getDataButtonWrapper.getChildren().addAll(fetchButton, streamButton);
 		getDataButtonWrapper.setSpacing(20);
-		getDataButtonWrapper.setPadding(new Insets(10, 10, 10, 10));
-		getDataButtonWrapper.setAlignment(Pos.CENTER);
+		getDataButtonWrapper.setPadding(new Insets(10, 10, 10, 0));
+		getDataButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
 		//this box is hidden before a connection is established
 		getDataButtonWrapper.setVisible(false);
 
 		logs = new TextArea("");
 		logs.setEditable(false);
-		logs.setMinWidth(300);
+		logs.setMaxWidth(400);
 		logs.setMinHeight(50);
 		logs.setWrapText(true);
 
 		controlBox.getChildren().addAll(
-				portSelectionWrapper, instructionLabel, connectionButtonWrapper, getDataButtonWrapper, logs);
+				portSelectionWrapper, connectionButtonWrapper, getDataButtonWrapper, logs);
 	}
 
+
+	public void addRefreshButtonHandler(EventHandler<ActionEvent> refreshButtonHandler) {
+
+		refreshButton.setOnAction(refreshButtonHandler);
+	}
 
 	public void addConnectionButtonsHandler(EventHandler<ActionEvent> connectButtonHandler,
 			EventHandler<ActionEvent> closeConnectionButtonHandler) {
@@ -159,10 +168,12 @@ public class RendererView {
 	}
 
 	public void showPortsInUse(ArrayList<CommPortIdentifier> portsInUse) {
+		portsComboBox.getItems().clear();
 		for (CommPortIdentifier port : portsInUse) {
 			portsComboBox.getItems().add(port.getName());
 		}
 	}
+
 
 	public void showAvailablePorts(ArrayList<CommPortIdentifier> availablePorts) {
 		for (CommPortIdentifier port : availablePorts)

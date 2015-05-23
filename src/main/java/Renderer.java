@@ -44,17 +44,16 @@ public class Renderer {
         this.model = model;
         this.view = view;
 
+        view.addRefreshButtonHandler(new RefreshButtonHandler());
     	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
     			new CloseConnectionButtonHandler());
     	view.addFetchStreamButtonsHandler(new FetchButtonHandler(),
     			new StreamButtonHandler());
 
         // Kerrin: Why were we showing inUse ports in the dropdown??????
-//        ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
-//        view.showPortsInUse(portsInUse);
-
-        ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
-        view.showAvailablePorts(portsInUse);
+        // Romain: See function javaDoc
+        ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
+        view.showPortsInUse(portsInUse);
     }
 
     /**
@@ -142,9 +141,18 @@ public class Renderer {
     // -------------------------------------------------------------------------
     //      EVENT LISTENERS
     // -------------------------------------------------------------------------
+    // 'Refresh' button handler
+    private class RefreshButtonHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent arg0) {
+            ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
+            view.showPortsInUse(portsInUse);
+        }
+    }
+
     // 'Start' button handler
     private class ConnectButtonHandler implements EventHandler<ActionEvent> {
-		public void handle(ActionEvent e) {
+        public void handle(ActionEvent e) {
+
             portName = view.getSelectedPort();
 
             if (portName == null) {
@@ -159,9 +167,10 @@ public class Renderer {
             }
 
             view.toggleControlPaneForArduinoConnected(true);
-		}
+        }
     }
 
+    // 'Stop' button handler
     private class CloseConnectionButtonHandler implements EventHandler<ActionEvent> {
 		public void handle(ActionEvent arg0) {
             stopSerialListener();
@@ -170,6 +179,7 @@ public class Renderer {
 		}
     }
 
+    // 'Fetch' button handler
     private class FetchButtonHandler implements EventHandler<ActionEvent> {
 		public void handle(ActionEvent arg0) {
 			String error = "";
@@ -179,6 +189,7 @@ public class Renderer {
 		}
     }
 
+    // 'Stream' button handler
     private class StreamButtonHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             // TODO, should disable the button to prevent this event
@@ -233,7 +244,19 @@ public class Renderer {
 
 
     // Kerrin: Why are we wishing to fetch unavailable ports?
+    //
+    // Romain: The idea is to plug the Arduino before this function is called
+    // (ie, before you launch the app) so one of the port in this list will
+    // be the port used to connect with the Arduino
+    //
+    // I will add a 'refresh' button that will call this function when clicked
     /**
+     * Once the Arduino is connected, the port it is connected to will appear in
+     * this list.
+     *
+     * This function is called when application is launched, and when user press
+     * the 'Refresh' button.
+     *
      * @return    An ArrayList containing the CommPortIdentifier for all
      * 			  serial ports that are currently being used.
      */
@@ -263,6 +286,7 @@ public class Renderer {
      * @author Kerrin
      * @return A list of available serial ports.
      */
+    // Romain: this function returns nothing in my case...
     private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
         ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
         Enumeration ports = CommPortIdentifier.getPortIdentifiers();
