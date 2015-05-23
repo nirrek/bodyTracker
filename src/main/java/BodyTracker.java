@@ -14,7 +14,7 @@ import javax.swing.*;
 
 public class BodyTracker extends Application {
 
-	private PApplet applet = new RenderR();
+	private RenderR applet = new RenderR();
 
 	public static void main(String[] args) {
 		launch(args);
@@ -33,7 +33,7 @@ public class BodyTracker extends Application {
 		// The model for the renderer
 		Modeler modeler = new Modeler();
 		// The view for the renderer
-		RendererView rendererView = new RendererView(modeler);
+		RendererView rendererView = new RendererView(modeler, applet);
 		// TODO : REMOVE OR IMPLEMENT
 		HistoryView historyView = new HistoryView();
 		
@@ -42,21 +42,21 @@ public class BodyTracker extends Application {
 		
 
 
-		JPanel panel = new JPanel();
-		panel.add(applet);
-		SwingNode node = new SwingNode();
-		node.setContent(panel);
+		//JPanel panel = new JPanel();
+		//panel.add(applet);
+		//SwingNode node = new SwingNode();
+		//node.setContent(panel);
 
-		Group root = new Group();
-		Scene scene = new Scene(root, 500, 500, Color.WHITE);
-		root.getChildren().addAll(node, layout);
+		//Group root = new Group();
+		//Scene scene = new Scene(root, 500, 500, Color.WHITE);
+		//root.getChildren().addAll(node, layout);
 
 
-		//Scene scene = new Scene(layout);
+		Scene scene = new Scene(layout);
 		//Scene scene = new Scene(new Group(node), 200, 200, Color.BLACK);
 
 		stage.setScene(scene);
-        
+
         // The controller for the renderer (needs to be initialize here as it is initial view)
         new Renderer(stage, modeler, rendererView);
         

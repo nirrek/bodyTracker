@@ -1,4 +1,5 @@
 import gnu.io.CommPortIdentifier;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,6 +21,8 @@ import java.util.HashSet;
 
 public class RendererView {
 
+	private RenderR applet;
+
 	// TODO : REMOVE IF UNNECESSARRY
 	private Modeler model;
 	
@@ -39,7 +42,7 @@ public class RendererView {
 	private Button streamButton;
 	private TextArea logs;
 	
-	public RendererView(Modeler model) {
+	public RendererView(Modeler model, RenderR blaApplet) {
 		this.model = model;
 		
 		container = new HBox(2);
@@ -52,10 +55,18 @@ public class RendererView {
 		controlBox = new VBox(4);
 		initControlBox();
 
+		applet = blaApplet;
+		JPanel panel = new JPanel();
+		panel.add(applet);
+		SwingNode node = new SwingNode();
+		node.setContent(panel);
+
+		displayBox.getChildren().add(node);
+
 		container.getChildren().addAll(displayBox, controlBox);
 	}
-	
-	
+
+
 	private void initDisplayBox() {
 		displayBox.setAlignment(Pos.CENTER);
 		displayBox.setMinWidth(400);
@@ -163,6 +174,11 @@ public class RendererView {
 		for (CommPortIdentifier port : portsInUse) {
 			portsComboBox.getItems().add(port.getName());
 		}
+	}
+
+	public void drawInApplet() {
+		System.out.println("drawInApplet");
+		applet.call();
 	}
 
 	public void displayError(String errorMessage) {

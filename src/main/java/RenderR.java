@@ -18,20 +18,18 @@ public class RenderR extends PApplet {
     String val;     // Data received from the serial port
 
     public static void main(String args[]) {
-        PApplet.main(new String[] { "--present", "RenderR" });
+        PApplet.main(new String[]{"--present", "RenderR"});
       }
     
     public void setup() {
-        size(200,200);
+        size(200, 200);
         background(0);
       }
 
       public void draw() {
-        stroke(255);
-        if (mousePressed) {
-          line(mouseX,mouseY,pmouseX,pmouseY);
-        }
-          GButton button = new GButton(this, 0,0,80,20, "Click Me!");
+          stroke(255);
+          ellipse(50,50,80,80);
+          //GButton button = new GButton(this, 0,0,80,20, "Click Me!");
       }
 
     private void processingConnect() throws Exception {
@@ -39,4 +37,9 @@ public class RenderR extends PApplet {
         myPort = new Serial(this, portName, 9600);
     }
 
+    public void call() {
+        System.out.println("call");
+        ellipse(50,50,80,80);
+        draw();
+    }
 }

@@ -165,6 +165,8 @@ public class Renderer {
 		public void handle(ActionEvent e) {
 			boolean connectionIsSuccessful = true;
 
+            rendererView.drawInApplet();
+            System.out.println("renderer");
         	 try {
                  portName = rendererView.getSelectedPort();
                  if ((portName = rendererView.getSelectedPort()) != null) {
