@@ -23,6 +23,8 @@ public class Modeler implements Iterable<BothArms>{
 	private PointInSpace leftShoulder;
 	private PointInSpace rightShoulder;
 	
+	private int iterationUpTo;
+	
 	//takes an input of some kind and outputs the arm positions
 	//currently assuming arms start relaxed
 	public Modeler(){
@@ -39,6 +41,8 @@ public class Modeler implements Iterable<BothArms>{
 		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
 				new Arm(rightShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
 		pastArms.add(currentArms);
+		
+		iterationUpTo = 0;
 	}
 	
 	//TODO calibration step
@@ -76,12 +80,27 @@ public class Modeler implements Iterable<BothArms>{
 	}
 	
 	/**
-	 * Work out the degrees turned by a gyroscope in that session
-	 * @param dps the dps reading from the gyroscope
-	 * @return the degrees turned in that sensor session
+	 * Returns true if there is an unread sample, false otherwise
+	 * Use getNextSample to read the next one
 	 */
-	public double degreesTurned(double dps){
-		return (dps * secondsBetweenSamples);
+	public boolean hasUnreadSample(){
+		//past arms index = size - 1
+		//iterationUpTo
+		//have we read them all - is past arms index larger than iterationUpTo?
+		return ((pastArms.size() - 1) >= iterationUpTo);
+	}
+	
+	/**
+	 * Returns the next BothArms object
+	 * @return A BothArms object, or null if all objects have been read
+	 */
+	public BothArms getNextSample(){
+		if (iterationUpTo >= pastArms.size()){
+			return null;
+		}
+		BothArms result = pastArms.get(iterationUpTo);
+		iterationUpTo++;
+		return result;
 	}
 	
 	/**
@@ -107,7 +126,8 @@ public class Modeler implements Iterable<BothArms>{
 	 */
 	public Arm getPastLeftArm(int iterationsAgo){
 		if(iterationsAgo < 0 || iterationsAgo > pastArms.size()){
-			throw new Error("That is not a valid number of iterations ago!");
+			BothArms armsInQuestion = pastArms.get(0);
+			return armsInQuestion.getLeftArm();
 		}
 		BothArms armsInQuestion = pastArms.get(pastArms.size() - (iterationsAgo + 1));
 		return armsInQuestion.getLeftArm();

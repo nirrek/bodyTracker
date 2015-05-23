@@ -1,4 +1,3 @@
-
 public class PointInSpace {
 	
 	private double X;

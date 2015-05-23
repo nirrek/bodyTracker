@@ -29,6 +29,15 @@ public class ModelerTest {
     	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().X()) - 0 < 0.0001);
     	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().Y()) - 60.2 < 0.0001);
     }
+    
+    @Test
+    public void readThemAll() throws Exception{
+    	testModeler = new Modeler();
+    	assertTrue("Initial position not there", testModeler.getNextSample() != null);
+    	assertFalse("Our only position should already be read", testModeler.hasUnreadSample());
+    	testModeler.advanceIteration(24, 80, 23, 0, 0, 0);
+    	assertTrue("There is a new iteration that should register as unread!", testModeler.hasUnreadSample());
+    }
 
     @After
     public void tearDown() throws Exception {
