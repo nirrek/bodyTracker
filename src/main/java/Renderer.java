@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.function.Consumer;
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -94,10 +95,7 @@ public class Renderer {
      */
     private void stopSerialListener() {
         if (serialListener == null) return;
-
-        // TODO. Don't brute force stop the thread. Have the thread periodically
-        // check if it should close itself.
-        serialListener.stop();
+        serialListener.interrupt();
     }
 
 
@@ -141,10 +139,6 @@ public class Renderer {
 		}
     }
 
-
-    // -------------------------------------------------------------------------
-    //      HELPER METHODS
-    // -------------------------------------------------------------------------
     private class StreamButtonHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             // TODO, should disable the button to prevent this event
@@ -152,31 +146,49 @@ public class Renderer {
 
             stopSerialListener(); // stop any preexisting listener
 
-            serialListener = createSerialListenerThread(serial);
+            serialListener = new SerialListener((message) -> {
+                System.out.println(message);
+            });
             serialListener.start();
         }
     }
+    // -------------------------------------------------------------------------
+    //      END OF EVENT HANDLERS
+    // -------------------------------------------------------------------------
 
-    // Create a thread that will listen for inbound messages on the
-    // provided serial.
-    private Thread createSerialListenerThread(Serial serial) {
-        return new Thread() {
-            public void run() {
-                String message = null;
+    /**
+     * SerialListener thread reads new messages from the Serial and dispatches
+     * them to the provided callback.
+     */
+    private class SerialListener extends Thread {
+        // Callback to be executed when a new message arrives.
+        private Consumer<String> callback;
 
-                // TODO decide how we want to be able to cancel this thread
-                try {
-                    while (true) {
-                        message = serial.getNextMessage();
-                        System.out.println(message);
-                    }
-                } catch (IOException e) {
-                    // TODO decide how we want to handle this.
-                    // Printstacktrace, and exit thread.
-                    e.printStackTrace();
+        /**
+         * Instantiates a new SerialListener thread. The callback provided
+         * will be invoked every time a new message is received.
+         * @param callback The callback to be invoked upon message reception. The
+         *                 callback is passed a single message string argument.
+         */
+        SerialListener(Consumer<String> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    String message = serial.getNextMessage();
+                    callback.accept(message);
+
+                    if (Thread.interrupted()) return;
                 }
+            } catch (IOException e) {
+                // Exit thread on IOException.
+                // TODO figure out best way to handle this case.
+                e.printStackTrace();
             }
-        };
+        }
     }
 
 
