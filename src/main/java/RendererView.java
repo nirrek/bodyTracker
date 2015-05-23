@@ -46,6 +46,7 @@ public class RendererView {
 		this.model = model;
 
 		container = new HBox(2);
+		container.getStyleClass().add("Container");
 		container.setAlignment(Pos.TOP_RIGHT);
 
 		displayBox = new VBox();
@@ -53,6 +54,7 @@ public class RendererView {
 		initDisplayBox();
 
 		controlBox = new VBox(4);
+		controlBox.getStyleClass().add("Sidebar");
 		initControlBox();
 
 		container.getChildren().addAll(displayBox, controlBox);
@@ -72,13 +74,13 @@ public class RendererView {
 		controlBox.setPadding(new Insets(5, 5, 5, 5));
 
 		Label portLabel = new Label("Select port: ");
-		portLabel.setFont(new Font("", 12));
+		portLabel.getStyleClass().add("Label");
 
 		portsComboBox = new ComboBox<String>();
 		portsComboBox.setMinWidth(240);
 
 		refreshButton = new Button("Refresh");
-		refreshButton.setFont(new Font("", 13));
+		refreshButton.getStyleClass().add("Btn");
 
 		HBox portSelectionWrapper = new HBox(3);
 		portSelectionWrapper.getChildren().addAll(portLabel, portsComboBox, refreshButton);
@@ -87,15 +89,13 @@ public class RendererView {
 		portSelectionWrapper.setAlignment(Pos.BASELINE_LEFT);
 
 		instructionLabel = new Label("Click Start to connect with your Arduino");
-		instructionLabel.setFont(new Font("", 12));
+		instructionLabel.getStyleClass().add("Label");
 
 		connectButton = new Button("Start");
-		connectButton.setMinWidth(75);
-		connectButton.setFont(new Font("", 13));
+		connectButton.getStyleClass().add("Btn");
 
 		closeConnectionButton = new Button("Stop");
-		closeConnectionButton.setMinWidth(75);
-		closeConnectionButton.setFont(new Font("", 13));
+		closeConnectionButton.getStyleClass().add("Btn");
 		//this button is disabled before a connection is established
 		closeConnectionButton.setDisable(true);
 
@@ -106,14 +106,10 @@ public class RendererView {
 		connectionButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
 
 		fetchButton = new Button("Fetch");
-		fetchButton.setMinWidth(100);
-		fetchButton.setMinHeight(40);
-		fetchButton.setFont(new Font("", 20));
+		fetchButton.getStyleClass().add("Btn--large");
 
-		streamButton = new Button("Stream");
-		streamButton.setMinWidth(100);
-		streamButton.setMinHeight(40);
-		streamButton.setFont(new Font("", 20));
+		streamButton = new Button("Start Streaming From Arduino");
+		streamButton.getStyleClass().add("Btn--large");
 
 		getDataButtonWrapper = new HBox(2);
 		getDataButtonWrapper.getChildren().addAll(fetchButton, streamButton);
@@ -124,9 +120,8 @@ public class RendererView {
 		getDataButtonWrapper.setVisible(false);
 
 		logs = new TextArea("");
+		logs.getStyleClass().add("Log");
 		logs.setEditable(false);
-		logs.setMaxWidth(380);
-		logs.setMinHeight(50);
 		logs.setWrapText(true);
 
 		controlBox.getChildren().addAll(
