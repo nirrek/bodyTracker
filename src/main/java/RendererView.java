@@ -75,6 +75,7 @@ public class RendererView {
 		portLabel.setFont(new Font("", 12));
 
 		portsComboBox = new ComboBox<String>();
+		portsComboBox.setMinWidth(240);
 
 		refreshButton = new Button("Refresh");
 		refreshButton.setFont(new Font("", 13));
@@ -124,7 +125,7 @@ public class RendererView {
 
 		logs = new TextArea("");
 		logs.setEditable(false);
-		logs.setMaxWidth(400);
+		logs.setMaxWidth(380);
 		logs.setMinHeight(50);
 		logs.setWrapText(true);
 
@@ -167,15 +168,9 @@ public class RendererView {
 		return portsComboBox.getValue();
 	}
 
-	public void showPortsInUse(ArrayList<CommPortIdentifier> portsInUse) {
-		portsComboBox.getItems().clear();
-		for (CommPortIdentifier port : portsInUse) {
-			portsComboBox.getItems().add(port.getName());
-		}
-	}
-
 
 	public void showAvailablePorts(ArrayList<CommPortIdentifier> availablePorts) {
+		portsComboBox.getItems().clear();
 		for (CommPortIdentifier port : availablePorts)
 			portsComboBox.getItems().add(port.getName());
 	}

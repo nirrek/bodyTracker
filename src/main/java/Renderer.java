@@ -50,10 +50,9 @@ public class Renderer {
     	view.addFetchStreamButtonsHandler(new FetchButtonHandler(),
     			new StreamButtonHandler());
 
-        // Kerrin: Why were we showing inUse ports in the dropdown??????
-        // Romain: See function javaDoc
-        ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
-        view.showPortsInUse(portsInUse);
+
+        ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
+        view.showAvailablePorts(availablePorts);
     }
 
     /**
@@ -144,8 +143,8 @@ public class Renderer {
     // 'Refresh' button handler
     private class RefreshButtonHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent arg0) {
-            ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
-            view.showPortsInUse(portsInUse);
+            ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
+            view.showAvailablePorts(availablePorts);
         }
     }
 
@@ -243,50 +242,17 @@ public class Renderer {
     }
 
 
-    // Kerrin: Why are we wishing to fetch unavailable ports?
-    //
-    // Romain: The idea is to plug the Arduino before this function is called
-    // (ie, before you launch the app) so one of the port in this list will
-    // be the port used to connect with the Arduino
-    //
-    // I will add a 'refresh' button that will call this function when clicked
     /**
+     * Fetches a list of all available serial ports.
      * Once the Arduino is connected, the port it is connected to will appear in
      * this list.
      *
      * This function is called when application is launched, and when user press
      * the 'Refresh' button.
      *
-     * @return    An ArrayList containing the CommPortIdentifier for all
-     * 			  serial ports that are currently being used.
-     */
-    public static ArrayList<CommPortIdentifier> getUnavailableSerialPorts() {
-        ArrayList<CommPortIdentifier> unavailablePorts = new ArrayList<>();
-        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
-        while (ports.hasMoreElements()) {
-            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
-            if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                try {
-                    CommPort thePort = port.open("CommUtil", 50);
-                    thePort.close();
-                } catch (PortInUseException e) {
-                    unavailablePorts.add(port);
-                    System.out.println("Port, "  + port.getName() + ", is in use.");
-                } catch (Exception e) {
-                    System.err.println("Failed to open port " +  port.getName());
-                    e.printStackTrace();
-                }
-            }
-        }
-        return unavailablePorts;
-    }
-
-    /**
-     * Fetches a list of all available serial ports.
      * @author Kerrin
      * @return A list of available serial ports.
      */
-    // Romain: this function returns nothing in my case...
     private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
         ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
         Enumeration ports = CommPortIdentifier.getPortIdentifiers();
