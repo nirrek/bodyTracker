@@ -168,6 +168,7 @@ public class RendererView {
 	}
 
 	public void showPortsInUse(ArrayList<CommPortIdentifier> portsInUse) {
+		portsComboBox.getItems().clear();
 		for (CommPortIdentifier port : portsInUse) {
 			portsComboBox.getItems().add(port.getName());
 		}
