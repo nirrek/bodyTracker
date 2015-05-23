@@ -164,6 +164,11 @@ public class RendererView {
 		}
 	}
 
+	public void showAvailablePorts(ArrayList<CommPortIdentifier> availablePorts) {
+		for (CommPortIdentifier port : availablePorts)
+			portsComboBox.getItems().add(port.getName());
+	}
+
 	public void displayError(String errorMessage) {
 		logs.setText(errorMessage);
 	}
