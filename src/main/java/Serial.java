@@ -90,7 +90,8 @@ public class Serial {
         String line = in.readLine();
         while ((line != null)) {
             if (line.equals(messageBoundary)) break;
-            message.append(line);
+            message.append(line)
+                   .append("\n"); // readLine() strips newline.
             line = in.readLine();
         }
 
