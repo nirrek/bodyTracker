@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 
 
 sourceCompatibility = 1.8  // Use Java 8
@@ -14,11 +15,13 @@ repositories {
 }
 
 dependencies {
-    compile name: 'G4P'
-    compile 'org.processing:core:2.2.1'
-    compile 'org.processing:serial:2.2.1'
     compile group: 'org.scream3r', name: 'jssc', version: '2.8.0'
-    compile 'org.rxtx:rxtxcomm:2.0-7pre1'
     compile 'org.rxtx:rxtx:2.1.7'
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task launchApp(type: JavaExec, dependsOn: 'classes') {
+    main = 'BodyTracker'
+    jvmArgs = ['-Djava.library.path=' + projectDir + '/lib']
+    classpath = sourceSets.main.runtimeClasspath
 }

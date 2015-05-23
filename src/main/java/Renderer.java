@@ -1,15 +1,13 @@
-import java.io.*;
-import java.util.*;
-
 import gnu.io.*;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-import processing.core.PApplet;
-import processing.serial.Serial;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.function.Consumer;
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -17,267 +15,233 @@ import processing.serial.Serial;
  * and display it in an artistic manner after conversion by the Modeler.
  */
 public class Renderer {
-
-	private RendererView rendererView;
-    private Modeler modeler;
+	private RendererView view;
+    private Modeler model;
     SerialPort serialPort;
     private static final int TIME_OUT = 2000;
-	private static final int DATA_RATE = 9600;
+	private static final int DATA_RATE = 115200;
 	private CommPortIdentifier portIdentifier;
 	private InputStream in;
 
-    // TODO: Remove if everything works correctly
-    //private String portName = "/dev/cu.usbmodem1451";  //Lisa's iMac port.
-    private String portName;  //Lisa's iMac port.
+    // The name of the serial port.
+    private String portName;
 
-    public Renderer(Stage primaryStage, Modeler model, RendererView view) {
-    	rendererView = view;
-    	modeler = model;
-    	
-    	rendererView.addConnectionButtonsHandler(new ConnectButtonHandler(), 
+    // Higher level serial wrapper by Kerrin
+    private Serial serial;
+
+    // The thread listening to inbound serial messages
+    private Thread serialListener;
+
+    /**
+     * Constructors a new renderer that is bound to the given model and view.
+     * @param model The model in the MVC pattern (ostensibly)
+     * @param view The view in the MVC pattern (ostensibly)
+     */
+    public Renderer(Modeler model, RendererView view) {
+        this.model = model;
+        this.view = view;
+
+    	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
     			new CloseConnectionButtonHandler());
-    	rendererView.addFetchStreamButtonsHandler(new FetchButtonHandler(), 
+    	view.addFetchStreamButtonsHandler(new FetchButtonHandler(),
     			new StreamButtonHandler());
-    	
-    	// We might want to make sure the connection with arduino is closed
-    	// before user closes the application window
-    	primaryStage.setOnCloseRequest(new CloseWindowHandler());
+
+        // Kerrin: Why were we showing inUse ports in the dropdown??????
+//        ArrayList<CommPortIdentifier> portsInUse = getUnavailableSerialPorts();
+//        view.showPortsInUse(portsInUse);
 
         ArrayList<CommPortIdentifier> portsInUse = getAvailableSerialPorts();
-        rendererView.showPortsInUse(portsInUse);
+        view.showAvailablePorts(portsInUse);
     }
 
     /**
-     * This function is called when user press the "Start" button.
-     * @throws Exception
+     * Establishes a new serial connection using, and stores the new Serial
+     * connection object on the instance.
      */
-    private void connect() throws Exception, NoSuchPortException {
-        portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+    private void connect() {
+        if (this.serial != null) {
+            // TODO close existing serial before establishing new connection.
+        }
 
-        if (portIdentifier.isCurrentlyOwned()) {
-            System.out.println("Error: Port is currently in use");
-        } else {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(),
-                    TIME_OUT);
-            if ( commPort instanceof SerialPort ) {
-                serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(DATA_RATE,SerialPort.DATABITS_8,
-                        SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+        this.serial = new Serial();
+        this.serial.connect(this.portName, DATA_RATE);
 
-                OutputStream out = serialPort.getOutputStream();
-
-                (new Thread(new SerialWriter(out))).start();
-            }
-            else {
-                System.out.println("Error: Only serial ports are handled by "
-                        + "this example.");
-            }
+        if (!this.serial.isConnected()) {
+            // TODO handle connection failure
+            System.err.println("Failed to connect");
         }
     }
 
 
+    /**
+     * Lifecycle method to be called before the Renderer is unmounted to
+     * clean-up necessary state.
+     */
+    public void unmount() {
+        stopSerialListener();
+        closeConnection();
+    }
+
+    /**
+     * Closes the serial connection.
+     */
     private void closeConnection() {
-        if (serialPort != null) {
-            serialPort.removeEventListener();
-            serialPort.close();
-        }
+        if (serial == null) return;
+        serial.close();
     }
 
     /**
-     * This function is called when user press the "Stream" button
-     * @throws Exception
+     * Stops the thread that is listening for inbound serial communication.
      */
-    private void listenForInput() throws Exception{
-        in = serialPort.getInputStream();
-        serialPort.addEventListener(new SerialReader(in));
-        serialPort.notifyOnDataAvailable(true);
+    private void stopSerialListener() {
+        if (serialListener == null) return;
+        serialListener.interrupt();
     }
 
 
-    /////////////////////////////////////////////////////////////////////////
-    ////////////// COMMUNICATION TO/FROM ARDUINO ////////////////////////////
-    /////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Handles the input coming from the serial port. A new line character
-     * is treated as the end of a block in this example. 
-     */
-    public static class SerialReader implements SerialPortEventListener {
-        private InputStream in;
-        private byte[] buffer = new byte[1024];
-        
-        
-        public SerialReader ( InputStream in ) {
-            this.in = in;
-        }
-        
-        public void serialEvent(SerialPortEvent arg0) {
-            int data;
-          
-            try {
-                int len = 0;
-                while ( ( data = in.read()) > -1 ) {
-                    if ( data == '\n' ) {
-                        break;
-                    }
-                    buffer[len++] = (byte) data;
-                }
-                System.out.print(new String(buffer,0,len));
-                
-            } catch ( IOException e ) {
-                e.printStackTrace();
-                System.exit(-1);
-            }             
-        } 
-    }
-    
-    /**
-     * Open a new thread. Sends message(s) to the Arduino
-     */
-    public static class SerialWriter implements Runnable {
-        OutputStream out;
-        
-        public SerialWriter ( OutputStream out ) {
-            this.out = out;
-        }
-        
-        public void run () {
-            try {                
-                int c = 0;
-                while ( ( c = System.in.read()) > -1 ) {
-                    this.out.write(c);
-                }   
-                
-            } catch ( IOException e ) {
-                e.printStackTrace();
-                System.exit(-1);
-            }            
-        }
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    /////////////////////////// BUTTONS LISTENER /////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
+    // -------------------------------------------------------------------------
+    //      EVENT LISTENERS
+    // -------------------------------------------------------------------------
+    // 'Start' button handler
     private class ConnectButtonHandler implements EventHandler<ActionEvent> {
-
-		//@Override
 		public void handle(ActionEvent e) {
-			boolean connectionIsSuccessful = true;
 
-            rendererView.drawInApplet();
-            System.out.println("renderer");
-        	 try {
-                 portName = rendererView.getSelectedPort();
-                 if ((portName = rendererView.getSelectedPort()) != null) {
-                     connect();
-                 } else {
-                     rendererView.displayError("Please select a port to connect to Arduino");
-                     connectionIsSuccessful = false;
-                 }
-             } catch (Exception exception) {
-                 rendererView.displayError("Can not connect to port " + portName);
-                 connectionIsSuccessful = false;
-             }
-        	
-        	if (connectionIsSuccessful) {
-        		rendererView.toggleControlPaneForArduinoConnected(true);
-        	}
+            portName = view.getSelectedPort();
+
+            if (portName == null) {
+                view.displayError("Please select a port to connect to Arduino");
+                return;
+            }
+
+            connect();
+            if (!serial.isConnected()) {
+                view.displayError("Can not connect to port " + portName);
+                return;
+            }
+
+            view.toggleControlPaneForArduinoConnected(true);
 		}
-    	
     }
 
     private class CloseConnectionButtonHandler implements EventHandler<ActionEvent> {
-
-		//@Override
 		public void handle(ActionEvent arg0) {
-        	closeConnection();
-            rendererView.toggleControlPaneForArduinoConnected(false);
+            stopSerialListener();
+            closeConnection();
+            view.toggleControlPaneForArduinoConnected(false);
 		}
-    	
     }
-    
+
     private class FetchButtonHandler implements EventHandler<ActionEvent> {
-
-		//@Override
 		public void handle(ActionEvent arg0) {
 			String error = "";
-			
+
 			// TODO: FETCH DATA STORED IN ARDUINO
-			
-			rendererView.displayError(error);
+			view.displayError(error);
 		}
-    	
     }
 
-    
     private class StreamButtonHandler implements EventHandler<ActionEvent> {
-    	
-        //@Override
-		public void handle(ActionEvent arg0) {
-		    try {
-				listenForInput();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		  
-			String error = "";
-			
-			Thread t=new Thread() {
-			public void run() {
-				//listens to input for 1000 seconds & prints to console.
-				try {						
-					Thread.sleep(1000000);
-				} catch (InterruptedException ie) 
-				{	
-				}
-			}
-		};
-			
-			t.start();
-	
-			rendererView.displayError(error);
-		}	
+        public void handle(ActionEvent event) {
+            // TODO, should disable the button to prevent this event
+            // handler from being run multiple times.
+
+            stopSerialListener(); // stop any preexisting listener
+
+            serialListener = new SerialListener((message) -> {
+                System.out.println(message);
+            });
+            serialListener.start();
+        }
     }
+    // -------------------------------------------------------------------------
+    //      END OF EVENT HANDLERS
+    // -------------------------------------------------------------------------
 
     /**
-     * The handle() method is called when user closes the application window.
-     * Closes the connection with the Arduino
+     * SerialListener thread reads new messages from the Serial and dispatches
+     * them to the provided callback.
      */
-    private class CloseWindowHandler implements EventHandler<WindowEvent> {
+    private class SerialListener extends Thread {
+        // Callback to be executed when a new message arrives.
+        private Consumer<String> callback;
 
-		/* Close connection with arduino */
-		public void handle(WindowEvent e) {
-	    	closeConnection();
-		}
+        /**
+         * Instantiates a new SerialListener thread. The callback provided
+         * will be invoked every time a new message is received.
+         * @param callback The callback to be invoked upon message reception. The
+         *                 callback is passed a single message string argument.
+         */
+        SerialListener(Consumer<String> callback) {
+            this.callback = callback;
+        }
 
-		
-	}
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    String message = serial.getNextMessage();
+                    callback.accept(message);
+
+                    if (Thread.interrupted()) return;
+                }
+            } catch (IOException e) {
+                // Exit thread on IOException.
+                // TODO figure out best way to handle this case.
+                e.printStackTrace();
+            }
+        }
+    }
 
 
+    // Kerrin: Why are we wishing to fetch unavailable ports?
     /**
      * @return    An ArrayList containing the CommPortIdentifier for all
      * 			  serial ports that are currently being used.
      */
-    public static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
-        ArrayList<CommPortIdentifier> h = new ArrayList<CommPortIdentifier>();
-        Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
-        while (thePorts.hasMoreElements()) {
-            CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
-            switch (com.getPortType()) {
-            case CommPortIdentifier.PORT_SERIAL:
+    public static ArrayList<CommPortIdentifier> getUnavailableSerialPorts() {
+        ArrayList<CommPortIdentifier> unavailablePorts = new ArrayList<>();
+        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+        while (ports.hasMoreElements()) {
+            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
+            if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
                 try {
-                    CommPort thePort = com.open("CommUtil", 50);
+                    CommPort thePort = port.open("CommUtil", 50);
                     thePort.close();
                 } catch (PortInUseException e) {
-                    h.add(com);
-                    System.out.println("Port, "  + com.getName() + ", is in use.");
+                    unavailablePorts.add(port);
+                    System.out.println("Port, "  + port.getName() + ", is in use.");
                 } catch (Exception e) {
-                    System.err.println("Failed to open port " +  com.getName());
+                    System.err.println("Failed to open port " +  port.getName());
                     e.printStackTrace();
                 }
             }
         }
-        return h;
+        return unavailablePorts;
+    }
+
+    /**
+     * Fetches a list of all available serial ports.
+     * @author Kerrin
+     * @return A list of available serial ports.
+     */
+    private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
+        ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
+        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+        while (ports.hasMoreElements()) {
+            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
+            if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                try {
+                    CommPort thePort = port.open("CommUtil", 50);
+                    thePort.close();
+                    availablePorts.add(port);
+                } catch (PortInUseException e) {
+                    System.out.println("Port, "  + port.getName() + ", is in use.");
+                } catch (Exception e) {
+                    System.err.println("Failed to open port " +  port.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+        return availablePorts;
     }
 }
