@@ -4,7 +4,6 @@ import javafx.event.EventHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -43,6 +42,12 @@ public class Renderer {
     public Renderer(Modeler model, RendererView view) {
         this.model = model;
         this.view = view;
+
+        model.addListener(Modeler.NEW_SAMPLE, p -> {
+            System.out.println("new sample added to model");
+            // - Fetch the data from the model
+            // - Tell the 'sketchCanvas' to sketch a new line
+        });
 
         view.addRefreshButtonHandler(new RefreshButtonHandler());
     	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
@@ -198,6 +203,10 @@ public class Renderer {
 
             serialListener = new SerialListener((message) -> {
                 List<Sample> samples = parseMessage(message);
+
+                if (!samples.isEmpty()) {
+                    model.newSensorReading(samples.get(0));
+                }
             });
             serialListener.start();
         }
