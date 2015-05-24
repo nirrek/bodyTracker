@@ -24,6 +24,16 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	private PointInSpace rightShoulder;
 
 	private int iterationUpTo;
+	
+	private double[] Xvector = {1, 0, 0};
+	private double[] Yvector = {0, 1, 0};
+	
+	private double[][] transposeMatrix = {	{1, 0},
+											{0, 1},
+											{0, 0}
+											};
+	
+	//transposeMatrix = transpose(transposeMatrix);
 
 	// Event constants
 	public static final String NEW_SAMPLE = "newSample";
@@ -34,7 +44,7 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		elbowToWrist = 300;//Millimeters
 		shoulderToElbow = 300;//TODO:Make this dynamic
 		startLeftPitch = 0;//TODO: Make these inputs!
-		startLeftRoll = 90;
+		startLeftRoll = -90;
 		//startLeftYaw = 0;
 		startRightPitch = 0;//Shoulder forwards/backwards
 		startRightRoll = 90;//Shoulder up/down
@@ -62,20 +72,20 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		//double currentRightYaw = rightYaw - startRightYaw;
 
 		double lEX = shoulderToElbow * sine(currentLeftRoll) * sine(currentLeftPitch);//Forwards/back
-		double lEY = shoulderToElbow * sine(currentLeftRoll) * cosine(currentLeftPitch);//Up down
-		double lEZ = -shoulderToElbow * cosine(currentLeftRoll);//Z being left/right
+		double lEY = -shoulderToElbow * sine(currentLeftRoll) * cosine(currentLeftPitch);//Up down
+		double lEZ = -shoulderToElbow * sine(currentLeftRoll);//Z being left/right
 
 		double rEX = shoulderToElbow * sine(currentRightRoll) * sine(currentRightPitch);
 		double rEY = shoulderToElbow * sine(currentRightRoll) * cosine(currentRightPitch);
-		double rEZ = shoulderToElbow * cosine(currentRightRoll);
+		double rEZ = shoulderToElbow * sine(currentRightRoll);
 
 		double lWX = elbowToWrist * sine(-90) * sine(0);
-		double lWY = elbowToWrist * sine(-90) * cosine(0);
-		double lWZ = -elbowToWrist * cosine(-90);
+		double lWY = -elbowToWrist * sine(-90) * cosine(0);
+		double lWZ = -elbowToWrist * sine(-90);
 
 		double rWX = elbowToWrist * sine(-90) * sine(0);
 		double rWY = elbowToWrist * sine(-90) * cosine(0);
-		double rWZ = elbowToWrist * cosine(-90);
+		double rWZ = elbowToWrist * sine(-90);
 
 		Arm newLeftArm = new Arm(leftShoulder, lEX, lEY, lEZ, lWX, lWY, lWZ, true);
 		Arm newRightArm = new Arm(rightShoulder, rEX, rEY, rEZ, rWX, rWY, rWZ, false);
@@ -104,14 +114,14 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		double pitch = armSample.pitch - initialPitch;
 
 		// Upper arm
-		double upperX = shoulderToElbow * sine(roll) * cosine(pitch); // Forwards/back
-		double upperY = shoulderToElbow * sine(roll) * sine(pitch); // Up down
-		double upperZ = (sign) * shoulderToElbow * cosine(roll);			// Z being left/right
+		double upperX = shoulderToElbow * sine(roll) * sine(pitch); // Forwards/back
+		double upperY = (sign) * shoulderToElbow * sine(roll) * cosine(pitch); // Up down
+		double upperZ = (sign) * shoulderToElbow * sine(roll);			// Z being left/right
 
 		// Lower arm
-		double lowerX = elbowToWrist * sine(-90) * cosine(0);
-		double lowerY = elbowToWrist * sine(-90) * sine(0);
-		double lowerZ = (sign) * elbowToWrist * cosine(-90);
+		double lowerX = elbowToWrist * sine(-90) * sine(0);
+		double lowerY = (sign) * elbowToWrist * sine(-90) * cosine(0);
+		double lowerZ = (sign) * elbowToWrist * sine(-90);
 
 		PointInSpace shoulderLocation = (isLeftArm) ? leftShoulder
 													: rightShoulder;
@@ -248,5 +258,25 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	// mainly used for unit testing
 	public int pastArmsCount() {
 		return pastArms.size();
+	}
+	
+	public double[][] transpose(double[][] matrix){
+
+	    double tmp1, tmp2;
+	    int n = matrix.length;
+	    int m = matrix[0].length;
+	    
+		double[][] answerMatrix = new double[n][m];
+	    
+	    for (int i = 0; i < n; i++) {
+	        for (int j = i; j < m; j++) {
+	            tmp1 = matrix[i][j];
+	            tmp2 = matrix[j][i];
+	            answerMatrix[i][j] = tmp2;
+	            answerMatrix[j][i] = tmp1;
+	        }
+	    }
+	    
+	    return answerMatrix;
 	}
 }

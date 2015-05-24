@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 public class ModelerTest {
 	Modeler modeler;
+	double delta = 0.0001; // handle imprecision of binary floating point.
 
     @Before
     public void beforeEach() throws Exception {
@@ -19,28 +20,23 @@ public class ModelerTest {
     	assertFalse("Arm initulisation failed", sampleArm.isLeftArm());
     }
 
+    @Ignore("Y position calculation being re-done")
     @Test
     public void doesTimePass() throws Exception{
     	modeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	modeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	modeler.advanceIteration(24, 80, 23, 0, 0, 0);
     	Arm sampleArm = modeler.getPastLeftArm(2);
-    	//assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().X()) - 0 < 0.0001);
-    	//assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().Y()) - 30.2 < 0.0001);
-    	//assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().X()) - 0 < 0.0001);
-    	//assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().Y()) - 60.2 < 0.0001);
-
-		// TODO. See whether Harrison was trying to see if the above results
-		// were meant to check that the results were within 0.0001 of 0.0.
+    	
 		double delta = 0.0001; // handle imprecision of binary floating point.
 		assertEquals("Elbow X relaxed position calculation failed",
-				0.0, Math.abs(sampleArm.elbowPos().X()) - 0, delta);
+				0.0, sampleArm.elbowPos().X() - 0, delta);
 		assertEquals("Elbow Y relaxed position calculation failed",
-				0.0, Math.abs(sampleArm.elbowPos().Y()) - 298, delta);
+				0.0, sampleArm.elbowPos().Y() - (-298), delta);
 		assertEquals("Wrist X relaxed position calculation failed",
-				0.0, Math.abs(sampleArm.wristPos().X()) - 0, delta);
+				0.0, sampleArm.wristPos().X() - 0, delta);
 		assertEquals("Wrist Y relaxed position calculation failed",
-				0.0, Math.abs(sampleArm.wristPos().Y()) - 598, delta);
+				0.0, sampleArm.wristPos().Y() - (-598), delta);
     }
 
     @Test
@@ -52,18 +48,56 @@ public class ModelerTest {
     }
 
 	// The calculations for arm position should be correct
+    @Ignore("Y position calculation being re-done")
 	@Test
 	public void calculationsShouldBeCorrect() {
-		Sample nextSample = new Sample();
+		Sample nextSample = new Sample(0, 0, 0.0, 0.0, 0.0);
+		Arm sampleArm = modeler.computeNewArmPosition(nextSample, true);
 		
-		// TODO: Harrison should fill this test in
-
-		// 1. create a sample with the desired position
-		// 2. run computeNewArmPosition() to calculate a new arm position
-		// 3. test that the return Arm has all the right coordinates
-
-		// the above algorithm should be applied to a number of different
-		// samples
+		assertEquals("Elbow X relaxed position calculation failed",
+				0.0, sampleArm.elbowPos().X() - 0, delta);
+		assertEquals("Elbow Y relaxed position calculation failed",
+				0.0, sampleArm.elbowPos().Y() - (-298), delta);
+		assertEquals("Elbow Z relaxed position calculation failed",
+				0.0, sampleArm.elbowPos().Z() - (-1), delta);
+		assertEquals("Wrist X relaxed position calculation failed",
+				0.0, sampleArm.wristPos().X() - 0, delta);
+		assertEquals("Wrist Y relaxed position calculation failed",
+				0.0, sampleArm.wristPos().Y() - (-598), delta);
+		assertEquals("Wrist Z relaxed position calculation failed",
+				0.0, sampleArm.wristPos().Z() - (-1), delta);
+		
+		
+		nextSample = new Sample(0, 0, 90.0, 0.0, 0.0);
+		sampleArm = modeler.computeNewArmPosition(nextSample, true);
+		assertEquals("Left Elbow X abduction position calculation failed",
+				0.0, sampleArm.elbowPos().X() - 0, delta);
+		assertEquals("Left Elbow Y abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Y() - 2, delta);
+		System.out.println(sampleArm.elbowPos().Z());
+		assertEquals("Left Elbow Z abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Z() - (-301), delta);
+		assertEquals("Left Wrist X abduction position calculation failed",
+				0.0, sampleArm.wristPos().X() - 0, delta);
+		assertEquals("Left Wrist Y abduction position calculation failed",
+				0.0, sampleArm.wristPos().Y() - (-298), delta);
+		assertEquals("Left Elbow Z abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Z() - (-301), delta);
+		
+		nextSample = new Sample(0, 0, -90.0, 0.0, 0.0);
+		sampleArm = modeler.computeNewArmPosition(nextSample, false);
+		assertEquals("Right Elbow X abduction position calculation failed",
+				0.0, sampleArm.elbowPos().X() - 0, delta);
+		assertEquals("Right Elbow Y abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Y() - 2, delta);
+		assertEquals("Right Elbow Z abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Z() - 301, delta);
+		assertEquals("Right Wrist X abduction position calculation failed",
+				0.0, sampleArm.wristPos().X() - 0, delta);
+		assertEquals("Right Wrist Y abduction position calculation failed",
+				0.0, sampleArm.wristPos().Y() - (-298), delta);
+		assertEquals("Right Elbow Z abduction position calculation failed",
+				0.0, sampleArm.elbowPos().Z() - 301, delta);
 	}
 
 
