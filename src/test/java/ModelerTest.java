@@ -7,7 +7,10 @@ import static org.junit.Assert.*;
 
 public class ModelerTest {
 	Modeler modeler;
-	double delta = 0.0001; // handle imprecision of binary floating point.
+
+	// Allowable delta whe comparing equality of doubles. Required for handling
+	// imprecision of the 64-bit binary floating point representation.
+	double delta = 0.0001;
 
     @Before
     public void beforeEach() throws Exception {
@@ -26,16 +29,15 @@ public class ModelerTest {
     	modeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	modeler.advanceIteration(24, 80, 23, 0, 0, 0);
     	Arm sampleArm = modeler.getPastLeftArm(2);
-    	
-		double delta = 0.0001; // handle imprecision of binary floating point.
+
 		assertEquals("Elbow X relaxed position calculation failed",
-				0.0, sampleArm.elbowPos().X(), delta);
+				0.0, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Elbow Y relaxed position calculation failed",
-				-298, sampleArm.elbowPos().Y(), delta);
+				-298, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Wrist X relaxed position calculation failed",
-				0.0, sampleArm.wristPos().X(), delta);
+				0.0, sampleArm.wristPos().getX(), delta);
 		assertEquals("Wrist Y relaxed position calculation failed",
-				-598, sampleArm.wristPos().Y(), delta);
+				-598, sampleArm.wristPos().getY(), delta);
     }
 
     @Test
@@ -51,80 +53,80 @@ public class ModelerTest {
 	public void calculationsShouldBeCorrect() {
 		Sample nextSample = new Sample(0, 0, 0.0, 0.0, 0.0);
 		Arm sampleArm = modeler.computeNewArmPosition(nextSample, true);
-		
+
 		assertEquals("Elbow X relaxed position calculation failed",
-				0.0, sampleArm.elbowPos().X(), delta);
+				0.0, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Elbow Y relaxed position calculation failed",
-				-298, sampleArm.elbowPos().Y(), delta);
+				-298, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Elbow Z relaxed position calculation failed",
-				-1, sampleArm.elbowPos().Z(), delta);
+				-1, sampleArm.elbowPos().getZ(), delta);
 		assertEquals("Wrist X relaxed position calculation failed",
-				0.0, sampleArm.wristPos().X(), delta);
+				0.0, sampleArm.wristPos().getX(), delta);
 		assertEquals("Wrist Y relaxed position calculation failed",
-				-598, sampleArm.wristPos().Y(), delta);
+				-598, sampleArm.wristPos().getY(), delta);
 		assertEquals("Wrist Z relaxed position calculation failed",
-				-1, sampleArm.wristPos().Z(), delta);
-		
-		
+				-1, sampleArm.wristPos().getZ(), delta);
+
+
 		nextSample = new Sample(0, 0, 90.0, 0.0, 0.0);
 		sampleArm = modeler.computeNewArmPosition(nextSample, true);
 		assertEquals("Left Elbow X abduction position calculation failed",
-				0.0, sampleArm.elbowPos().X(), delta);
+				0.0, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Left Elbow Y abduction position calculation failed",
-				2, sampleArm.elbowPos().Y(), delta);
+				2, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Left Elbow Z abduction position calculation failed",
-				-301, sampleArm.elbowPos().Z(), delta);
+				-301, sampleArm.elbowPos().getZ(), delta);
 		assertEquals("Left Wrist X abduction position calculation failed",
-				0.0, sampleArm.wristPos().X(), delta);
+				0.0, sampleArm.wristPos().getX(), delta);
 		assertEquals("Left Wrist Y abduction position calculation failed",
-				-298, sampleArm.wristPos().Y(), delta);
+				-298, sampleArm.wristPos().getY(), delta);
 		assertEquals("Left Elbow Z abduction position calculation failed",
-				-301, sampleArm.elbowPos().Z(), delta);
-		
+				-301, sampleArm.elbowPos().getZ(), delta);
+
 		nextSample = new Sample(0, 0, -90.0, 0.0, 0.0);
 		sampleArm = modeler.computeNewArmPosition(nextSample, false);
 		assertEquals("Right Elbow X abduction position calculation failed",
-				0.0, sampleArm.elbowPos().X(), delta);
+				0.0, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Right Elbow Y abduction position calculation failed",
-				2, sampleArm.elbowPos().Y(), delta);
+				2, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Right Elbow Z abduction position calculation failed",
-				301, sampleArm.elbowPos().Z(), delta);
+				301, sampleArm.elbowPos().getZ(), delta);
 		assertEquals("Right Wrist X abduction position calculation failed",
-				0.0, sampleArm.wristPos().X(), delta);
+				0.0, sampleArm.wristPos().getX(), delta);
 		assertEquals("Right Wrist Y abduction position calculation failed",
-				-298, sampleArm.wristPos().Y(), delta);
+				-298, sampleArm.wristPos().getY(), delta);
 		assertEquals("Right Elbow Z abduction position calculation failed",
-				301, sampleArm.elbowPos().Z(), delta);
-		
+				301, sampleArm.elbowPos().getZ(), delta);
+
 		nextSample = new Sample(0, 0, 0.0, 0.0, -90.0);
 		sampleArm = modeler.computeNewArmPosition(nextSample, true);
 		assertEquals("Left Elbow X flexion position calculation failed",
-				300, sampleArm.elbowPos().X(), delta);
+				300, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Left Elbow Y flexion position calculation failed",
-				2, sampleArm.elbowPos().Y(), delta);
+				2, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Left Elbow Z flexion position calculation failed",
-				-1, sampleArm.elbowPos().Z(), delta);
+				-1, sampleArm.elbowPos().getZ(), delta);
 		assertEquals("Left Wrist X flexion position calculation failed",
-				300, sampleArm.wristPos().X(), delta);
+				300, sampleArm.wristPos().getX(), delta);
 		assertEquals("Left Wrist Y flexion position calculation failed",
-				-298, sampleArm.wristPos().Y(), delta);
+				-298, sampleArm.wristPos().getY(), delta);
 		assertEquals("Left Elbow Z flexion position calculation failed",
-				-1, sampleArm.elbowPos().Z(), delta);
-		
+				-1, sampleArm.elbowPos().getZ(), delta);
+
 		nextSample = new Sample(0, 0, 0.0, 0.0, 90.0);
 		sampleArm = modeler.computeNewArmPosition(nextSample, true);
 		assertEquals("Left Elbow X extension position calculation failed",
-				-300, sampleArm.elbowPos().X(), delta);
+				-300, sampleArm.elbowPos().getX(), delta);
 		assertEquals("Left Elbow Y extension position calculation failed",
-				2, sampleArm.elbowPos().Y(), delta);
+				2, sampleArm.elbowPos().getY(), delta);
 		assertEquals("Left Elbow Z extension position calculation failed",
-				-1, sampleArm.elbowPos().Z(), delta);
+				-1, sampleArm.elbowPos().getZ(), delta);
 		assertEquals("Left Wrist X extension position calculation failed",
-				-300, sampleArm.wristPos().X(), delta);
+				-300, sampleArm.wristPos().getX(), delta);
 		assertEquals("Left Wrist Y extension position calculation failed",
-				-298, sampleArm.wristPos().Y(), delta);
+				-298, sampleArm.wristPos().getY(), delta);
 		assertEquals("Left Elbow Z extension position calculation failed",
-				-1, sampleArm.elbowPos().Z(), delta);
+				-1, sampleArm.elbowPos().getZ(), delta);
 	}
 
 
