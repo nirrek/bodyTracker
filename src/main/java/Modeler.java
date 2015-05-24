@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,20 +61,14 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		double currentRightRoll = rightRoll - startRightRoll;
 		//double currentRightYaw = rightYaw - startRightYaw;
 
-		// Kerrin:
-		// These should probably be factored into a function such as
-		// Arm leftArm = computeUpperArmPosition(sample, isLeft)
 		double lEX = shoulderToElbow * Math.sin(currentLeftRoll) * Math.cos(currentLeftPitch);//Forwards/back
 		double lEY = shoulderToElbow * Math.sin(currentLeftRoll) * Math.sin(currentLeftPitch);//Up down
 		double lEZ = -shoulderToElbow * Math.cos(currentLeftRoll);//Z being left/right
 
-		// And this can become:
-		// Arm rightArm = computeUpperArmPosition(sample, !isLeft)
 		double rEX = shoulderToElbow * Math.sin(currentRightRoll) * Math.cos(currentRightPitch);
 		double rEY = shoulderToElbow * Math.sin(currentRightRoll) * Math.sin(currentRightPitch);
 		double rEZ = shoulderToElbow * Math.cos(currentRightRoll);
 
-		// Same deal with these guys. Most of this is repetition.
 		double lWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
 		double lWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
 		double lWZ = -elbowToWrist * Math.cos(-Math.PI);
@@ -90,21 +85,71 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		this.emit(NEW_SAMPLE);
 	}
 
+	/**
+	 * Computes an arm's position using the specified sensor sample. The new
+	 * position is modeled by the returned Arm object.
+	 * @param armSample The sensor sample used to compute the arm position.
+	 * @param isLeftArm Whether we are computing the arm position for a left arm.
+	 *                  If false, it implied we are computing right arm position.
+	 * @return A new arm object that models the arm's position in space.
+	 */
+	public Arm computeNewArmPosition(Sample armSample, boolean isLeftArm) {
+		// flip the sign for certain operations when it is a left arm.
+		double sign =  isLeftArm ? -1 : 1;
+
+		// Compute the roll/pitch/yaw relative to calibrated start position
+		double initialRoll = isLeftArm ? startLeftRoll : startRightRoll;
+		double initialPitch = isLeftArm ? startLeftPitch : startRightPitch;
+		double roll = armSample.roll - initialRoll;
+		double pitch = armSample.pitch - initialPitch;
+
+		// Upper arm
+		double upperX = shoulderToElbow * Math.sin(roll) * Math.cos(pitch); // Forwards/back
+		double upperY = shoulderToElbow * Math.sin(roll) * Math.sin(pitch); // Up down
+		double upperZ = (sign) * shoulderToElbow * Math.cos(roll);			// Z being left/right
+
+		// Lower arm
+		double lowerX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
+		double lowerY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
+		double lowerZ = (sign) * elbowToWrist * Math.cos(-Math.PI);
+
+		PointInSpace shoulderLocation = (isLeftArm) ? leftShoulder
+													: rightShoulder;
+		return new Arm(shoulderLocation,
+				       upperX, upperY, upperZ,
+				       lowerX, lowerY, lowerZ,
+				       isLeftArm);
+	}
+
 	// TODO: (Kerrin) might be better to rename Sample => SensorReading
 
-	// Right now I only have one arm working with the sensor. So we need to be
-	// able to have the Modeler either work for a single arm, or both arms.
-	public void newSensorReading(Sample leftArm) {
-
+	/**
+	 * Adds a new arm position when only a left arm sample is available.
+	 * Right now the shirt is only using a single sensor, so we want the modeler
+	 * to work under those conditions as well.
+	 * @param leftArmSample The sensor reading for the left arm.
+	 */
+	public void newSensorReading(Sample leftArmSample) {
+		Arm leftArm = computeNewArmPosition(leftArmSample, true);
+		BothArms arms = new BothArms(leftArm, null);
+		pastArms.add(arms);
 		this.emit(NEW_SAMPLE);
 	}
 
-	// Kerrin: How should we determine which one is left and which is right?
-	// Just wanna do something lame and have (sensorId == 1) ==> left
-	//                                       (sensorId == 2) ==> right
-	// and just hardcode this in the arduino software....
-	public void newSensorReading(Sample leftArm, Sample rightArm) {
-
+	// TODO decide how we determine left/right sample in the client code
+	// for this method. Possibly just a hardcoded mapping from sensorId => side
+	/**
+	 * Adds an arm position to the modeler for a new time slice from the
+	 * specified sensor readings.
+	 * @param leftArmSample  The left arm sensor reading
+	 * @param rightArmSample The righ arm sensor reading
+	 */
+	public void newSensorReading(Sample leftArmSample, Sample rightArmSample) {
+		Arm leftArm = computeNewArmPosition(leftArmSample, true);
+		Arm rightArm = computeNewArmPosition(rightArmSample, false);
+		BothArms arms = new BothArms(leftArm, rightArm);
+		pastArms.add(arms);
+		this.emit(NEW_SAMPLE);
 	}
 
 	/**
@@ -179,5 +224,11 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	 */
 	public Iterator<BothArms> iterator(){
 		return pastArms.iterator();
+	}
+
+	// number of past arms calculated
+	// mainly used for unit testing
+	public int pastArmsCount() {
+		return pastArms.size();
 	}
 }
