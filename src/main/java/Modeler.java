@@ -31,18 +31,18 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	//takes an input of some kind and outputs the arm positions
 	//currently assuming arms start relaxed
 	public Modeler(){
-		elbowToWrist = 30;
-		shoulderToElbow = 30;//TODO:Make this dynamic
+		elbowToWrist = 300;//Millimeters
+		shoulderToElbow = 300;//TODO:Make this dynamic
 		startLeftPitch = 0;//TODO: Make these inputs!
-		startLeftRoll = 0;
+		startLeftRoll = 90;
 		//startLeftYaw = 0;
 		startRightPitch = 0;//Shoulder forwards/backwards
-		startRightRoll = 0;//Shoulder up/down
+		startRightRoll = 90;//Shoulder up/down
 		//startRightYaw = 0;//Theoretically unused
-		leftShoulder = new PointInSpace(0, 0.2, -0.1);//TODO: Dynamic again
-		rightShoulder = new PointInSpace(0, 0.2, 0.1);
-		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, true),
-				new Arm(rightShoulder, 0, shoulderToElbow, 0, 0, elbowToWrist, 0, false));//Create arms at rest
+		leftShoulder = new PointInSpace(0, 2, -1);//TODO: Dynamic again
+		rightShoulder = new PointInSpace(0, 2, 1);
+		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, -shoulderToElbow, 0, 0, -elbowToWrist, 0, true),
+				new Arm(rightShoulder, 0, -shoulderToElbow, 0, 0, -elbowToWrist, 0, false));//Create arms at rest
 		pastArms.add(currentArms);
 
 		iterationUpTo = 0;
@@ -61,21 +61,21 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		double currentRightRoll = rightRoll - startRightRoll;
 		//double currentRightYaw = rightYaw - startRightYaw;
 
-		double lEX = shoulderToElbow * Math.sin(currentLeftRoll) * Math.cos(currentLeftPitch);//Forwards/back
-		double lEY = shoulderToElbow * Math.sin(currentLeftRoll) * Math.sin(currentLeftPitch);//Up down
-		double lEZ = -shoulderToElbow * Math.cos(currentLeftRoll);//Z being left/right
+		double lEX = shoulderToElbow * sine(currentLeftRoll) * sine(currentLeftPitch);//Forwards/back
+		double lEY = shoulderToElbow * sine(currentLeftRoll) * cosine(currentLeftPitch);//Up down
+		double lEZ = -shoulderToElbow * cosine(currentLeftRoll);//Z being left/right
 
-		double rEX = shoulderToElbow * Math.sin(currentRightRoll) * Math.cos(currentRightPitch);
-		double rEY = shoulderToElbow * Math.sin(currentRightRoll) * Math.sin(currentRightPitch);
-		double rEZ = shoulderToElbow * Math.cos(currentRightRoll);
+		double rEX = shoulderToElbow * sine(currentRightRoll) * sine(currentRightPitch);
+		double rEY = shoulderToElbow * sine(currentRightRoll) * cosine(currentRightPitch);
+		double rEZ = shoulderToElbow * cosine(currentRightRoll);
 
-		double lWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
-		double lWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
-		double lWZ = -elbowToWrist * Math.cos(-Math.PI);
+		double lWX = elbowToWrist * sine(-90) * sine(0);
+		double lWY = elbowToWrist * sine(-90) * cosine(0);
+		double lWZ = -elbowToWrist * cosine(-90);
 
-		double rWX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
-		double rWY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
-		double rWZ = elbowToWrist * Math.cos(-Math.PI);
+		double rWX = elbowToWrist * sine(-90) * sine(0);
+		double rWY = elbowToWrist * sine(-90) * cosine(0);
+		double rWZ = elbowToWrist * cosine(-90);
 
 		Arm newLeftArm = new Arm(leftShoulder, lEX, lEY, lEZ, lWX, lWY, lWZ, true);
 		Arm newRightArm = new Arm(rightShoulder, rEX, rEY, rEZ, rWX, rWY, rWZ, false);
@@ -104,14 +104,14 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		double pitch = armSample.pitch - initialPitch;
 
 		// Upper arm
-		double upperX = shoulderToElbow * Math.sin(roll) * Math.cos(pitch); // Forwards/back
-		double upperY = shoulderToElbow * Math.sin(roll) * Math.sin(pitch); // Up down
-		double upperZ = (sign) * shoulderToElbow * Math.cos(roll);			// Z being left/right
+		double upperX = shoulderToElbow * sine(roll) * cosine(pitch); // Forwards/back
+		double upperY = shoulderToElbow * sine(roll) * sine(pitch); // Up down
+		double upperZ = (sign) * shoulderToElbow * cosine(roll);			// Z being left/right
 
 		// Lower arm
-		double lowerX = elbowToWrist * Math.sin(-Math.PI) * Math.cos(0);
-		double lowerY = elbowToWrist * Math.sin(-Math.PI) * Math.sin(0);
-		double lowerZ = (sign) * elbowToWrist * Math.cos(-Math.PI);
+		double lowerX = elbowToWrist * sine(-90) * cosine(0);
+		double lowerY = elbowToWrist * sine(-90) * sine(0);
+		double lowerZ = (sign) * elbowToWrist * cosine(-90);
 
 		PointInSpace shoulderLocation = (isLeftArm) ? leftShoulder
 													: rightShoulder;
@@ -119,6 +119,24 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 				       upperX, upperY, upperZ,
 				       lowerX, lowerY, lowerZ,
 				       isLeftArm);
+	}
+	
+	/**
+	 * Works out the cosine of an anglee in degrees
+	 * @param angleInDegrees
+	 * @return the cosine of the angle
+	 */
+	private double cosine(double angleInDegrees){
+		return Math.cos(Math.toRadians(angleInDegrees));
+	}
+	
+	/**
+	 * Works out the sine of an anglee in degrees
+	 * @param angleInDegrees
+	 * @return the sine of the angle
+	 */
+	private double sine(double angleInDegrees){
+		return Math.sin(Math.toRadians(angleInDegrees));
 	}
 
 	// TODO: (Kerrin) might be better to rename Sample => SensorReading

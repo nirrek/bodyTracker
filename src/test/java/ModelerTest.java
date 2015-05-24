@@ -25,22 +25,22 @@ public class ModelerTest {
     	modeler.advanceIteration(0, 0, 0, 0, 0, 0);
     	modeler.advanceIteration(24, 80, 23, 0, 0, 0);
     	Arm sampleArm = modeler.getPastLeftArm(2);
-    	assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().X()) - 0 < 0.0001);
-    	assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().Y()) - 30.2 < 0.0001);
-    	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().X()) - 0 < 0.0001);
-    	assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().Y()) - 60.2 < 0.0001);
+    	//assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().X()) - 0 < 0.0001);
+    	//assertTrue("Elbow position calculation failed", Math.abs(sampleArm.elbowPos().Y()) - 30.2 < 0.0001);
+    	//assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().X()) - 0 < 0.0001);
+    	//assertTrue("Wrist position calculation failed", Math.abs(sampleArm.wristPos().Y()) - 60.2 < 0.0001);
 
 		// TODO. See whether Harrison was trying to see if the above results
 		// were meant to check that the results were within 0.0001 of 0.0.
-//		double delta = 0.0001; // handle imprecision of binary floating point.
-//		assertEquals("Elbow position calculation failed",
-//				0.0, Math.abs(sampleArm.elbowPos().X()) - 0, delta);
-//		assertEquals("Elbow position calculation failed",
-//				0.0, Math.abs(sampleArm.elbowPos().Y()) - 30.2, delta);
-//		assertEquals("Elbow position calculation failed",
-//				0.0, Math.abs(sampleArm.wristPos().X()) - 0, delta);
-//		assertEquals("Elbow position calculation failed",
-//				0.0, Math.abs(sampleArm.wristPos().Y()) - 60.2, delta);
+		double delta = 0.0001; // handle imprecision of binary floating point.
+		assertEquals("Elbow X relaxed position calculation failed",
+				0.0, Math.abs(sampleArm.elbowPos().X()) - 0, delta);
+		assertEquals("Elbow Y relaxed position calculation failed",
+				0.0, Math.abs(sampleArm.elbowPos().Y()) - 298, delta);
+		assertEquals("Wrist X relaxed position calculation failed",
+				0.0, Math.abs(sampleArm.wristPos().X()) - 0, delta);
+		assertEquals("Wrist Y relaxed position calculation failed",
+				0.0, Math.abs(sampleArm.wristPos().Y()) - 598, delta);
     }
 
     @Test
@@ -54,6 +54,8 @@ public class ModelerTest {
 	// The calculations for arm position should be correct
 	@Test
 	public void calculationsShouldBeCorrect() {
+		Sample nextSample = new Sample();
+		
 		// TODO: Harrison should fill this test in
 
 		// 1. create a sample with the desired position
