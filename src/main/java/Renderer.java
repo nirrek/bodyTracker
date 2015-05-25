@@ -1,4 +1,5 @@
 import gnu.io.*;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -45,8 +46,10 @@ public class Renderer {
 
         model.addListener(Modeler.NEW_SAMPLE, p -> {
             System.out.println("new sample added to model");
-            // - Fetch the data from the model
-            // - Tell the 'sketchCanvas' to sketch a new line
+
+            // Just doing one arm for the moment
+            Arm leftArm = model.getNextSample().getLeftArm();
+            view.renderLeftArm(leftArm);
         });
 
         view.addRefreshButtonHandler(new RefreshButtonHandler());
@@ -116,7 +119,7 @@ public class Renderer {
                 "time ([0-9]+) " + // group 2
                 "x ([-]?[0-9]+\\.?[0-9]+) " + // group 3
                 "y ([-]?[0-9]+\\.?[0-9]+) " + // group 4
-                "z ([-]?[0-9]+\\.?[0-9]+)"  // group 5
+                "z ([-]?[0-9]+\\.?[0-9]+) $"  // group 5
         );
 
         List<Sample> samples = new ArrayList<>();
@@ -125,7 +128,8 @@ public class Renderer {
             Matcher m = sampleRegex.matcher(line);
             if (!m.matches()) {
                 // TODO use a real logging framework
-                System.out.println("Invalid sample line: " + line);
+                System.out.println("Invalid sample line: ");
+                System.out.println(line);
                 continue; // skip invalid lines
             }
 
@@ -238,8 +242,11 @@ public class Renderer {
             try {
                 while (true) {
                     String message = serial.getNextMessage();
-                    callback.accept(message);
 
+                    // Add the callback invokation to the an event queue on
+                    // the application thread. This is required due to the fact
+                    // that the JavaFX Scene graph is NOT THREADSAFE.
+                    Platform.runLater(() -> callback.accept(message) );
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {

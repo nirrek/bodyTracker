@@ -5,12 +5,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
 import javax.swing.*;
@@ -23,6 +23,12 @@ public class RendererView {
 
 	// TODO : REMOVE IF UNNECESSARRY
 	private Modeler model;
+
+	// The root node of the view tree.
+	private GridPane containerView;
+
+	// The render canvas used to render representation of arms in space.
+	private RenderCanvas canvas;
 
 	// The main container of the view
 	private HBox container;
@@ -45,19 +51,39 @@ public class RendererView {
 	public RendererView(Modeler model) {
 		this.model = model;
 
-		container = new HBox(2);
+		containerView = new GridPane();
+
+		// Make the grid resize when the window is resized by the user
+		ColumnConstraints col1 = new ColumnConstraints();
+		col1.setHgrow(Priority.ALWAYS);
+		containerView.getColumnConstraints().addAll(col1);
+		RowConstraints row1 = new RowConstraints();
+		row1.setVgrow(Priority.ALWAYS);
+		containerView.getRowConstraints().addAll(row1);
+
+		canvas = new RenderCanvas();
+		GridPane.setConstraints(canvas.getNode(), 1, 1);
+
+		// -------------------------------------------------
+		// Start old Romain code.
+		container = new HBox();
 		container.getStyleClass().add("Container");
 		container.setAlignment(Pos.TOP_RIGHT);
+		GridPane.setConstraints(container, 2, 1);
 
-		displayBox = new VBox();
-		//TODO: settings for the display (if any)
-		initDisplayBox();
+//		displayBox = new VBox();
+//		//TODO: settings for the display (if any)
+//		initDisplayBox();
 
 		controlBox = new VBox(4);
 		controlBox.getStyleClass().add("Sidebar");
 		initControlBox();
 
-		container.getChildren().addAll(displayBox, controlBox);
+		container.getChildren().addAll(controlBox);
+		// End old Romain code
+		// -------------------------------------------------
+
+		containerView.getChildren().addAll(canvas.getNode(), container);
 	}
 
 
@@ -175,6 +201,12 @@ public class RendererView {
 	}
 
 	public Node getNode() {
-        return container;
+        return containerView;
     }
+
+	// Temporary method for rendering a single arm from the side.
+	public void renderLeftArm(Arm leftArm) {
+		System.out.println("renderLeftArm()");
+		canvas.drawArm(leftArm, "side");
+	}
 }
