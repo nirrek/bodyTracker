@@ -13,20 +13,29 @@ import javafx.scene.paint.Color;
  * @author Kerrin
  */
 public class RenderCanvas {
+    // The default length of the arm segment
+    private static final int ARM_LENGTH = 300;
+
     // The underlying canvas node
     private Canvas canvas;
 
     // The canvas context
     private GraphicsContext ctx;
 
+    // Width and height dimensions for the canvas in pixels
+    private int width;
+    private int height;
+
     // The point in the original projected 2d plane that will become
     // (0, 0) in the canvas coordinate system.
-    private Point2D rebasePoint = new Point2D(-300, 300);
+    private Point2D rebasePoint = new Point2D(-ARM_LENGTH, ARM_LENGTH);
 
     public RenderCanvas() {
         // TODO, decide how we wish to expose the functionality for setting
         // the canvas dimensions
-        this.canvas = new Canvas(600, 600);
+        width = 2 * ARM_LENGTH;
+        height = 2 * ARM_LENGTH;
+        this.canvas = new Canvas(width, height);
         ctx = this.canvas.getGraphicsContext2D();
     }
 
@@ -57,6 +66,13 @@ public class RenderCanvas {
         elbow2D = rebase(elbow2D, rebasePoint);
 
         drawLine(shoulder2D, elbow2D, ctx);
+    }
+
+    /**
+     * Clears the canvas of existing drawings.
+     */
+    public void clearCanvas() {
+        ctx.clearRect(0, 0, width, height);
     }
 
     /**
