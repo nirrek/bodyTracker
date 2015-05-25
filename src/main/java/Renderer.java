@@ -2,12 +2,14 @@ import gnu.io.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,12 +37,18 @@ public class Renderer {
     // The thread listening to inbound serial messages
     private Thread serialListener;
 
+    // The stage that acts as the Window for the application. Certain operations
+    // in JavaFX require this to be passed, which is why the controller needs
+    // to maintain a pointer to him.
+    private Stage stage;
+
     /**
      * Constructors a new renderer that is bound to the given model and view.
      * @param model The model in the MVC pattern (ostensibly)
      * @param view The view in the MVC pattern (ostensibly)
      */
-    public Renderer(Modeler model, RendererView view) {
+    public Renderer(Stage stage, Modeler model, RendererView view) {
+        this.stage = stage;
         this.model = model;
         this.view = view;
 
@@ -51,6 +59,42 @@ public class Renderer {
             Arm leftArm = model.getNextSample().getLeftArm();
             view.renderLeftArm(leftArm);
         });
+
+        view.addListener("loadFile", event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open a datalog file");
+
+            File selectedFile = fileChooser.showOpenDialog(stage);
+            if (selectedFile == null) return;
+
+            // Spawn a new thread for reading from the file
+            (new Thread(() -> {
+                Scanner s = null;
+                try {
+                    s = new Scanner(selectedFile);
+                } catch (FileNotFoundException e) { e.printStackTrace(); }
+                if (s == null) return;
+
+                while (s.hasNextLine()) {
+                    String line = s.nextLine();
+                    if (line.equals("$")) continue; // message boundary
+
+                    List<Sample> samples = parseMessage(line);
+                    if (!samples.isEmpty()) {
+                        try {
+                            Thread.sleep(100); // simulate events coming in
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Platform.runLater(() -> {
+                            model.newSensorReading(samples.get(0));
+                        });
+                    }
+                }
+            })).start();
+        });
+
+        view.addListener("clearCanvases", event -> view.clearCanvases());
 
         view.addRefreshButtonHandler(new RefreshButtonHandler());
     	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
@@ -119,7 +163,7 @@ public class Renderer {
                 "time ([0-9]+) " + // group 2
                 "x ([-]?[0-9]+\\.?[0-9]+) " + // group 3
                 "y ([-]?[0-9]+\\.?[0-9]+) " + // group 4
-                "z ([-]?[0-9]+\\.?[0-9]+) $"  // group 5
+                "z ([-]?[0-9]+\\.?[0-9]+)[ ]?$"  // group 5
         );
 
         List<Sample> samples = new ArrayList<>();
