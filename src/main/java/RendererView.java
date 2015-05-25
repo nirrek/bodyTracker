@@ -1,34 +1,31 @@
 import gnu.io.CommPortIdentifier;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
-import javax.swing.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-
-public class RendererView {
-
-
+public class RendererView extends EventEmitter {
 	// TODO : REMOVE IF UNNECESSARRY
 	private Modeler model;
 
 	// The root node of the view tree.
 	private GridPane containerView;
 
-	// The render canvas used to render representation of arms in space.
-	private RenderCanvas canvas;
+	// Front view canvas for rendering arm in space.
+	private RenderCanvas canvasFront;
+
+	// Side view canvas for rendering arm in space.
+	private RenderCanvas canvasSide;
+
 
 	// The main container of the view
 	private HBox container;
@@ -61,15 +58,47 @@ public class RendererView {
 		row1.setVgrow(Priority.ALWAYS);
 		containerView.getRowConstraints().addAll(row1);
 
-		canvas = new RenderCanvas();
-		GridPane.setConstraints(canvas.getNode(), 1, 1);
+		// Add the section for the front-view canvas
+		Text titleCanvasFront = new Text("Front View");
+		canvasFront = new RenderCanvas();
+		containerView.add(titleCanvasFront, 1, 1);
+		containerView.add(canvasFront.getNode(), 1, 2);
+
+		// Add the section for the side-view canvas
+		Text titleCanvasSide = new Text("Side View");
+		canvasSide = new RenderCanvas();
+		containerView.add(titleCanvasSide, 2, 1);
+		containerView.add(canvasSide.getNode(), 2, 2);
+
+		// Add section for load from file / clear canvas controls
+		VBox section = new VBox(10);
+			section.setStyle("-fx-fill-color: #eaeaea;");
+			// Label for the section
+			Text sectionTitle = new Text("Load data from a file");
+
+			// Load from file button
+			Button buttonLoadFromFile = new Button("Load from file");
+			buttonLoadFromFile.getStyleClass().add("Btn--large");
+			buttonLoadFromFile.setOnAction(event -> this.emit("loadFile"));
+
+			// Clear canvases button
+			Button buttonClearCanvases = new Button("Clear canvases");
+			buttonClearCanvases.getStyleClass().add("Btn--large");
+			buttonClearCanvases.setOnAction(event -> this.emit("clearCanvases"));
+
+		section.getChildren().addAll(
+				sectionTitle,
+				buttonLoadFromFile,
+				buttonClearCanvases
+		);
+		containerView.add(section, 3, 3);
 
 		// -------------------------------------------------
 		// Start old Romain code.
 		container = new HBox();
 		container.getStyleClass().add("Container");
 		container.setAlignment(Pos.TOP_RIGHT);
-		GridPane.setConstraints(container, 2, 1);
+		containerView.add(container, 3, 2);
 
 //		displayBox = new VBox();
 //		//TODO: settings for the display (if any)
@@ -83,7 +112,6 @@ public class RendererView {
 		// End old Romain code
 		// -------------------------------------------------
 
-		containerView.getChildren().addAll(canvas.getNode(), container);
 	}
 
 
@@ -131,14 +159,11 @@ public class RendererView {
 		connectionButtonWrapper.setPadding(new Insets(5, 5, 0, 0));
 		connectionButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
 
-		fetchButton = new Button("Fetch");
-		fetchButton.getStyleClass().add("Btn--large");
-
 		streamButton = new Button("Start Streaming From Arduino");
 		streamButton.getStyleClass().add("Btn--large");
 
 		getDataButtonWrapper = new HBox(2);
-		getDataButtonWrapper.getChildren().addAll(fetchButton, streamButton);
+		getDataButtonWrapper.getChildren().addAll(streamButton);
 		getDataButtonWrapper.setSpacing(20);
 		getDataButtonWrapper.setPadding(new Insets(10, 10, 10, 0));
 		getDataButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
@@ -151,7 +176,11 @@ public class RendererView {
 		logs.setWrapText(true);
 
 		controlBox.getChildren().addAll(
-				portSelectionWrapper, connectionButtonWrapper, getDataButtonWrapper, logs);
+			portSelectionWrapper,
+			connectionButtonWrapper,
+			getDataButtonWrapper,
+			logs
+		);
 	}
 
 
@@ -169,8 +198,6 @@ public class RendererView {
 
 	public void addFetchStreamButtonsHandler(EventHandler<ActionEvent> fetchButtonHandler,
 			EventHandler<ActionEvent> streamButtonHandler) {
-
-		fetchButton.setOnAction(fetchButtonHandler);
 		streamButton.setOnAction(streamButtonHandler);
 	}
 
@@ -207,6 +234,12 @@ public class RendererView {
 	// Temporary method for rendering a single arm from the side.
 	public void renderLeftArm(Arm leftArm) {
 		System.out.println("renderLeftArm()");
-		canvas.drawArm(leftArm, "side");
+		canvasFront.drawArm(leftArm, "front");
+		canvasSide.drawArm(leftArm, "side");
+	}
+
+	public void clearCanvases() {
+		canvasFront.clearCanvas();
+		canvasSide.clearCanvas();
 	}
 }
