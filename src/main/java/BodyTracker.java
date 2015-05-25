@@ -25,18 +25,18 @@ public class BodyTracker extends Application {
 		// TODO : REMOVE OR IMPLEMENT
 		HistoryView historyView = new HistoryView();
 
-		VBox rootNode = new VBox();
+		ScrollPane rootNode = new ScrollPane();
 		rootNode.getStyleClass().add("Root");
 
 		TabPane tabPane = createTabs(rendererView, historyView);
-		rootNode.getChildren().add(tabPane);
+		rootNode.setContent(tabPane);
 
 		Scene scene = new Scene(rootNode);
 		String cssUrl = this.getClass().getResource("style.css").toExternalForm();
 		scene.getStylesheets().add(cssUrl);
 
 		// The controller for the renderer (needs to be initialize here as it is initial view)
-        Renderer rendererController = new Renderer(modeler, rendererView);
+        Renderer rendererController = new Renderer(stage, modeler, rendererView);
 
         // Configure stage
 		setStageSize(stage);
@@ -51,15 +51,15 @@ public class BodyTracker extends Application {
 	}
 
 	/**
-	 * Set the size of the specified stage. The size will be set to 1280x720
+	 * Set the size of the specified stage. The size will be set to 1920x1080
 	 * unless the usable screen size is smaller than this. If the screen size
-	 * is smaller than 1280x720, the stage will be set equal to screen size.
+	 * is smaller than 1920x1080, the stage will be set equal to screen size.
 	 * @param stage The stage to set the size of
 	 */
 	private void setStageSize(Stage stage) {
 		Rectangle2D screen = Screen.getPrimary().getVisualBounds();
-		double width = Math.min(1280, screen.getWidth());
-		double height = Math.min(720, screen.getHeight());
+		double width = Math.min(1920, screen.getWidth());
+		double height = Math.min(1080, screen.getHeight());
 		stage.setWidth(width);
 		stage.setHeight(height);
 	}
