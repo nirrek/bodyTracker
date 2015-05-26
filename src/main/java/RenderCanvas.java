@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineCap;
 
 
 // TODO decide on an interface for custom views, or see if there is an
@@ -26,6 +27,10 @@ public class RenderCanvas {
     private int width;
     private int height;
 
+    // Brush parameters
+    private double brushSize = 3.0;
+    private Color brushColor = Color.rgb(67, 188, 135, 0.6);
+
     // The point in the original projected 2d plane that will become
     // (0, 0) in the canvas coordinate system.
     private Point2D rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
@@ -37,6 +42,10 @@ public class RenderCanvas {
         height = 2 * ARM_LENGTH;
         this.canvas = new Canvas(width, height);
         ctx = this.canvas.getGraphicsContext2D();
+     
+        // Set default brush parameters
+        ctx.setStroke(brushColor);
+        ctx.setLineWidth(brushSize);
     }
 
     /**
@@ -75,6 +84,31 @@ public class RenderCanvas {
         ctx.clearRect(0, 0, width, height);
     }
 
+    public void setBrush(Color color, double size) {
+        setBrushColor(color);
+        setBrushSize(size);
+    }
+
+    public void setBrushColor(Color color) {
+        brushColor = color;
+        ctx.setStroke(color);
+    }
+
+    public void setBrushSize(double size) {
+        brushSize = size;
+        ctx.setLineWidth(size);
+    }
+
+    // between 0.0 and 1.0
+    public void setBrushOpacity(double opacity) {
+        // JavaFX uses a whack version of RGB by default. Uses doubles in
+        // range 0.0 -> 1.0, instead of ints from 0 -> 255
+        double r = brushColor.getRed();
+        double g = brushColor.getGreen();
+        double b = brushColor.getBlue();
+        setBrushColor(Color.color(r, g, b, opacity));
+    }
+
     /**
      * Draws a line between the two specified 2D points on the canvas.
      * @param from The start coordinate for the line.
@@ -85,8 +119,9 @@ public class RenderCanvas {
         // TODO decide how we want to be configuring stroke/line width
         // Most probably the determiner of this will be how we want to be doing
         // the artistic generative art.
-        ctx.setStroke(Color.BLUE);
+        ctx.setStroke(Color.rgb(67, 188, 135, 0.6));
         ctx.setLineWidth(3);
+        ctx.setLineCap(StrokeLineCap.ROUND);
 
         ctx.strokeLine(from.getX(), from.getY(), to.getX(), to.getY());
     }
