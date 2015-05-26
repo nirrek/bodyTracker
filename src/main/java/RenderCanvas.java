@@ -28,7 +28,7 @@ public class RenderCanvas {
 
     // The point in the original projected 2d plane that will become
     // (0, 0) in the canvas coordinate system.
-    private Point2D rebasePoint = new Point2D(-ARM_LENGTH, ARM_LENGTH);
+    private Point2D rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
 
     public RenderCanvas() {
         // TODO, decide how we wish to expose the functionality for setting
