@@ -44,67 +44,25 @@ public class Renderer {
 
     /**
      * Constructors a new renderer that is bound to the given model and view.
-     * @param model The model in the MVC pattern (ostensibly)
-     * @param view The view in the MVC pattern (ostensibly)
+     * @param modeler The model in the MVC pattern (ostensibly)
+     * @param rendererView The view in the MVC pattern (ostensibly)
      */
-    public Renderer(Stage stage, Modeler model, RendererView view) {
-        this.stage = stage;
-        this.model = model;
-        this.view = view;
+    public Renderer(Stage stg, Modeler modeler, RendererView rendererView) {
+        stage = stg;
+        model = modeler;
+        view = rendererView;
 
-        model.addListener(Modeler.NEW_SAMPLE, p -> {
-            System.out.println("new sample added to model");
+        model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
-            // Just doing one arm for the moment
-            Arm leftArm = model.getNextSample().getLeftArm();
-            view.renderLeftArm(leftArm);
-        });
-
-        view.addListener("loadFile", event -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open a datalog file");
-
-            File selectedFile = fileChooser.showOpenDialog(stage);
-            if (selectedFile == null) return;
-
-            // Spawn a new thread for reading from the file
-            (new Thread(() -> {
-                Scanner s = null;
-                try {
-                    s = new Scanner(selectedFile);
-                } catch (FileNotFoundException e) { e.printStackTrace(); }
-                if (s == null) return;
-
-                while (s.hasNextLine()) {
-                    String line = s.nextLine();
-                    if (line.equals("$")) continue; // message boundary
-
-                    List<Sample> samples = parseMessage(line);
-                    if (!samples.isEmpty()) {
-                        try {
-                            Thread.sleep(100); // simulate events coming in
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Platform.runLater(() -> {
-                            model.newSensorReading(samples.get(0));
-                        });
-                    }
-                }
-            })).start();
-        });
-
+        view.addListener("refresh", event -> refreshButtonClicked());
+        view.addListener("connect", event -> startButtonClicked());
+        view.addListener("closeConnection", event -> stopButtonClicked());
+        view.addListener("loadFile", event -> loadFileButtonClicked());
+        view.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         view.addListener("clearCanvases", event -> view.clearCanvases());
 
-        view.addRefreshButtonHandler(new RefreshButtonHandler());
-    	view.addConnectionButtonsHandler(new ConnectButtonHandler(),
-    			new CloseConnectionButtonHandler());
-    	view.addFetchStreamButtonsHandler(new FetchButtonHandler(),
-    			new StreamButtonHandler());
+        displaySerialPorts();
 
-
-        ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
-        view.showAvailablePorts(availablePorts);
     }
 
     /**
@@ -112,6 +70,7 @@ public class Renderer {
      * connection object on the instance.
      */
     private void connect() {
+
         if (this.serial != null) {
             // TODO close existing serial before establishing new connection.
         }
@@ -190,77 +149,147 @@ public class Renderer {
         return samples;
     }
 
-    // -------------------------------------------------------------------------
-    //      EVENT LISTENERS
-    // -------------------------------------------------------------------------
-    // 'Refresh' button handler
-    private class RefreshButtonHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent arg0) {
-            ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
-            view.showAvailablePorts(availablePorts);
+    /**
+     * Fetches a list of all available serial ports.
+     * Once the Arduino is connected, the port it is connected to will appear in
+     * this list.
+     *
+     * This function is called when application is launched, and when user press
+     * the 'Refresh' button.
+     *
+     * @author Kerrin
+     * @return A list of available serial ports.
+     */
+    private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
+        ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
+        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+        while (ports.hasMoreElements()) {
+            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
+            if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                try {
+                    CommPort thePort = port.open("CommUtil", 50);
+                    thePort.close();
+                    availablePorts.add(port);
+                } catch (PortInUseException e) {
+                    //System.out.println("Port, "  + port.getName() + ", is in use.");
+                } catch (Exception e) {
+                    System.err.println("Failed to open port " +  port.getName());
+                    e.printStackTrace();
+                }
+            }
         }
+        return availablePorts;
     }
 
+    private void displaySerialPorts() {
+        ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
+        view.showAvailablePorts(availablePorts);
+    }
+
+    // -------------------------------------------------------------------------
+    //      MODEL EVENT LISTENERS
+    // -------------------------------------------------------------------------
+
+    private void modelAddedNewSample() {
+        System.out.println("new sample added to model");
+
+        // Just doing one arm for the moment
+        Arm leftArm = model.getNextSample().getLeftArm();
+        view.renderLeftArm(leftArm);
+    }
+
+    // -------------------------------------------------------------------------
+    //      VIEW EVENT LISTENERS
+    // -------------------------------------------------------------------------
+
+    // 'Refresh' button handler
+    private void refreshButtonClicked() {
+        displaySerialPorts();
+    }
+
+
     // 'Start' button handler
-    private class ConnectButtonHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent e) {
+    private void startButtonClicked() {
+        portName = view.getSelectedPort();
 
-            portName = view.getSelectedPort();
-
-            if (portName == null) {
-                view.displayError("Please select a port to connect to Arduino");
-                return;
-            }
-
-            connect();
-            if (!serial.isConnected()) {
-                view.displayError("Can not connect to port " + portName);
-                return;
-            }
-
-            view.toggleControlPaneForArduinoConnected(true);
+        if (portName == null) {
+            view.displayError("Please select a port to connect to Arduino");
+            return;
         }
+
+        connect();
+        if (!serial.isConnected()) {
+            view.displayError("Can not connect to port " + portName);
+            return;
+        }
+
+        view.toggleControlPaneForArduinoConnected(true);
     }
 
     // 'Stop' button handler
-    private class CloseConnectionButtonHandler implements EventHandler<ActionEvent> {
-		public void handle(ActionEvent arg0) {
-            stopSerialListener();
-            closeConnection();
-            view.toggleControlPaneForArduinoConnected(false);
-		}
+    private void stopButtonClicked() {
+        stopSerialListener();
+        closeConnection();
+        view.toggleControlPaneForArduinoConnected(false);
     }
 
-    // 'Fetch' button handler
-    private class FetchButtonHandler implements EventHandler<ActionEvent> {
-		public void handle(ActionEvent arg0) {
-			String error = "";
+    // 'Load File' button handler
+    private void loadFileButtonClicked() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open a datalog file");
 
-			// TODO: FETCH DATA STORED IN ARDUINO
-			view.displayError(error);
-		}
-    }
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        if (selectedFile == null) return;
 
-    // 'Stream' button handler
-    private class StreamButtonHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-            // TODO, should disable the button to prevent this event
-            // handler from being run multiple times.
+        // Spawn a new thread for reading from the file
+        (new Thread(() -> {
+            Scanner s = null;
+            try {
+                s = new Scanner(selectedFile);
+            } catch (FileNotFoundException e) { e.printStackTrace(); }
+            if (s == null) return;
 
-            stopSerialListener(); // stop any preexisting listener
+            while (s.hasNextLine()) {
+                String line = s.nextLine();
+                if (line.equals("$")) continue; // message boundary
 
-            serialListener = new SerialListener((message) -> {
-                List<Sample> samples = parseMessage(message);
-
+                List<Sample> samples = parseMessage(line);
                 if (!samples.isEmpty()) {
-                    model.newSensorReading(samples.get(0));
+                    try {
+                        Thread.sleep(100); // simulate events coming in
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Platform.runLater(() -> {
+                        model.newSensorReading(samples.get(0));
+                    });
                 }
-            });
-            serialListener.start();
-        }
+            }
+        })).start();
     }
+
+    // 'Stream from Arduino' button handler
+    private void streamFromArduinoButtonClicked() {
+        // Disable the button to prevent this event
+        // handler from being run multiple times.
+        view.enableStreamButton(false);
+        // TODO: re-enable stream button at some point
+
+        // stop any preexisting listener
+        stopSerialListener();
+
+        serialListener = new SerialListener((message) -> {
+            List<Sample> samples = parseMessage(message);
+
+            if (!samples.isEmpty()) {
+                model.newSensorReading(samples.get(0));
+            }
+        });
+        serialListener.start();
+    }
+
     // -------------------------------------------------------------------------
-    //      END OF EVENT HANDLERS
+    //      END OF EVENT LISTENERS
     // -------------------------------------------------------------------------
 
     /**
@@ -290,7 +319,7 @@ public class Renderer {
                     // Add the callback invokation to the an event queue on
                     // the application thread. This is required due to the fact
                     // that the JavaFX Scene graph is NOT THREADSAFE.
-                    Platform.runLater(() -> callback.accept(message) );
+                    Platform.runLater(() -> callback.accept(message));
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
@@ -299,38 +328,5 @@ public class Renderer {
                 e.printStackTrace();
             }
         }
-    }
-
-
-    /**
-     * Fetches a list of all available serial ports.
-     * Once the Arduino is connected, the port it is connected to will appear in
-     * this list.
-     *
-     * This function is called when application is launched, and when user press
-     * the 'Refresh' button.
-     *
-     * @author Kerrin
-     * @return A list of available serial ports.
-     */
-    private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
-        ArrayList<CommPortIdentifier> availablePorts = new ArrayList<>();
-        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
-        while (ports.hasMoreElements()) {
-            CommPortIdentifier port = (CommPortIdentifier) ports.nextElement();
-            if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                try {
-                    CommPort thePort = port.open("CommUtil", 50);
-                    thePort.close();
-                    availablePorts.add(port);
-                } catch (PortInUseException e) {
-                    System.out.println("Port, "  + port.getName() + ", is in use.");
-                } catch (Exception e) {
-                    System.err.println("Failed to open port " +  port.getName());
-                    e.printStackTrace();
-                }
-            }
-        }
-        return availablePorts;
     }
 }

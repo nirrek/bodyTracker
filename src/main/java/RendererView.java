@@ -26,21 +26,21 @@ public class RendererView extends EventEmitter {
 	// Side view canvas for rendering arm in space.
 	private RenderCanvas canvasSide;
 
+	// The control box.
+	private GridPane gridControlBox;
 
 	// The main container of the view
 	private HBox container;
-	// The box where the drawing happens
-	private VBox displayBox;
 	// The control-panel
 	private VBox controlBox;
 
 	private ComboBox<String> portsComboBox;
 	private Button refreshButton;
+
 	private Label instructionLabel;
 	private Button connectButton;
 	private Button closeConnectionButton;
-	private HBox getDataButtonWrapper;
-	private Button fetchButton;
+	private Button loadFromFileButton;
 	private Button streamButton;
 	private TextArea logs;
 
@@ -48,163 +48,129 @@ public class RendererView extends EventEmitter {
 	public RendererView(Modeler model) {
 		this.model = model;
 
-		containerView = new GridPane();
+		// Create constraint to make the grid resize when the window is resized by the user
+		ColumnConstraints colConsraint = new ColumnConstraints();
+		colConsraint.setHgrow(Priority.ALWAYS);
+		RowConstraints rowConstraint = new RowConstraints();
+		rowConstraint.setVgrow(Priority.ALWAYS);
 
-		// Make the grid resize when the window is resized by the user
-		ColumnConstraints col1 = new ColumnConstraints();
-		col1.setHgrow(Priority.ALWAYS);
-		containerView.getColumnConstraints().addAll(col1);
-		RowConstraints row1 = new RowConstraints();
-		row1.setVgrow(Priority.ALWAYS);
-		containerView.getRowConstraints().addAll(row1);
+		// Main grid (root)
+		containerView = new GridPane();
+		//containerView.setGridLinesVisible(true);
+		containerView.getColumnConstraints().addAll(colConsraint);
+		containerView.getRowConstraints().addAll(rowConstraint);
 
 		// Add the section for the front-view canvas
 		Text titleCanvasFront = new Text("Front View");
 		canvasFront = new RenderCanvas();
-		containerView.add(titleCanvasFront, 1, 1);
-		containerView.add(canvasFront.getNode(), 1, 2);
+		containerView.add(titleCanvasFront, 0, 0);
+		containerView.add(canvasFront.getNode(), 0, 1);
 
 		// Add the section for the side-view canvas
 		Text titleCanvasSide = new Text("Side View");
 		canvasSide = new RenderCanvas();
-		containerView.add(titleCanvasSide, 2, 1);
-		containerView.add(canvasSide.getNode(), 2, 2);
+		containerView.add(titleCanvasSide, 1, 0);
+		containerView.add(canvasSide.getNode(), 1, 1);
 
-		// Add section for load from file / clear canvas controls
-		VBox section = new VBox(10);
-			section.setStyle("-fx-fill-color: #eaeaea;");
-			// Label for the section
-			Text sectionTitle = new Text("Load data from a file");
-
-			// Load from file button
-			Button buttonLoadFromFile = new Button("Load from file");
-			buttonLoadFromFile.getStyleClass().add("Btn--large");
-			buttonLoadFromFile.setOnAction(event -> this.emit("loadFile"));
-
-			// Clear canvases button
-			Button buttonClearCanvases = new Button("Clear canvases");
-			buttonClearCanvases.getStyleClass().add("Btn--large");
-			buttonClearCanvases.setOnAction(event -> this.emit("clearCanvases"));
-
-		section.getChildren().addAll(
-				sectionTitle,
-				buttonLoadFromFile,
-				buttonClearCanvases
-		);
-		containerView.add(section, 3, 3);
-
-		// -------------------------------------------------
-		// Start old Romain code.
-		container = new HBox();
-		container.getStyleClass().add("Container");
-		container.setAlignment(Pos.TOP_RIGHT);
-		containerView.add(container, 3, 2);
-
-//		displayBox = new VBox();
-//		//TODO: settings for the display (if any)
-//		initDisplayBox();
-
-		controlBox = new VBox(4);
-		controlBox.getStyleClass().add("Sidebar");
-		initControlBox();
-
-		container.getChildren().addAll(controlBox);
-		// End old Romain code
-		// -------------------------------------------------
-
+		// Add the section for the control box
+		gridControlBox = new GridPane();
+		gridControlBox.getStyleClass().add("Sidebar");
+		gridControlBox.setHgap(10);
+		gridControlBox.setVgap(10);
+		//gridControlBox.setGridLinesVisible(true);
+		initControlBox(gridControlBox);
+		containerView.add(gridControlBox, 2, 1);
 	}
 
+	private void initControlBox(GridPane controlBox) {
 
-	private void initDisplayBox() {
-		displayBox.setAlignment(Pos.CENTER);
-		displayBox.setMinWidth(400);
-		displayBox.setSpacing(10);
-		displayBox.setPadding(new Insets(10, 10, 10, 10));
-	}
+		// Title for the section Load from file
+		Text sectionTitleLoad = new Text("Display arm movements saved on file.");
 
-	private void initControlBox() {
-		controlBox.setAlignment(Pos.TOP_LEFT);
-		controlBox.setSpacing(10);
-		controlBox.setPadding(new Insets(5, 5, 5, 5));
+		// Load from file button
+		loadFromFileButton = new Button("Load From File");
+		loadFromFileButton.getStyleClass().add("Btn--large");
+		loadFromFileButton.setOnAction(event -> this.emit("loadFile"));
 
-		Label portLabel = new Label("Select port: ");
-		portLabel.getStyleClass().add("Label");
+		// Title for the section Stream data from Arduino
+		Text sectionTitleStream = new Text("Display arm movements from the ClothMotion.");
 
+		// Step-by-step instructions
+		Text stepOne = new Text("1. Select serial port connected to your ClothMotion");
+		Text stepTwo = new Text("2. Click 'Connect' to begin connection with your Arduino");
+		Text stepThree = new Text("3. Click 'Stream From ClothMotion' to display arm movements");
+
+		// Style titles and instructions
+		sectionTitleStream.getStyleClass().add("SectionTitle");
+		sectionTitleLoad.getStyleClass().add("SectionTitle");
+		stepOne.getStyleClass().add("Instruction");
+		stepTwo.getStyleClass().add("Instruction");
+		stepThree.getStyleClass().add("Instruction");
+
+		// Step one
 		portsComboBox = new ComboBox<String>();
 		portsComboBox.setMinWidth(240);
 
 		refreshButton = new Button("Refresh");
 		refreshButton.getStyleClass().add("Btn");
+		refreshButton.setOnAction(event -> this.emit("refresh"));
 
-		HBox portSelectionWrapper = new HBox(3);
-		portSelectionWrapper.getChildren().addAll(portLabel, portsComboBox, refreshButton);
-		portSelectionWrapper.setSpacing(5);
-		portSelectionWrapper.setPadding(new Insets(5, 5, 5, 0));
-		portSelectionWrapper.setAlignment(Pos.BASELINE_LEFT);
-
-		instructionLabel = new Label("Click Start to connect with your Arduino");
-		instructionLabel.getStyleClass().add("Label");
-
-		connectButton = new Button("Start");
+		// Step two
+		connectButton = new Button("Connect");
 		connectButton.getStyleClass().add("Btn");
+		connectButton.setOnAction(event -> this.emit("connect"));
 
-		closeConnectionButton = new Button("Stop");
+		closeConnectionButton = new Button("Close Connection");
 		closeConnectionButton.getStyleClass().add("Btn");
+		closeConnectionButton.setOnAction(event -> this.emit("closeConnection"));
 		//this button is disabled before a connection is established
 		closeConnectionButton.setDisable(true);
 
-		HBox connectionButtonWrapper = new HBox(3);
-		connectionButtonWrapper.getChildren().addAll(instructionLabel, connectButton, closeConnectionButton);
-		connectionButtonWrapper.setSpacing(5);
-		connectionButtonWrapper.setPadding(new Insets(5, 5, 0, 0));
-		connectionButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
-
+		// Step three
 		streamButton = new Button("Start Streaming From Arduino");
 		streamButton.getStyleClass().add("Btn--large");
+		streamButton.setOnAction(event -> this.emit("streamFromArduino"));
+		//this button is disabled before a connection is established
+		streamButton.setDisable(true);
 
-		getDataButtonWrapper = new HBox(2);
-		getDataButtonWrapper.getChildren().addAll(streamButton);
-		getDataButtonWrapper.setSpacing(20);
-		getDataButtonWrapper.setPadding(new Insets(10, 10, 10, 0));
-		getDataButtonWrapper.setAlignment(Pos.BASELINE_LEFT);
-		//this box is hidden before a connection is established
-		getDataButtonWrapper.setVisible(false);
-
+		// Create logs text area
 		logs = new TextArea("");
 		logs.getStyleClass().add("Log");
 		logs.setEditable(false);
 		logs.setWrapText(true);
 
-		controlBox.getChildren().addAll(
-			portSelectionWrapper,
-			connectionButtonWrapper,
-			getDataButtonWrapper,
-			logs
-		);
-	}
+		// Clear canvases button
+		Button buttonClearCanvases = new Button("Clear canvases");
+		buttonClearCanvases.getStyleClass().add("Btn--large");
+		buttonClearCanvases.setOnAction(event -> this.emit("clearCanvases"));
 
+		// Add elements grid control box
+		controlBox.add(sectionTitleLoad, 0, 0, 3, 1);
+		controlBox.add(loadFromFileButton, 0, 1, 3, 1);
 
-	public void addRefreshButtonHandler(EventHandler<ActionEvent> refreshButtonHandler) {
+		controlBox.add(sectionTitleStream, 0, 2, 3, 1);
 
-		refreshButton.setOnAction(refreshButtonHandler);
-	}
+		controlBox.add(stepOne, 0, 3, 3, 1);
+		controlBox.add(portsComboBox, 0, 4, 2, 1);
+		controlBox.add(refreshButton, 2, 4);
 
-	public void addConnectionButtonsHandler(EventHandler<ActionEvent> connectButtonHandler,
-			EventHandler<ActionEvent> closeConnectionButtonHandler) {
+		controlBox.add(stepTwo, 0, 5, 3, 1);
+		controlBox.add(connectButton, 0, 6);
+		controlBox.add(closeConnectionButton, 1, 6);
 
-		connectButton.setOnAction(connectButtonHandler);
-		closeConnectionButton.setOnAction(closeConnectionButtonHandler);
-	}
+		controlBox.add(stepThree, 0, 7, 3, 1);
+		controlBox.add(streamButton, 0, 8, 3, 1);
 
-	public void addFetchStreamButtonsHandler(EventHandler<ActionEvent> fetchButtonHandler,
-			EventHandler<ActionEvent> streamButtonHandler) {
-		streamButton.setOnAction(streamButtonHandler);
+		controlBox.add(logs, 0, 9, 3, 1);
+
+		controlBox.add(buttonClearCanvases, 0, 10, 3, 1);
 	}
 
 	public void toggleControlPaneForArduinoConnected(boolean connected) {
 		connectButton.setDisable(connected);
 		closeConnectionButton.setDisable(!connected);
-		getDataButtonWrapper.setVisible(connected);
+		streamButton.setDisable(!connected);
+
 		if (connected) {
 			instructionLabel.setText("Click Stop to close the connection with Arduino");
 		} else {
@@ -225,6 +191,10 @@ public class RendererView extends EventEmitter {
 
 	public void displayError(String errorMessage) {
 		logs.setText(errorMessage);
+	}
+
+	public void enableStreamButton(boolean enable) {
+		streamButton.setDisable(!enable);
 	}
 
 	public Node getNode() {
