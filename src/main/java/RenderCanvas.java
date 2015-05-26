@@ -120,7 +120,7 @@ public class RenderCanvas {
      */
     private Point2D projectTo2DPlane(Point3D coord, String side) {
         if (side.equals("side"))
-            return new Point2D(coord.getZ(), coord.getY());
-        return new Point2D(coord.getX(), coord.getY());
+            return new Point2D(coord.getX(), coord.getY());
+        return new Point2D(coord.getZ(), coord.getY());
     }
 }
