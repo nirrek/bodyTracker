@@ -1,87 +1,59 @@
-import javafx.application.Application;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-public class BodyTracker extends Application {
+public class BodyTracker{
 
 	public static void main(String[] args) {
-		launch(args);
+		new BodyTracker();
 	}
 
 
 	/**
-	 * This is the entry point for a JavaFX application. The element that
-	 * encapsulates the entire app is the stage.
+	 * This is the entry point of the application.
+	 * The element that encapsulates the entire app is the container.
 	 */
-	@Override
-	public void start(Stage stage) throws Exception {
-		// The model for the renderer
-		Modeler modeler = new Modeler();
-		// The view for the renderer
-		RendererView rendererView = new RendererView();
-		// TODO : REMOVE OR IMPLEMENT
-		HistoryView historyView = new HistoryView();
+	public BodyTracker() {
+		JFrame main = new JFrame();
+		// Set title
+		main.setTitle("Cloth Motion");
+		// Set size
+		setWindowSize(main);
 
-		ScrollPane rootNode = new ScrollPane();
-		rootNode.getStyleClass().add("Root");
 
-		TabPane tabPane = createTabs(rendererView, historyView);
-		rootNode.setContent(tabPane);
+		// Pass container view and model to the Renderer
+		Container container = main.getContentPane();
+		Modeler model = new Modeler();
+		Renderer rendererController = new Renderer(model, container);
 
-		Scene scene = new Scene(rootNode);
-		String cssUrl = this.getClass().getResource("style.css").toExternalForm();
-		scene.getStylesheets().add(cssUrl);
+		// Clean up when window closes
+		main.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent windowEvent) {
+				rendererController.unmount();
+				System.exit(0);
+			}
+		});
 
-		// The controller for the renderer (needs to be initialize here as it is initial view)
-        Renderer rendererController = new Renderer(stage, modeler, rendererView);
+		// TODO add css style sheet
+		//String cssUrl = this.getClass().getResource("style.css").toExternalForm();
+		//main.getStylesheets().add(cssUrl);
 
-        // Configure stage
-		setStageSize(stage);
-        stage.setOnCloseRequest(event -> {
-            // Unmount the Renderer before app closure.
-			rendererController.unmount();
-            // TODO track the actual current view.
-			// Romain: What for?
-        });
-        stage.setTitle("ClothMotion");
-        stage.setScene(scene);
-		stage.show();
+		main.setVisible(true);
 	}
 
 	/**
-	 * Set the size of the specified stage. The size will be set to 1920x1080
+	 * Set the size of the specified frame. The size will be set to 1920x1080
 	 * unless the usable screen size is smaller than this. If the screen size
-	 * is smaller than 1920x1080, the stage will be set equal to screen size.
-	 * @param stage The stage to set the size of
+	 * is smaller than 1920x1080, the frame will be set equal to the effective
+	 * screen size.
+	 * @param frame The frame to set the size of
 	 */
-	private void setStageSize(Stage stage) {
-		Rectangle2D screen = Screen.getPrimary().getVisualBounds();
-		double width = Math.min(1920, screen.getWidth());
-		double height = Math.min(1080, screen.getHeight());
-		stage.setWidth(width);
-		stage.setHeight(height);
-	}
-
-	// Can be useful to have a separate tab to review history/previous drawings
-	// A good place to archive screenshots etc...
-	// TODO : REMOVE OR IMPLEMENT HISTORY VIEW
-	private TabPane createTabs(RendererView rendererView, HistoryView historyView) {
-		TabPane tabPane = new TabPane();
-		tabPane.getStyleClass().add("TabPane");
-		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-
-		Tab rendererTab = new Tab("Renderer");
-		rendererTab.setContent(rendererView.getNode());
-		Tab historyTab = new Tab("History");
-		historyTab.setContent(historyView.getNode());
-
-		tabPane.getTabs().addAll(rendererTab, historyTab);
-		return tabPane;
+	private void setWindowSize(JFrame frame) {
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int width = Math.min(1920, screenSize.width);
+		int height = Math.min(1080, screenSize.width);
+		frame.setSize(width, height);
 	}
 
 }

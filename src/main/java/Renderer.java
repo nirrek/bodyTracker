@@ -5,6 +5,8 @@ import javafx.event.EventHandler;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -23,8 +25,12 @@ public class Renderer {
 
     private static final int DATA_RATE = 115200;
 
-	private RendererView view;
     private Modeler model;
+
+    private Container container;
+    private ControlView controls;
+    private RendeR canvas1;
+    private RendeR canvas2;
 
     // The name of the serial port.
     private String portName;
@@ -35,30 +41,36 @@ public class Renderer {
     // The thread listening to inbound serial messages
     private Thread serialListener;
 
-    // The stage that acts as the Window for the application. Certain operations
-    // in JavaFX require this to be passed, which is why the controller needs
-    // to maintain a pointer to him.
-    private Stage stage;
 
     /**
      * Constructors a new renderer that is bound to the given model and view.
-     * @param modeler The model in the MVC pattern (ostensibly)
-     * @param rendererView The view in the MVC pattern (ostensibly)
+     * @param modeler Produce a 3-Dimensional model of the user's limb in space
+     * @param container The container view of the application
      */
-    public Renderer(Stage stg, Modeler modeler, RendererView rendererView) {
-        stage = stg;
-        model = modeler;
-        view = rendererView;
+    public Renderer(Modeler modeler, Container container) {
+        this.model = modeler;
+        this.container = container;
+
+        canvas1 = new RendeR();
+        container.add(canvas1, BorderLayout.WEST);
+        canvas1.init();
+
+        canvas2 = new RendeR();
+        container.add(canvas2, BorderLayout.CENTER);
+        canvas2.init();
+
+        controls = new ControlView();
+        container.add(controls.getPanel(), BorderLayout.EAST);
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
-        view.addListener("refresh", event -> refreshButtonClicked());
-        view.addListener("connect", event -> startButtonClicked());
-        view.addListener("closeConnection", event -> stopButtonClicked());
-        view.addListener("loadFile", event -> loadFileButtonClicked());
-        view.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
-        view.addListener("stopStreaming", event -> stopStreamingButtonClicked());
-        view.addListener("clearCanvases", event -> view.clearCanvases());
+        controls.addListener("refresh", event -> refreshButtonClicked());
+        controls.addListener("connect", event -> startButtonClicked());
+        controls.addListener("closeConnection", event -> stopButtonClicked());
+        controls.addListener("loadFile", event -> loadFileButtonClicked());
+        controls.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
+        controls.addListener("stopStreaming", event -> stopStreamingButtonClicked());
+        controls.addListener("clearCanvases", event -> clearCanvases());
 
         displaySerialPorts();
 
@@ -88,6 +100,8 @@ public class Renderer {
      * clean-up necessary state.
      */
     public void unmount() {
+        canvas1.destroy();
+        canvas2.destroy();
         stopSerialListener();
         closeConnection();
     }
@@ -180,7 +194,7 @@ public class Renderer {
 
     private void displaySerialPorts() {
         ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
-        view.showAvailablePorts(availablePorts);
+        controls.showAvailablePorts(availablePorts);
     }
 
     // -------------------------------------------------------------------------
@@ -189,10 +203,16 @@ public class Renderer {
 
     private void modelAddedNewSample() {
         System.out.println("new sample added to model");
-
-        // Just doing one arm for the moment
         Arm leftArm = model.getNextSample().getLeftArm();
-        view.renderLeftArm(leftArm);
+
+        /* OLD CODE
+		canvasFront.drawArm(leftArm, "front");
+		canvasSide.drawArm(leftArm, "side");
+        */
+
+        // TODO draw something in canvas
+        // canvas1.drawArmOrWhatever()
+        // canvas2.drawArmOrWhatever()
     }
 
     // -------------------------------------------------------------------------
@@ -207,37 +227,41 @@ public class Renderer {
 
     // 'Start' button handler
     private void startButtonClicked() {
-        portName = view.getSelectedPort();
+        portName = controls.getSelectedPort();
 
         if (portName == null) {
-            view.displayError("Please select a port to connect to Arduino");
+            controls.displayError("Please select a port to connect to Arduino");
             return;
         }
 
         if (!connect()) {
-            view.displayError("Can not connect to port " + portName);
+            controls.displayError("Can not connect to port " + portName);
             return;
         }
 
-        view.toggleControlPaneForArduinoConnected(true);
+        controls.toggleControlPaneForArduinoConnected(true);
     }
 
     // 'Stop' button handler
     private void stopButtonClicked() {
         stopSerialListener();
         closeConnection();
-        view.toggleControlPaneForArduinoConnected(false);
+        controls.toggleControlPaneForArduinoConnected(false);
     }
 
     // 'Load File' button handler
     private void loadFileButtonClicked() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open a datalog file");
+        JFileChooser fileChooser = new JFileChooser();
+        File selectedFile;
 
-        File selectedFile = fileChooser.showOpenDialog(stage);
-        if (selectedFile == null) return;
+        int returnVal = fileChooser.showOpenDialog(container.getParent());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            selectedFile = fileChooser.getSelectedFile();
+        } else {
+            return;
+        }
 
-        view.enableLoadFileButton(false);
+        controls.enableLoadFileButton(false);
 
         // Spawn a new thread for reading from the file
         (new Thread(() -> {
@@ -258,13 +282,13 @@ public class Renderer {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    Platform.runLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
                         model.newSensorReading(samples.get(0));
                     });
                 }
             }
 
-            view.enableLoadFileButton(true);
+            controls.enableLoadFileButton(true);
         })).start();
     }
 
@@ -272,7 +296,7 @@ public class Renderer {
     private void streamFromArduinoButtonClicked() {
         // Disable the button to prevent this event
         // handler from being run multiple times.
-        view.enableStreamButton(false);
+        controls.enableStreamButton(false);
 
         // stop any preexisting listener
         stopSerialListener();
@@ -288,8 +312,12 @@ public class Renderer {
     }
 
     private void stopStreamingButtonClicked() {
-        view.enableStreamButton(true);
+        controls.enableStreamButton(true);
         stopSerialListener();
+    }
+
+    private void clearCanvases() {
+        //TODO
     }
 
     // -------------------------------------------------------------------------
@@ -323,12 +351,12 @@ public class Renderer {
                     // Add the callback invokation to the an event queue on
                     // the application thread. This is required due to the fact
                     // that the JavaFX Scene graph is NOT THREADSAFE.
-                    Platform.runLater(() -> callback.accept(message));
+                    SwingUtilities.invokeLater(() -> callback.accept(message));
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
-                view.enableStreamButton(true);
-                view.displayError("Connection with Arduino was interrupted");
+                controls.enableStreamButton(true);
+                controls.displayError("Connection with Arduino was interrupted");
                 //e.printStackTrace();
             }
         }

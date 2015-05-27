@@ -27,13 +27,17 @@ public class Controller {
 
     public void stopLoop() {
         System.out.println("You clicked STOP");
+        /*
         canvas1.stopLoop();
         canvas2.stopLoop();
+        */
     }
 
     public void startLoop() {
         System.out.println("You clicked START");
+        /*
         canvas1.startLoop();
         canvas2.startLoop();
+        */
     }
 }

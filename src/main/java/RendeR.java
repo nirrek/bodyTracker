@@ -7,7 +7,7 @@ import processing.core.PApplet;
  */
 public class RendeR extends PApplet {
 
-    private static int val = 0;
+    //private static int val = 0;
 
     public RendeR() {
         //
@@ -15,19 +15,20 @@ public class RendeR extends PApplet {
 
     public void setup() {
         size(400, 400);
-        background(0);
+        background(100);
     }
 
     public void draw() {
         //noLoop();
-        background(val * 50);
-        fill(100 + val * 2);
+        //background(val * 50);
+        //fill(100 + val * 2);
         ellipseMode(CENTER);
         ellipse(mouseX, mouseY, 80, 80);
-        val = val + 1;
+        //val = val + 1;
     }
 
 
+    /* ----- Some tests methods to see if everything works ------
     @Override
     public void mouseClicked() {
         System.out.println("click!");
@@ -42,5 +43,5 @@ public class RendeR extends PApplet {
         System.out.println("Restart loop");
         loop();
     }
-
+    */
 }
