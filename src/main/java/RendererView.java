@@ -1,8 +1,10 @@
 import gnu.io.CommPortIdentifier;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -10,12 +12,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.text.AttributedCharacterIterator;
 import java.util.ArrayList;
 
 public class RendererView extends EventEmitter {
-	// TODO : REMOVE IF UNNECESSARRY
-	private Modeler model;
 
 	// The root node of the view tree.
 	private GridPane containerView;
@@ -27,59 +32,65 @@ public class RendererView extends EventEmitter {
 	private RenderCanvas canvasSide;
 
 	// The control box.
-	private GridPane gridControlBox;
+	private GridPane controlBox;
 
-	// The main container of the view
-	private HBox container;
-	// The control-panel
-	private VBox controlBox;
 
 	private ComboBox<String> portsComboBox;
 	private Button refreshButton;
 
-	private Label instructionLabel;
 	private Button connectButton;
 	private Button closeConnectionButton;
+
 	private Button loadFromFileButton;
 	private Button streamButton;
+	private Button stopStreamingButton;
+
 	private TextArea logs;
 
 
-	public RendererView(Modeler model) {
-		this.model = model;
-
-		// Create constraint to make the grid resize when the window is resized by the user
-		ColumnConstraints colConsraint = new ColumnConstraints();
-		colConsraint.setHgrow(Priority.ALWAYS);
-		RowConstraints rowConstraint = new RowConstraints();
-		rowConstraint.setVgrow(Priority.ALWAYS);
-
+	public RendererView() {
 		// Main grid (root)
 		containerView = new GridPane();
-		//containerView.setGridLinesVisible(true);
-		containerView.getColumnConstraints().addAll(colConsraint);
-		containerView.getRowConstraints().addAll(rowConstraint);
+		containerView.setGridLinesVisible(true);
+
+
+		// Create constraint to make the grid resize when the window is resized by the user
+		ColumnConstraints col1 = new ColumnConstraints();
+		col1.setHgrow(Priority.ALWAYS);
+		ColumnConstraints col2 = new ColumnConstraints(600);
+		col2.setHgrow(Priority.ALWAYS);
+		ColumnConstraints col3 = new ColumnConstraints(400);
+
+		RowConstraints row1 = new RowConstraints();
+		RowConstraints row2 = new RowConstraints();
+		row2.setVgrow(Priority.ALWAYS);
+
+		containerView.getColumnConstraints().addAll(col1, col2, col3);
+		containerView.getRowConstraints().addAll(row1, row2);
 
 		// Add the section for the front-view canvas
 		Text titleCanvasFront = new Text("Front View");
+		titleCanvasFront.getStyleClass().add("SectionTitle");
 		canvasFront = new RenderCanvas();
 		containerView.add(titleCanvasFront, 0, 0);
 		containerView.add(canvasFront.getNode(), 0, 1);
 
 		// Add the section for the side-view canvas
 		Text titleCanvasSide = new Text("Side View");
+		titleCanvasSide.getStyleClass().add("SectionTitle");
 		canvasSide = new RenderCanvas();
 		containerView.add(titleCanvasSide, 1, 0);
 		containerView.add(canvasSide.getNode(), 1, 1);
 
 		// Add the section for the control box
-		gridControlBox = new GridPane();
-		gridControlBox.getStyleClass().add("Sidebar");
-		gridControlBox.setHgap(10);
-		gridControlBox.setVgap(10);
+		controlBox = new GridPane();
+		controlBox.getStyleClass().add("Sidebar");
+		controlBox.setHgap(10);
+		controlBox.setVgap(10);
 		//gridControlBox.setGridLinesVisible(true);
-		initControlBox(gridControlBox);
-		containerView.add(gridControlBox, 2, 1);
+		initControlBox(controlBox);
+		containerView.add(controlBox, 2, 1);
+
 	}
 
 	private void initControlBox(GridPane controlBox) {
@@ -133,6 +144,12 @@ public class RendererView extends EventEmitter {
 		//this button is disabled before a connection is established
 		streamButton.setDisable(true);
 
+		stopStreamingButton = new Button("Stop Streaming");
+		stopStreamingButton.getStyleClass().add("Btn--large");
+		stopStreamingButton.setOnAction(event -> this.emit("stopStreaming"));
+		//this button is disabled before user start streaming
+		stopStreamingButton.setDisable(true);
+
 		// Create logs text area
 		logs = new TextArea("");
 		logs.getStyleClass().add("Log");
@@ -159,7 +176,8 @@ public class RendererView extends EventEmitter {
 		controlBox.add(closeConnectionButton, 1, 6);
 
 		controlBox.add(stepThree, 0, 7, 3, 1);
-		controlBox.add(streamButton, 0, 8, 3, 1);
+		controlBox.add(streamButton, 0, 8, 2, 1);
+		controlBox.add(stopStreamingButton, 2, 8, 1, 1);
 
 		controlBox.add(logs, 0, 9, 3, 1);
 
@@ -170,12 +188,6 @@ public class RendererView extends EventEmitter {
 		connectButton.setDisable(connected);
 		closeConnectionButton.setDisable(!connected);
 		streamButton.setDisable(!connected);
-
-		if (connected) {
-			instructionLabel.setText("Click Stop to close the connection with Arduino");
-		} else {
-			instructionLabel.setText("Click Start to connect with your Arduino");
-		}
 	}
 
 	public String getSelectedPort() {
@@ -195,6 +207,11 @@ public class RendererView extends EventEmitter {
 
 	public void enableStreamButton(boolean enable) {
 		streamButton.setDisable(!enable);
+		stopStreamingButton.setDisable(enable);
+	}
+
+	public void enableLoadFileButton(boolean enable) {
+		loadFromFileButton.setDisable(!enable);
 	}
 
 	public Node getNode() {

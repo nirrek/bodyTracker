@@ -8,9 +8,11 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class BodyTracker extends Application {
+
 	public static void main(String[] args) {
 		launch(args);
 	}
+
 
 	/**
 	 * This is the entry point for a JavaFX application. The element that
@@ -21,7 +23,7 @@ public class BodyTracker extends Application {
 		// The model for the renderer
 		Modeler modeler = new Modeler();
 		// The view for the renderer
-		RendererView rendererView = new RendererView(modeler);
+		RendererView rendererView = new RendererView();
 		// TODO : REMOVE OR IMPLEMENT
 		HistoryView historyView = new HistoryView();
 
@@ -42,8 +44,9 @@ public class BodyTracker extends Application {
 		setStageSize(stage);
         stage.setOnCloseRequest(event -> {
             // Unmount the Renderer before app closure.
+			rendererController.unmount();
             // TODO track the actual current view.
-            rendererController.unmount();
+			// Romain: What for?
         });
         stage.setTitle("ClothMotion");
         stage.setScene(scene);

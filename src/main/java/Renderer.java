@@ -20,13 +20,11 @@ import java.util.regex.Pattern;
  * and display it in an artistic manner after conversion by the Modeler.
  */
 public class Renderer {
+
+    private static final int DATA_RATE = 115200;
+
 	private RendererView view;
     private Modeler model;
-    SerialPort serialPort;
-    private static final int TIME_OUT = 2000;
-	private static final int DATA_RATE = 115200;
-	private CommPortIdentifier portIdentifier;
-	private InputStream in;
 
     // The name of the serial port.
     private String portName;
@@ -59,6 +57,7 @@ public class Renderer {
         view.addListener("closeConnection", event -> stopButtonClicked());
         view.addListener("loadFile", event -> loadFileButtonClicked());
         view.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
+        view.addListener("stopStreaming", event -> stopStreamingButtonClicked());
         view.addListener("clearCanvases", event -> view.clearCanvases());
 
         displaySerialPorts();
@@ -68,20 +67,19 @@ public class Renderer {
     /**
      * Establishes a new serial connection using, and stores the new Serial
      * connection object on the instance.
+     *
+     * @return true if connection is successful, and false otherwise
      */
-    private void connect() {
+    private boolean connect() {
 
-        if (this.serial != null) {
-            // TODO close existing serial before establishing new connection.
-        }
+        // Close existing serial before establishing new connection.
+        closeConnection();
 
         this.serial = new Serial();
         this.serial.connect(this.portName, DATA_RATE);
 
-        if (!this.serial.isConnected()) {
-            // TODO handle connection failure
-            System.err.println("Failed to connect");
-        }
+        if (!this.serial.isConnected()) { return false;  }
+        else { return true; }
     }
 
 
@@ -130,7 +128,6 @@ public class Renderer {
         for (String line : msg.split("\n")) {
             Matcher m = sampleRegex.matcher(line);
             if (!m.matches()) {
-                // TODO use a real logging framework
                 System.out.println("Invalid sample line: ");
                 System.out.println(line);
                 continue; // skip invalid lines
@@ -217,8 +214,7 @@ public class Renderer {
             return;
         }
 
-        connect();
-        if (!serial.isConnected()) {
+        if (!connect()) {
             view.displayError("Can not connect to port " + portName);
             return;
         }
@@ -240,6 +236,8 @@ public class Renderer {
 
         File selectedFile = fileChooser.showOpenDialog(stage);
         if (selectedFile == null) return;
+
+        view.enableLoadFileButton(false);
 
         // Spawn a new thread for reading from the file
         (new Thread(() -> {
@@ -265,6 +263,8 @@ public class Renderer {
                     });
                 }
             }
+
+            view.enableLoadFileButton(true);
         })).start();
     }
 
@@ -273,7 +273,6 @@ public class Renderer {
         // Disable the button to prevent this event
         // handler from being run multiple times.
         view.enableStreamButton(false);
-        // TODO: re-enable stream button at some point
 
         // stop any preexisting listener
         stopSerialListener();
@@ -286,6 +285,11 @@ public class Renderer {
             }
         });
         serialListener.start();
+    }
+
+    private void stopStreamingButtonClicked() {
+        view.enableStreamButton(true);
+        stopSerialListener();
     }
 
     // -------------------------------------------------------------------------
@@ -323,9 +327,9 @@ public class Renderer {
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
-                // Exit thread on IOException.
-                // TODO figure out best way to handle this case.
-                e.printStackTrace();
+                view.enableStreamButton(true);
+                view.displayError("Connection with Arduino was interrupted");
+                //e.printStackTrace();
             }
         }
     }
