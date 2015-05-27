@@ -27,6 +27,10 @@ public class RendeR extends PApplet {
         //val = val + 1;
     }
 
+    public void clearCanvas() {
+        background(100);
+        redraw();
+    }
 
     /* ----- Some tests methods to see if everything works ------
     @Override

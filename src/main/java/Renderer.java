@@ -317,7 +317,8 @@ public class Renderer {
     }
 
     private void clearCanvases() {
-        //TODO
+        canvas1.clearCanvas();
+        canvas2.clearCanvas();
     }
 
     // -------------------------------------------------------------------------
