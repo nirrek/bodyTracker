@@ -1,9 +1,4 @@
 import gnu.io.*;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,8 +24,8 @@ public class Renderer {
 
     private Container container;
     private ControlView controls;
-    private RendeR canvas1;
-    private RendeR canvas2;
+    private RenderCanvas canvasLeft;
+    private RenderCanvas canvasRight;
 
     // The name of the serial port.
     private String portName;
@@ -51,16 +46,22 @@ public class Renderer {
         this.model = modeler;
         this.container = container;
 
-        canvas1 = new RendeR();
-        container.add(canvas1, BorderLayout.WEST);
-        canvas1.init();
-
-        canvas2 = new RendeR();
-        container.add(canvas2, BorderLayout.CENTER);
-        canvas2.init();
-
+        // Initiate the control Panel
         controls = new ControlView();
+
+        // TODO decide on the default canvas
+        // Make the left canvas render a (Front view) 2D representation of the arm
+        canvasLeft = new Render2DFront();
+        canvasLeft.init();
+        // Make the right canvas render a (Side view) 2D representation of the arm
+        canvasRight = new Render2DSide();
+        canvasRight.init();
+
+        // Add the canvases and the control Panel to the view container
+        container.add(canvasLeft, BorderLayout.WEST);
+        container.add(canvasRight, BorderLayout.CENTER);
         container.add(controls.getPanel(), BorderLayout.EAST);
+
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
@@ -72,8 +73,7 @@ public class Renderer {
         controls.addListener("stopStreaming", event -> stopStreamingButtonClicked());
         controls.addListener("clearCanvases", event -> clearCanvases());
 
-        displaySerialPorts();
-
+        displaySerialPortsAvailable();
     }
 
     /**
@@ -100,8 +100,8 @@ public class Renderer {
      * clean-up necessary state.
      */
     public void unmount() {
-        canvas1.destroy();
-        canvas2.destroy();
+        canvasLeft.destroy();
+        canvasRight.destroy();
         stopSerialListener();
         closeConnection();
     }
@@ -192,7 +192,7 @@ public class Renderer {
         return availablePorts;
     }
 
-    private void displaySerialPorts() {
+    private void displaySerialPortsAvailable() {
         ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
         controls.showAvailablePorts(availablePorts);
     }
@@ -211,7 +211,7 @@ public class Renderer {
         */
 
         // TODO draw something in canvas
-        // canvas1.drawArmOrWhatever()
+        // canvasLeft.drawArmOrWhatever()
         // canvas2.drawArmOrWhatever()
     }
 
@@ -221,7 +221,7 @@ public class Renderer {
 
     // 'Refresh' button handler
     private void refreshButtonClicked() {
-        displaySerialPorts();
+        displaySerialPortsAvailable();
     }
 
 
@@ -317,8 +317,8 @@ public class Renderer {
     }
 
     private void clearCanvases() {
-        canvas1.clearCanvas();
-        canvas2.clearCanvas();
+        canvasLeft.clearCanvas();
+        canvasRight.clearCanvas();
     }
 
     // -------------------------------------------------------------------------
