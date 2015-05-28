@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 /**
- * Created by romainjulien on 27/05/2015.
+ * Contains the main control buttons, as well as a text area to display errors.
  */
 public class ControlView extends EventEmitter {
 

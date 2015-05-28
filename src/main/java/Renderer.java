@@ -23,6 +23,7 @@ public class Renderer {
     private Modeler model;
 
     private Container container;
+    private CanvasSelectionView canvasSelectionView;
     private ControlView controls;
     private RenderCanvas canvasLeft;
     private RenderCanvas canvasRight;
@@ -46,7 +47,8 @@ public class Renderer {
         this.model = modeler;
         this.container = container;
 
-        // Initiate the control Panel
+        // Initiate the canvas selection panel and the control Panel
+        canvasSelectionView = new CanvasSelectionView();
         controls = new ControlView();
 
         // TODO decide on the default canvas
@@ -57,7 +59,8 @@ public class Renderer {
         canvasRight = new Render2DSide();
         canvasRight.init();
 
-        // Add the canvases and the control Panel to the view container
+        // Add the canvases, the canvas selection Panel, and the control Panel to the view container
+        container.add(canvasSelectionView.getPanel(), BorderLayout.NORTH);
         container.add(canvasLeft, BorderLayout.WEST);
         container.add(canvasRight, BorderLayout.CENTER);
         container.add(controls.getPanel(), BorderLayout.EAST);
@@ -72,6 +75,8 @@ public class Renderer {
         controls.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         controls.addListener("stopStreaming", event -> stopStreamingButtonClicked());
         controls.addListener("clearCanvases", event -> clearCanvases());
+
+        canvasSelectionView.addListener("applyChanges", event -> changeCanvases());
 
         displaySerialPortsAvailable();
     }
@@ -319,6 +324,13 @@ public class Renderer {
     private void clearCanvases() {
         canvasLeft.clearCanvas();
         canvasRight.clearCanvas();
+    }
+
+    private void changeCanvases() {
+        // TODO check from view that user has selected new canvases
+        // TODO verify that renderCanvases are not drawing anything just now
+        // TODO in view: change canvas titles
+        // TODO in Renderer: destroy current canvases and init new ones
     }
 
     // -------------------------------------------------------------------------
