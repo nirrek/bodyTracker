@@ -209,6 +209,10 @@ public class Renderer {
     private void modelAddedNewSample() {
         System.out.println("new sample added to model");
         Arm leftArm = model.getNextSample().getLeftArm();
+        
+       
+        canvasLeft.drawArm(leftArm, "front");
+        canvasRight.drawArm(leftArm, "side");
 
         /* OLD CODE
 		canvasFront.drawArm(leftArm, "front");

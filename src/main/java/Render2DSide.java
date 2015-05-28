@@ -1,3 +1,5 @@
+import javafx.geometry.Point2D;
+
 /**
  * Canvas responsible for rendering a 2D representation of the arm
  * Side view
@@ -12,17 +14,21 @@ public class Render2DSide extends RenderCanvas {
 
     public void setup() {
         size(400, 400);
-        background(100);
+        background(200);
     }
 
     public void draw() {
-        //noLoop();
+        noLoop();
         //background(val * 50);
         //fill(100 + val * 2);
-        ellipseMode(CENTER);
-        ellipse(mouseX, mouseY, 80, 80);
+     //   ellipseMode(CENTER);
+     //   ellipse(mouseX, mouseY, 80, 80);
         //val = val + 1;
+    //	background(100);
     }
+    
+
+
 
     // -------------------------------------------------------- //
 // -------- OLD CODE KERRIN WROTE TO RENDER IN 2D---------- //

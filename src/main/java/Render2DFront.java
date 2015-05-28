@@ -1,3 +1,4 @@
+import javafx.geometry.Point2D;
 import processing.core.PApplet;
 
 /**
@@ -20,13 +21,16 @@ public class Render2DFront extends RenderCanvas {
     }
 
     public void draw() {
-        //noLoop();
+        noLoop();
         //background(val * 50);
         //fill(100 + val * 2);
-        ellipseMode(CENTER);
-        ellipse(mouseX, mouseY, 80, 80);
+       // ellipseMode(CENTER);
+        //ellipse(mouseX, mouseY, 80, 80);
         //val = val + 1;
+       // background(100);
     }
+    
+ 
 
 // -------------------------------------------------------- //
 // -------- OLD CODE KERRIN WROTE TO RENDER IN 2D---------- //
