@@ -14,4 +14,15 @@ public enum RenderCanvasEnum {
     public String getValue() {
         return this.value;
     }
+
+    public static RenderCanvasEnum getEnumForValue(String value) {
+        switch (value) {
+            case "2D Front View":
+                return RenderCanvasEnum.Render2DFront;
+            case "2D Side View":
+                return RenderCanvasEnum.Render2DSide;
+            default:
+                return null;
+        }
+    }
 }

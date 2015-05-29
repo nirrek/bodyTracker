@@ -8,33 +8,33 @@ public class CanvasSelectionView extends EventEmitter {
 
     private JPanel canvasSelectionPanel;
 
-    private JLabel canvasLeftTitle;
-    private JComboBox<String> canvasLeftComboBox;
+    private JLabel leftCanvasTitle;
+    private JComboBox<String> leftCanvasComboBox;
 
-    private JLabel canvasRightTitle;
-    private JComboBox<String> canvasRightComboBox;
+    private JLabel rightCanvasTitle;
+    private JComboBox<String> rightCanvasComboBox;
 
     private JButton applyButton;
 
     public CanvasSelectionView() {
         canvasSelectionPanel = new JPanel();
 
-        canvasLeftTitle = new JLabel(RenderCanvasEnum.Render2DFront.getValue());
-        canvasLeftComboBox = new JComboBox<String>();
-        fillComboBox(canvasLeftComboBox);
+        leftCanvasTitle = new JLabel(RenderCanvasEnum.Render2DFront.getValue());
+        leftCanvasComboBox = new JComboBox<String>();
+        fillComboBox(leftCanvasComboBox);
 
-        canvasRightTitle = new JLabel(RenderCanvasEnum.Render2DSide.getValue());
-        canvasRightComboBox = new JComboBox<String>();
-        fillComboBox(canvasRightComboBox);
-        canvasRightComboBox.setSelectedItem(RenderCanvasEnum.Render2DSide.getValue());
+        rightCanvasTitle = new JLabel(RenderCanvasEnum.Render2DSide.getValue());
+        rightCanvasComboBox = new JComboBox<String>();
+        fillComboBox(rightCanvasComboBox);
+        rightCanvasComboBox.setSelectedItem(RenderCanvasEnum.Render2DSide.getValue());
 
         applyButton = new JButton("Apply");
         applyButton.addActionListener(event -> this.emit("applyChanges"));
 
-        canvasSelectionPanel.add(canvasLeftTitle);
-        canvasSelectionPanel.add(canvasLeftComboBox);
-        canvasSelectionPanel.add(canvasRightTitle);
-        canvasSelectionPanel.add(canvasRightComboBox);
+        canvasSelectionPanel.add(leftCanvasTitle);
+        canvasSelectionPanel.add(leftCanvasComboBox);
+        canvasSelectionPanel.add(rightCanvasTitle);
+        canvasSelectionPanel.add(rightCanvasComboBox);
         canvasSelectionPanel.add(applyButton);
     }
 
@@ -42,6 +42,30 @@ public class CanvasSelectionView extends EventEmitter {
         for (RenderCanvasEnum canvas : RenderCanvasEnum.values()) {
             cb.addItem(canvas.getValue());
         }
+    }
+
+    public boolean userHasSelectedDifferentLeftCanvas() {
+        return !leftCanvasTitle.getText().equals(getSelectedLeftCanvas());
+    }
+
+    public boolean userHasSelectedDifferentRightCanvas() {
+        return !rightCanvasTitle.getText().equals(getSelectedRightCanvas());
+    }
+
+    public String getSelectedLeftCanvas() {
+        return (String) leftCanvasComboBox.getSelectedItem();
+    }
+
+    public String getSelectedRightCanvas() {
+        return (String) rightCanvasComboBox.getSelectedItem();
+    }
+
+    public void setLeftCanvasTitle(String title) {
+        leftCanvasTitle.setText(title);
+    }
+
+    public void setRightCanvasTitle(String title) {
+        rightCanvasTitle.setText(title);
     }
 
     public JPanel getPanel() {

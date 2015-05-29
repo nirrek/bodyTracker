@@ -23,7 +23,7 @@ public class BodyTracker{
 
 
 		// Pass container view and model to the Renderer
-		Container container = main.getContentPane();
+		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane());
 		Modeler model = new Modeler();
 		Renderer rendererController = new Renderer(model, container);
 
