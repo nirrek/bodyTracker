@@ -1,3 +1,4 @@
+
 import javafx.geometry.Point2D;
 import processing.core.PApplet;
 
@@ -27,9 +28,18 @@ public class Render2DFront extends RenderCanvas {
        // ellipseMode(CENTER);
         //ellipse(mouseX, mouseY, 80, 80);
         //val = val + 1;
-       // background(100);
+        // background(100);
+    }
+
+    public void render(Point2D from, Point2D to) {
+    	line((float)from.getX(), (float)from.getY(), (float)to.getX(), 
+    			(float)to.getY());
+    	redraw();
+
     }
     
+    public void finalRender(){};
+
  
 
 // -------------------------------------------------------- //

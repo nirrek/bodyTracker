@@ -17,7 +17,7 @@ public abstract class RenderCanvas extends PApplet {
 
 	private Point2D rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
 
-	public void drawArm(Arm arm, String side) {
+	public Point2D drawArm(Arm arm, String side) {
 		Point3D shoulder = new Point3D(0, 0, 0);
 		Point3D elbow = arm.elbowPos();
 
@@ -29,7 +29,9 @@ public abstract class RenderCanvas extends PApplet {
 		shoulder2D = rebase(shoulder2D, rebasePoint);
 		elbow2D = rebase(elbow2D, rebasePoint);
 
-		drawLine(shoulder2D, elbow2D);
+		render(shoulder2D, elbow2D);
+		
+		return elbow2D;
 
 	}
 
@@ -45,10 +47,13 @@ public abstract class RenderCanvas extends PApplet {
 			return new Point2D(coord.getX(), coord.getY());
 		return new Point2D(coord.getZ(), coord.getY());
 	}
+	
+	public abstract void render(Point2D from, Point2D to);
+	 
+    public abstract void finalRender();
+	
 
-	private void drawLine(Point2D from, Point2D to) {
-		line((float)from.getX(), (float)from.getY(), (float)to.getX(), 
-				(float)to.getY());
-		redraw();
+	public void save(String s) {
+		saveFrame(s + ".jpg");
 	}
 }
