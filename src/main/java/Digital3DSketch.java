@@ -4,9 +4,9 @@ import processing.core.PImage;
 
 
 public class Digital3DSketch extends RenderCanvas {
-	
-	public Digital3DSketch() {
-		
+
+	public Digital3DSketch(int canvasSize) {
+		super(canvasSize);
 	}
 	/**
 	 * Peter de Jong attractor applet by Thor Fr&#248;lich.<br>
@@ -20,7 +20,7 @@ public class Digital3DSketch extends RenderCanvas {
 	int stepCounter;
 	 
 	public void setup() {
-	  size(640, 640);
+	  size(canvasSize, canvasSize);
 	  noFill();
 	  smooth();
 	  colorMode(HSB, 255);
@@ -39,40 +39,23 @@ public class Digital3DSketch extends RenderCanvas {
 	  }
 	  image(dj.pi, 0, 0, width, height);
 	}
-	 
-	/* While still reading samples */
-//	public void mouseDragged(int x, int y) {
-//	  noLoop();
-//	  stop = true;
-//	  dj.reparam(x,y);
-//	  redraw();
-//	}
 	
 	/* While still reading samples */
 	public void render(Point2D from, Point2D to) {
 	
 	  noLoop();
 	  stop = true;
-	  dj.reparam((float)to.getX(), (float)to.getY());
+	  dj.reparam((float) to.getX(), (float) to.getY());
 	  redraw();
-	  System.out.println("3d render called");
 	}
-//	 
+
 	/* Finished reading samples */
 	public void finalRender() {
 	  loop();
 	  stop = false;
 	  stepCounter = 0;
 	  dj.updateloop();
-	  System.out.println("3d final render called");
 	}
-	
-//	public void mouseReleased() {
-//		  loop();
-//		  stop = false;
-//		  stepCounter = 0;
-//		  dj.updateloop();
-//		}
 
 
 	class deJongAttractor {

@@ -7,10 +7,17 @@ import processing.core.PApplet;
  */
 public abstract class RenderCanvas extends PApplet {
 
+	int canvasSize;
+
+	public RenderCanvas(int canvasSize) {
+		this.canvasSize = canvasSize;
+	}
+
 	public void clearCanvas() {
 		background(83);
 		redraw();
 	}
+
 
 	// The default length of the arm segment
 	private static final int ARM_LENGTH = 300;
@@ -52,8 +59,7 @@ public abstract class RenderCanvas extends PApplet {
 	 
     public abstract void finalRender();
 	
-
 	public void save(String s) {
-		saveFrame(s + ".jpg");
+		saveFrame(s + "-###.jpg");
 	}
 }

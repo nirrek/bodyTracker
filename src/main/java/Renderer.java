@@ -23,16 +23,7 @@ public class Renderer {
 
     private Modeler model;
 
-<<<<<<< HEAD
     private BodyTrackerContainer view;
-=======
-    private Container container;
-    private CanvasSelectionView canvasSelectionView;
-    private ControlView controls;
-    private RenderCanvas canvasLeft;
-    private RenderCanvas canvasRight;
-    private RenderCanvas digital3D;
->>>>>>> c3c5826a3e48725d42353e02b49591d9e69354a6
 
     // The name of the serial port.
     private String portName;
@@ -53,7 +44,6 @@ public class Renderer {
      */
     public Renderer(Modeler modeler, BodyTrackerContainer container) {
         this.model = modeler;
-<<<<<<< HEAD
         this.view = container;
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
@@ -65,46 +55,7 @@ public class Renderer {
         view.getControlsView().addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         view.getControlsView().addListener("stopStreaming", event -> stopStreamingButtonClicked());
         view.getControlsView().addListener("clearCanvases", event -> clearCanvases());
-=======
-        this.container = container;
-
-        // Initiate the canvas selection panel and the control Panel
-        canvasSelectionView = new CanvasSelectionView();
-        controls = new ControlView();
-
-        // TODO decide on the default canvas
-        // Make the left canvas render a (Front view) 2D representation of the arm
-        canvasLeft = new Render2DFront();
-        canvasLeft.init();
-        // Make the right canvas render a (Side view) 2D representation of the arm
-        canvasRight = new Render2DSide();
-        canvasRight.init();
-        
-        // Make digital 3d canvas
-        digital3D = new Digital3DSketch();
-        digital3D.init();
-        
-        
-
-        // Add the canvases, the canvas selection Panel, and the control Panel to the view container
-        container.add(canvasSelectionView.getPanel(), BorderLayout.NORTH);
-        container.add(canvasRight, BorderLayout.WEST);
-   //     container.add(canvasRight, BorderLayout.CENTER);
-        container.add(digital3D, BorderLayout.CENTER);
-        container.add(controls.getPanel(), BorderLayout.EAST);
-
-
-        model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
-
-        controls.addListener("refresh", event -> refreshButtonClicked());
-        controls.addListener("connect", event -> startButtonClicked());
-        controls.addListener("closeConnection", event -> stopButtonClicked());
-        controls.addListener("loadFile", event -> loadFileButtonClicked());
-        controls.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
-        controls.addListener("stopStreaming", event -> stopStreamingButtonClicked());
-        controls.addListener("clearCanvases", event -> clearCanvases());
-        controls.addListener("saveCanvases", event -> saveCanvases());
->>>>>>> c3c5826a3e48725d42353e02b49591d9e69354a6
+        view.getControlsView().addListener("saveCanvases", event -> saveCanvases());
 
         view.getCanvasSelectionView().addListener("applyChanges", event -> changeCanvases());
 
@@ -238,27 +189,10 @@ public class Renderer {
     private void modelAddedNewSample() {
         System.out.println("new sample added to model");
         Arm leftArm = model.getNextSample().getLeftArm();
-        
-       
-<<<<<<< HEAD
+
         view.getLeftCanvas().drawArm(leftArm, "front");
         view.getRightCanvas().drawArm(leftArm, "side");
-=======
-     //   canvasLeft.drawArm(leftArm, "front");
-        canvasRight.drawArm(leftArm, "side");        
-        digital3D.drawArm(leftArm, "side");
-        
-        
->>>>>>> c3c5826a3e48725d42353e02b49591d9e69354a6
 
-        /* OLD CODE
-		canvasFront.drawArm(leftArm, "front");
-		canvasSide.drawArm(leftArm, "side");
-        */
-
-        // TODO draw something in canvas
-        // canvasLeft.drawArmOrWhatever()
-        // canvas2.drawArmOrWhatever()
     }
 
     // -------------------------------------------------------------------------
@@ -334,21 +268,17 @@ public class Renderer {
                     });
                 }
             }
-<<<<<<< HEAD
 
             modelIsProcessingNewReadings = false;
             view.enableLoadFileButton(true);
-=======
             //Finished reading from file
-            controls.enableLoadFileButton(true);
             //Need to pause & wait for the process to render the last reading
             try {
                 Thread.sleep(500);               
             } catch(InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
-            digital3D.finalRender();
->>>>>>> c3c5826a3e48725d42353e02b49591d9e69354a6
+            view.finalRender();
         })).start();
         
     }
@@ -379,37 +309,32 @@ public class Renderer {
         modelIsProcessingNewReadings = false;
     }
 
+    // Clear canvases button handler
     private void clearCanvases() {
-<<<<<<< HEAD
         view.clearCanvases();
-=======
-        canvasLeft.clearCanvas();
-        canvasRight.clearCanvas();
-        digital3D.clearCanvas();
->>>>>>> c3c5826a3e48725d42353e02b49591d9e69354a6
     }
     
-    
+    // Save Canvases button handler
     private void saveCanvases() {
-    	//canvasLeft.save("Front");
-        canvasRight.save("Side");
-        digital3D.save("Digital");
+    	view.saveCanvases();
     } 
 
+    // Apply button handler
     private void changeCanvases() {
         if (modelIsProcessingNewReadings) {
             view.displayError("Can't change rendering options while drawing happens.");
         }
 
         // Check if the user has selected different rendering options for the left canvas
-        if (view.userHasSelectedDifferentLeftCanvas()) {
-            view.changeLeftCanvasToUserSelection();
+        // and/or the right canvas
+        if (view.userHasSelectedLeftCanvas() && view.userHasSelectedRightCanvas()) {
+            view.displayTwoCanvases();
+        } else if (view.userHasSelectedLeftCanvas() || view.userHasSelectedRightCanvas()){
+            view.displayOneCanvas();
+        } else {
+            view.displayError("Select at least one rendering option");
         }
 
-        // Check if the user has selected different rendering options for the right canvas
-        if (view.userHasSelectedDifferentRightCanvas()) {
-            view.changeRightCanvasToUserSelection();
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -449,7 +374,6 @@ public class Renderer {
             } catch (IOException e) {
                 view.enableStreamButton(true);
                 view.displayError("Connection with Arduino was interrupted");
-                //e.printStackTrace();
             }
         }
     }

@@ -1,6 +1,7 @@
 import gnu.io.CommPortIdentifier;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -28,6 +29,8 @@ public class ControlView extends EventEmitter {
         controlPanel = new JPanel();
         GridBagLayout gridLayout = new GridBagLayout();
         controlPanel.setLayout(gridLayout);
+
+        controlPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // Title for the section Load from file
         JLabel sectionTitleLoad = new JLabel("Display arm movements saved on file.");

@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 /**
  * Where user can select which artistic representation should be displayed
@@ -8,32 +10,31 @@ public class CanvasSelectionView extends EventEmitter {
 
     private JPanel canvasSelectionPanel;
 
-    private JLabel leftCanvasTitle;
     private JComboBox<String> leftCanvasComboBox;
 
-    private JLabel rightCanvasTitle;
     private JComboBox<String> rightCanvasComboBox;
 
     private JButton applyButton;
 
     public CanvasSelectionView() {
-        canvasSelectionPanel = new JPanel();
+        FlowLayout layout = new FlowLayout();
+        layout.setAlignment(FlowLayout.LEFT);
+        canvasSelectionPanel = new JPanel(layout);
 
-        leftCanvasTitle = new JLabel(RenderCanvasEnum.Render2DFront.getValue());
+        canvasSelectionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
         leftCanvasComboBox = new JComboBox<String>();
         fillComboBox(leftCanvasComboBox);
+        leftCanvasComboBox.setSelectedItem(RenderCanvasEnum.FrontView2D.getValue());
 
-        rightCanvasTitle = new JLabel(RenderCanvasEnum.Render2DSide.getValue());
         rightCanvasComboBox = new JComboBox<String>();
         fillComboBox(rightCanvasComboBox);
-        rightCanvasComboBox.setSelectedItem(RenderCanvasEnum.Render2DSide.getValue());
+        rightCanvasComboBox.setSelectedItem(RenderCanvasEnum.SideView2D.getValue());
 
         applyButton = new JButton("Apply");
         applyButton.addActionListener(event -> this.emit("applyChanges"));
 
-        canvasSelectionPanel.add(leftCanvasTitle);
         canvasSelectionPanel.add(leftCanvasComboBox);
-        canvasSelectionPanel.add(rightCanvasTitle);
         canvasSelectionPanel.add(rightCanvasComboBox);
         canvasSelectionPanel.add(applyButton);
     }
@@ -44,12 +45,18 @@ public class CanvasSelectionView extends EventEmitter {
         }
     }
 
-    public boolean userHasSelectedDifferentLeftCanvas() {
-        return !leftCanvasTitle.getText().equals(getSelectedLeftCanvas());
+    public boolean userHasSelectedLeftCanvas() {
+        if (getSelectedLeftCanvas().equals("None")) {
+            return false;
+        }
+        return true;
     }
 
-    public boolean userHasSelectedDifferentRightCanvas() {
-        return !rightCanvasTitle.getText().equals(getSelectedRightCanvas());
+    public boolean userHasSelectedRightCanvas() {
+        if (getSelectedRightCanvas().equals("None")) {
+            return false;
+        }
+        return true;
     }
 
     public String getSelectedLeftCanvas() {
@@ -58,14 +65,6 @@ public class CanvasSelectionView extends EventEmitter {
 
     public String getSelectedRightCanvas() {
         return (String) rightCanvasComboBox.getSelectedItem();
-    }
-
-    public void setLeftCanvasTitle(String title) {
-        leftCanvasTitle.setText(title);
-    }
-
-    public void setRightCanvasTitle(String title) {
-        rightCanvasTitle.setText(title);
     }
 
     public JPanel getPanel() {

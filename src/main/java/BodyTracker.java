@@ -21,7 +21,6 @@ public class BodyTracker{
 		// Set size
 		setWindowSize(main);
 
-
 		// Pass container view and model to the Renderer
 		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane());
 		Modeler model = new Modeler();
