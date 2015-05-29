@@ -29,6 +29,7 @@ public class Renderer {
     private RenderCanvas canvasLeft;
     private RenderCanvas canvasRight;
     private RenderCanvas digital3D;
+    private RenderCanvas digital2D;
 
     // The name of the serial port.
     private String portName;
@@ -65,13 +66,19 @@ public class Renderer {
         digital3D = new Digital3DSketch();
         digital3D.init();
         
+        //Make digital 2d canvas
+        digital2D = new Digital2DSketch();
+        digital2D.init();
+        
+        
         
 
         // Add the canvases, the canvas selection Panel, and the control Panel to the view container
         container.add(canvasSelectionView.getPanel(), BorderLayout.NORTH);
         container.add(canvasRight, BorderLayout.WEST);
    //     container.add(canvasRight, BorderLayout.CENTER);
-        container.add(digital3D, BorderLayout.CENTER);
+  //      container.add(digital3D, BorderLayout.CENTER);
+        container.add(digital2D, BorderLayout.CENTER);
         container.add(controls.getPanel(), BorderLayout.EAST);
 
 
@@ -223,7 +230,8 @@ public class Renderer {
        
      //   canvasLeft.drawArm(leftArm, "front");
         canvasRight.drawArm(leftArm, "side");        
-        digital3D.drawArm(leftArm, "side");
+    //    digital3D.drawArm(leftArm, "side");
+        digital2D.drawArm(leftArm, "side");
         
         
 

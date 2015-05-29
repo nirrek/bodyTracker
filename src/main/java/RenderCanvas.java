@@ -13,7 +13,7 @@ public abstract class RenderCanvas extends PApplet {
 	}
 
 	// The default length of the arm segment
-	private static final int ARM_LENGTH = 300;
+	protected static final int ARM_LENGTH = 300;
 
 	private Point2D rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
 
