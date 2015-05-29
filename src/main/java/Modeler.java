@@ -42,8 +42,8 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		startRightPitch = 0;//Shoulder forwards/backwards
 		startRightRoll = 0;//90;//Shoulder up/down
 		//startRightYaw = 0;//Theoretically unused
-		leftShoulder = new Point3D(0, 2, -1);//TODO: Dynamic again
-		rightShoulder = new Point3D(0, 2, 1);
+		leftShoulder = new Point3D(0, 0, 0);//TODO: Dynamic again
+		rightShoulder = new Point3D(0, 0, 0);
 		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, -shoulderToElbow, 0, 0, -elbowToWrist, 0, true),
 				new Arm(rightShoulder, 0, -shoulderToElbow, 0, 0, -elbowToWrist, 0, false));//Create arms at rest
 		pastArms.add(currentArms);
