@@ -1,6 +1,7 @@
 import gnu.io.*;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class Renderer {
     private ControlView controls;
     private RenderCanvas canvasLeft;
     private RenderCanvas canvasRight;
+    private RenderCanvas digital3D;
 
     // The name of the serial port.
     private String portName;
@@ -58,11 +60,18 @@ public class Renderer {
         // Make the right canvas render a (Side view) 2D representation of the arm
         canvasRight = new Render2DSide();
         canvasRight.init();
+        
+        // Make digital 3d canvas
+        digital3D = new Digital3DSketch();
+        digital3D.init();
+        
+        
 
         // Add the canvases, the canvas selection Panel, and the control Panel to the view container
         container.add(canvasSelectionView.getPanel(), BorderLayout.NORTH);
-        container.add(canvasLeft, BorderLayout.WEST);
-        container.add(canvasRight, BorderLayout.CENTER);
+        container.add(canvasRight, BorderLayout.WEST);
+   //     container.add(canvasRight, BorderLayout.CENTER);
+        container.add(digital3D, BorderLayout.CENTER);
         container.add(controls.getPanel(), BorderLayout.EAST);
 
 
@@ -75,6 +84,7 @@ public class Renderer {
         controls.addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         controls.addListener("stopStreaming", event -> stopStreamingButtonClicked());
         controls.addListener("clearCanvases", event -> clearCanvases());
+        controls.addListener("saveCanvases", event -> saveCanvases());
 
         canvasSelectionView.addListener("applyChanges", event -> changeCanvases());
 
@@ -211,8 +221,11 @@ public class Renderer {
         Arm leftArm = model.getNextSample().getLeftArm();
         
        
-        canvasLeft.drawArm(leftArm, "front");
-        canvasRight.drawArm(leftArm, "side");
+     //   canvasLeft.drawArm(leftArm, "front");
+        canvasRight.drawArm(leftArm, "side");        
+        digital3D.drawArm(leftArm, "side");
+        
+        
 
         /* OLD CODE
 		canvasFront.drawArm(leftArm, "front");
@@ -296,9 +309,17 @@ public class Renderer {
                     });
                 }
             }
-
+            //Finished reading from file
             controls.enableLoadFileButton(true);
+            //Need to pause & wait for the process to render the last reading
+            try {
+                Thread.sleep(500);               
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            digital3D.finalRender();
         })).start();
+        
     }
 
     // 'Stream from Arduino' button handler
@@ -328,7 +349,15 @@ public class Renderer {
     private void clearCanvases() {
         canvasLeft.clearCanvas();
         canvasRight.clearCanvas();
+        digital3D.clearCanvas();
     }
+    
+    
+    private void saveCanvases() {
+    	//canvasLeft.save("Front");
+        canvasRight.save("Side");
+        digital3D.save("Digital");
+    } 
 
     private void changeCanvases() {
         // TODO check from view that user has selected new canvases

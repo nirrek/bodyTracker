@@ -1,3 +1,4 @@
+
 import javafx.geometry.Point2D;
 
 /**
@@ -26,6 +27,15 @@ public class Render2DSide extends RenderCanvas {
         //val = val + 1;
     //	background(100);
     }
+    
+    public void render(Point2D from, Point2D to) {
+    	line((float)from.getX(), (float)from.getY(), (float)to.getX(), 
+    			(float)to.getY());
+    	redraw();
+
+    }
+    
+    public void finalRender(){};
     
 
 

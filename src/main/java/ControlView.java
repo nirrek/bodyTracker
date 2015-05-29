@@ -93,8 +93,13 @@ public class ControlView extends EventEmitter {
 
         addToGrid(logs, 9, 0, 3, GridBagConstraints.HORIZONTAL);
 
-        // Clear canvases button
-        Button buttonClearCanvases = new Button("Clear canvases");
+        // Save canvas(es) button
+        Button buttonSaveCanvases = new Button("Save canvas(es)");
+        buttonSaveCanvases.addActionListener(event -> this.emit("saveCanvases"));
+        addToGrid(buttonSaveCanvases, 12, 0, 3, GridBagConstraints.HORIZONTAL);
+        
+        // Clear canvas(es) button
+        Button buttonClearCanvases = new Button("Clear canvas(es)");
         buttonClearCanvases.addActionListener(event -> this.emit("clearCanvases"));
 
         addToGrid(buttonClearCanvases, 10, 0, 3, GridBagConstraints.HORIZONTAL);
