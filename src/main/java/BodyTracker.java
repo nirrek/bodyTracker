@@ -49,9 +49,10 @@ public class BodyTracker{
 	 * @param frame The frame to set the size of
 	 */
 	private void setWindowSize(JFrame frame) {
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int width = Math.min(1920, screenSize.width);
-		int height = Math.min(1080, screenSize.width);
+		Dimension effectiveScreenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().
+				getMaximumWindowBounds().getSize();
+		int width = Math.min(1920, effectiveScreenSize.width);
+		int height = Math.min(1080, effectiveScreenSize.height);
 		frame.setSize(width, height);
 	}
 

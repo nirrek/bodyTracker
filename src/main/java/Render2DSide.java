@@ -9,14 +9,14 @@ import javafx.geometry.Point2D;
  */
 public class Render2DSide extends RenderCanvas {
 
-    public Render2DSide(int canvasSize) {
-        super(canvasSize);
-    }
+	public Render2DSide(int canvasWidth, int canvasHeight) {
+		super(canvasWidth, canvasHeight);
+	}
 
-    public void setup() {
-        size(canvasSize, canvasSize);
-        background(0);
-    }
+	public void setup() {
+		size(canvasWidth, canvasHeight);
+		background(0);
+	}
 
     public void draw() {
         noLoop();

@@ -34,13 +34,13 @@ public class Digital2DSketch extends RenderCanvas{
 	float[] deltaY = new float[stoixeia];
 	float fxMouse, fyMouse;
 
-	public Digital2DSketch(int canvasSize) {
-		super(canvasSize);
+	public Digital2DSketch(int canvasWidth, int canvasHeight) {
+		super(canvasWidth, canvasHeight);
 	}
 
 	public void setup()  {
 		frameRate(240);
-		size(640, 640);
+		size(canvasWidth, canvasHeight);
 
 
 		line0 = new SketchLine(30);

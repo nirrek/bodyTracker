@@ -5,8 +5,8 @@ import processing.core.PImage;
 
 public class Digital3DSketch extends RenderCanvas {
 
-	public Digital3DSketch(int canvasSize) {
-		super(canvasSize);
+	public Digital3DSketch(int canvasWidth, int canvasHeight) {
+		super(canvasWidth, canvasHeight);
 	}
 	/**
 	 * Peter de Jong attractor applet by Thor Fr&#248;lich.<br>
@@ -20,7 +20,7 @@ public class Digital3DSketch extends RenderCanvas {
 	int stepCounter;
 	 
 	public void setup() {
-	  size(canvasSize, canvasSize);
+	  size(canvasWidth, canvasHeight);
 	  noFill();
 	  smooth();
 	  colorMode(HSB, 255);

@@ -7,10 +7,12 @@ import processing.core.PApplet;
  */
 public abstract class RenderCanvas extends PApplet {
 
-	int canvasSize;
+	int canvasWidth;
+	int canvasHeight;
 
-	public RenderCanvas(int canvasSize) {
-		this.canvasSize = canvasSize;
+	public RenderCanvas(int canvasWidth, int canvasHeight) {
+		this.canvasWidth = canvasWidth;
+		this.canvasHeight = canvasHeight;
 	}
 
 	public void clearCanvas() {

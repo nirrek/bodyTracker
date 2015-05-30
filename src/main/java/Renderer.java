@@ -48,6 +48,7 @@ public class Renderer {
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
+        view.getControlsView().addListener("applyChanges", event -> changeCanvases());
         view.getControlsView().addListener("refresh", event -> refreshButtonClicked());
         view.getControlsView().addListener("connect", event -> startButtonClicked());
         view.getControlsView().addListener("closeConnection", event -> stopButtonClicked());
@@ -56,8 +57,6 @@ public class Renderer {
         view.getControlsView().addListener("stopStreaming", event -> stopStreamingButtonClicked());
         view.getControlsView().addListener("clearCanvases", event -> clearCanvases());
         view.getControlsView().addListener("saveCanvases", event -> saveCanvases());
-
-        view.getCanvasSelectionView().addListener("applyChanges", event -> changeCanvases());
 
         displaySerialPortsAvailable();
     }
@@ -86,7 +85,7 @@ public class Renderer {
      * clean-up necessary state.
      */
     public void unmount() {
-        view.destroyCanvases();
+        view.destroyCanvas();
         stopSerialListener();
         closeConnection();
     }
@@ -187,17 +186,11 @@ public class Renderer {
     // -------------------------------------------------------------------------
 
     private void modelAddedNewSample() {
-        System.out.println("new sample added to model");
         Arm leftArm = model.getNextSample().getLeftArm();
 
-        if (view.getLeftCanvas() != null) {
-            view.getLeftCanvas().drawArm(leftArm, "front");
+        if (view.getCanvas() != null) {
+            view.getCanvas().drawArm(leftArm, "front");
         }
-
-        if (view.getRightCanvas() != null) {
-            view.getRightCanvas().drawArm(leftArm, "side");
-        }
-
     }
 
     // -------------------------------------------------------------------------
@@ -316,12 +309,12 @@ public class Renderer {
 
     // Clear canvases button handler
     private void clearCanvases() {
-        view.clearCanvases();
+        view.clearCanvas();
     }
     
     // Save Canvases button handler
     private void saveCanvases() {
-    	view.saveCanvases();
+    	view.saveCanvas();
     } 
 
     // Apply button handler
@@ -332,11 +325,9 @@ public class Renderer {
 
         // Check if the user has selected different rendering options for the left canvas
         // and/or the right canvas
-        if (view.userHasSelectedLeftCanvas() && view.userHasSelectedRightCanvas()) {
-            view.displayTwoCanvases();
-        } else if (view.userHasSelectedLeftCanvas() || view.userHasSelectedRightCanvas()){
-            view.displayOneCanvas();
-        } else {
+        if (!view.getSelectedCanvas().equals("None")) {
+            view.changeCanvasToUserSelection();
+        } else{
             view.displayError("Select at least one rendering option");
         }
 

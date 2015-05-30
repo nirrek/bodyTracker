@@ -10,12 +10,12 @@ import processing.core.PApplet;
  */
 public class Render2DFront extends RenderCanvas {
 
-    public Render2DFront(int canvasSize) {
-        super(canvasSize);
+    public Render2DFront(int canvasWidth, int canvasHeight) {
+        super(canvasWidth, canvasHeight);
     }
 
     public void setup() {
-        size(canvasSize, canvasSize);
+        size(canvasWidth, canvasHeight);
         background(0);
     }
 
