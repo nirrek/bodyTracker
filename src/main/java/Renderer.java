@@ -2,15 +2,13 @@ import gnu.io.*;
 
 import javax.swing.*;
 
-import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * The Application's Controller (Or the Renderer Controller...).
@@ -50,15 +48,15 @@ public class Renderer {
 
         view.getControlsView().addListener("applyChanges", event -> changeCanvases());
         view.getControlsView().addListener("refresh", event -> refreshButtonClicked());
-        view.getControlsView().addListener("connect", event -> startButtonClicked());
-        view.getControlsView().addListener("closeConnection", event -> stopButtonClicked());
+        view.getControlsView().addListener("connect", event -> connectButtonClicked());
+        view.getControlsView().addListener("closeConnection", event -> closeConnectionButtonClicked());
         view.getControlsView().addListener("loadFile", event -> loadFileButtonClicked());
         view.getControlsView().addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         view.getControlsView().addListener("stopStreaming", event -> stopStreamingButtonClicked());
         view.getControlsView().addListener("clearCanvases", event -> clearCanvases());
         view.getControlsView().addListener("saveCanvases", event -> saveCanvases());
 
-        displaySerialPortsAvailable();
+        updateUIDisplaySerialPortsAvailable();
     }
 
     /**
@@ -107,44 +105,6 @@ public class Renderer {
     }
 
     /**
-     * Parses a message from the Arduino, and returns a list of Samples
-     * from the message.
-     * @param msg The message to parse
-     * @return A list of Samples, or null if no valid samples in the message.
-     */
-    public static List<Sample> parseMessage(String msg) {
-        Pattern sampleRegex = Pattern.compile(
-                "^id ([0-9]+) " + // group 1
-                "time ([0-9]+) " + // group 2
-                "x ([-]?[0-9]+\\.?[0-9]+) " + // group 3
-                "y ([-]?[0-9]+\\.?[0-9]+) " + // group 4
-                "z ([-]?[0-9]+\\.?[0-9]+)[ ]?$"  // group 5
-        );
-
-        List<Sample> samples = new ArrayList<>();
-
-        for (String line : msg.split("\n")) {
-            Matcher m = sampleRegex.matcher(line);
-            if (!m.matches()) {
-                System.out.println("Invalid sample line: ");
-                System.out.println(line);
-                continue; // skip invalid lines
-            }
-
-            Sample sample = new Sample();
-            sample.sensorId = Integer.parseInt(m.group(1));
-            sample.timestamp = Long.parseLong(m.group(2));
-            sample.yaw = Double.parseDouble(m.group(3));   // X => yaw
-            sample.pitch = Double.parseDouble(m.group(4)); // Y => pitch
-            sample.roll = Double.parseDouble(m.group(5));  // Z => roll
-
-            samples.add(sample);
-        }
-
-        return samples;
-    }
-
-    /**
      * Fetches a list of all available serial ports.
      * Once the Arduino is connected, the port it is connected to will appear in
      * this list.
@@ -176,9 +136,28 @@ public class Renderer {
         return availablePorts;
     }
 
-    private void displaySerialPortsAvailable() {
-        ArrayList<CommPortIdentifier> availablePorts = getAvailableSerialPorts();
-        view.showAvailablePorts(availablePorts);
+    // -------------------------------------------------------------------------
+    //      UI CONTROL METHODS
+    // -------------------------------------------------------------------------
+
+    private void updateUIForArduinoConnected(boolean isConnected) {
+        view.enableConnectButton(!isConnected);
+        view.enableStreamButton(isConnected);
+    }
+
+    private void updateUIForModelProcessingReadings(boolean isProcessingReadings) {
+        view.enableLoadFileButton(!isProcessingReadings);
+        view.enableStreamButton(!isProcessingReadings);
+    }
+
+    private void updateUIDisplaySerialPortsAvailable() {
+        ArrayList<String> portNames = new ArrayList<>();
+
+        for (CommPortIdentifier port : getAvailableSerialPorts()) {
+            portNames.add(port.getName());
+        }
+
+        view.fillAvailablePortsComboBox(portNames);
     }
 
     // -------------------------------------------------------------------------
@@ -199,12 +178,12 @@ public class Renderer {
 
     // 'Refresh' button handler
     private void refreshButtonClicked() {
-        displaySerialPortsAvailable();
+        updateUIDisplaySerialPortsAvailable();
     }
 
 
     // 'Start' button handler
-    private void startButtonClicked() {
+    private void connectButtonClicked() {
         portName = view.getSelectedPort();
 
         if (portName == null) {
@@ -217,14 +196,14 @@ public class Renderer {
             return;
         }
 
-        view.toggleControlPaneForArduinoConnected(true);
+        updateUIForArduinoConnected(true);
     }
 
     // 'Stop' button handler
-    private void stopButtonClicked() {
+    private void closeConnectionButtonClicked() {
         stopSerialListener();
         closeConnection();
-        view.toggleControlPaneForArduinoConnected(false);
+        updateUIForArduinoConnected(false);
     }
 
     // 'Load File' button handler
@@ -240,8 +219,9 @@ public class Renderer {
         }
 
         modelIsProcessingNewReadings = true;
-        view.enableLoadFileButton(false);
+        updateUIForModelProcessingReadings(true);
 
+        // TODO: make the thread a private class that extends thread
         // Spawn a new thread for reading from the file
         (new Thread(() -> {
             Scanner s = null;
@@ -254,7 +234,7 @@ public class Renderer {
                 String line = s.nextLine();
                 if (line.equals("$")) continue; // message boundary
 
-                List<Sample> samples = parseMessage(line);
+                List<Sample> samples = Sample.parseMessage(line);
                 if (!samples.isEmpty()) {
                     try {
                         Thread.sleep(100); // simulate events coming in
@@ -267,8 +247,6 @@ public class Renderer {
                 }
             }
 
-            modelIsProcessingNewReadings = false;
-            view.enableLoadFileButton(true);
             //Finished reading from file
             //Need to pause & wait for the process to render the last reading
             try {
@@ -278,21 +256,23 @@ public class Renderer {
             }
             view.finalRender();
         })).start();
+
+        modelIsProcessingNewReadings = false;
+        updateUIForModelProcessingReadings(false);
         
     }
 
     // 'Stream from Arduino' button handler
     private void streamFromArduinoButtonClicked() {
-        // Disable the button to prevent this event
-        // handler from being run multiple times.
-        view.enableStreamButton(false);
-        modelIsProcessingNewReadings = true;
 
         // stop any preexisting listener
         stopSerialListener();
 
+        modelIsProcessingNewReadings = true;
+        updateUIForModelProcessingReadings(true);
+
         serialListener = new SerialListener((message) -> {
-            List<Sample> samples = parseMessage(message);
+            List<Sample> samples = Sample.parseMessage(message);
 
             if (!samples.isEmpty()) {
                 model.newSensorReading(samples.get(0));
@@ -301,10 +281,11 @@ public class Renderer {
         serialListener.start();
     }
 
+    // 'Stop Streaming' button handler
     private void stopStreamingButtonClicked() {
         stopSerialListener();
-        view.enableStreamButton(true);
         modelIsProcessingNewReadings = false;
+        updateUIForModelProcessingReadings(false);
     }
 
     // Clear canvases button handler
@@ -328,13 +309,13 @@ public class Renderer {
         if (!view.getSelectedCanvas().equals("None")) {
             view.changeCanvasToUserSelection();
         } else{
-            view.displayError("Select at least one rendering option");
+            view.displayError("You must select a rendering style");
         }
 
     }
 
     // -------------------------------------------------------------------------
-    //      END OF EVENT LISTENERS
+    //      PRIVATE THREADS
     // -------------------------------------------------------------------------
 
     /**
@@ -368,7 +349,7 @@ public class Renderer {
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
-                view.enableStreamButton(true);
+                updateUIForArduinoConnected(false);
                 view.displayError("Connection with Arduino was interrupted");
             }
         }

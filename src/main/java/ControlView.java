@@ -8,17 +8,18 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 /**
- * Contains the main control buttons, as well as a text area to display errors.
+ * Lay out the control panel components, set their initial states,
+ * and provide getters functions for further changes by the parent
+ * view (BodyTrackerContainer)
  */
 public class ControlView extends EventEmitter {
 
     private JPanel controlPanel;
 
-    private JComboBox<String> selectCanvasComboBox;
+    private JComboBox<String> renderingOptionComboBox;
     private JButton applyButton;
 
-    private JComboBox<String> portsComboBox;
-    private JButton refreshButton;
+    private JComboBox<String> availablePortsComboBox;
 
     private JButton connectButton;
     private JButton closeConnectionButton;
@@ -27,7 +28,7 @@ public class ControlView extends EventEmitter {
     private JButton streamButton;
     private JButton stopStreamingButton;
 
-    private JTextArea logs;
+    private JTextArea logsTextArea;
 
     public ControlView() {
         // Create a new Panel
@@ -42,10 +43,10 @@ public class ControlView extends EventEmitter {
         addToGrid(sectionTitleSelectStyle, 0, 0, 3, GridBagConstraints.HORIZONTAL);
 
         // Rendering option comboBox
-        selectCanvasComboBox = new JComboBox<String>();
-        fillComboBox(selectCanvasComboBox);
-        selectCanvasComboBox.setSelectedItem(RenderCanvasEnum.None.getValue());
-        selectCanvasComboBox.addItemListener(new ItemListener() {
+        renderingOptionComboBox = new JComboBox<String>();
+        fillRenderingOptionComboBox(renderingOptionComboBox);
+        renderingOptionComboBox.setSelectedItem(RenderCanvasEnum.None.getValue());
+        renderingOptionComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -58,9 +59,9 @@ public class ControlView extends EventEmitter {
         applyButton = new JButton("Apply");
         applyButton.addActionListener(event -> this.emit("applyChanges"));
         // Initially disabled, until user selects an option
-        disableApplyButton();
+        applyButton.setEnabled(false);
 
-        addToGrid(selectCanvasComboBox, 1, 0, 2, GridBagConstraints.HORIZONTAL);
+        addToGrid(renderingOptionComboBox, 1, 0, 2, GridBagConstraints.HORIZONTAL);
         addToGrid(applyButton, 1, 2, 1, GridBagConstraints.NONE);
 
         // Title for the section Load from file
@@ -79,13 +80,13 @@ public class ControlView extends EventEmitter {
         // Step 1 -- Components to select serial port
         JLabel stepOne = new JLabel("1. Select serial port connected to your ClothMotion");
 
-        portsComboBox = new JComboBox<String>();
+        availablePortsComboBox = new JComboBox<String>();
 
-        refreshButton = new JButton("Refresh");
+        JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(event -> this.emit("refresh"));
 
         addToGrid(stepOne, 5, 0, 3, GridBagConstraints.HORIZONTAL);
-        addToGrid(portsComboBox, 6, 0, 2, GridBagConstraints.HORIZONTAL);
+        addToGrid(availablePortsComboBox, 6, 0, 2, GridBagConstraints.HORIZONTAL);
         addToGrid(refreshButton, 6, 2, 1, GridBagConstraints.NONE);
 
         // Step 2 -- Components to start/stop connection with Arduino
@@ -121,11 +122,11 @@ public class ControlView extends EventEmitter {
         addToGrid(stopStreamingButton, 10, 2, 1, GridBagConstraints.NONE);
 
         // Create logs text area
-        logs = new JTextArea("");
-        logs.setEditable(false);
-        logs.setLineWrap(true);
+        logsTextArea = new JTextArea("");
+        logsTextArea.setEditable(false);
+        logsTextArea.setLineWrap(true);
 
-        addToGrid(logs, 11, 0, 3, GridBagConstraints.HORIZONTAL);
+        addToGrid(logsTextArea, 11, 0, 3, GridBagConstraints.HORIZONTAL);
 
         // Save canvas(es) button
         Button buttonSaveCanvases = new Button("Save canvas(es)");
@@ -151,48 +152,24 @@ public class ControlView extends EventEmitter {
         controlPanel.add(comp, constraints);
     }
 
-    private void fillComboBox(JComboBox cb) {
+    private void fillRenderingOptionComboBox(JComboBox cb) {
         for (RenderCanvasEnum canvas : RenderCanvasEnum.values()) {
             cb.addItem(canvas.getValue());
         }
     }
 
-    public String getSelectedCanvas() {
-        return (String) selectCanvasComboBox.getSelectedItem();
-    }
 
-    public void disableApplyButton() {
-        applyButton.setEnabled(false);
-    }
+    public JButton getApplyButton() { return applyButton; }
+    public JButton getConnectButton() { return connectButton; }
+    public JButton getCloseConnectionButton() { return closeConnectionButton; }
+    public JButton getLoadFromFileButton() { return loadFromFileButton; }
+    public JButton getStreamButton() { return streamButton; }
+    public JButton getStopStreamingButton() { return stopStreamingButton; }
 
-    public void toggleControlPaneForArduinoConnected(boolean connected) {
-        connectButton.setEnabled(!connected);
-        closeConnectionButton.setEnabled(connected);
-        streamButton.setEnabled(connected);
-    }
+    public JComboBox getRenderingOptionComboBox() { return renderingOptionComboBox; }
+    public JComboBox getAvailablePortsComboBox() { return availablePortsComboBox; }
 
-    public String getSelectedPort() {
-        return (String) portsComboBox.getSelectedItem();
-    }
-
-    public void showAvailablePorts(ArrayList<CommPortIdentifier> availablePorts) {
-        portsComboBox.removeAllItems();
-        for (CommPortIdentifier port : availablePorts)
-            portsComboBox.addItem(port.getName());
-    }
-
-    public void displayError(String errorMessage) {
-        logs.setText(errorMessage);
-    }
-
-    public void enableLoadFileButton(boolean enable) {
-        loadFromFileButton.setEnabled(enable);
-    }
-
-    public void enableStreamButton(boolean enable) {
-        streamButton.setEnabled(enable);
-        stopStreamingButton.setEnabled(!enable);
-    }
+    public JTextArea getLogsTextArea() { return logsTextArea; }
 
     public JPanel getPanel() {
         return controlPanel;

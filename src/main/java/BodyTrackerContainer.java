@@ -1,5 +1,3 @@
-import gnu.io.CommPortIdentifier;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -94,11 +92,11 @@ public class BodyTrackerContainer {
     // -------------------------------------------------------------------------
 
     public String getSelectedCanvas() {
-        return controlsView.getSelectedCanvas();
+        return (String) controlsView.getRenderingOptionComboBox().getSelectedItem();
     }
 
     public void changeCanvasToUserSelection() {
-        String selectedCanvas = controlsView.getSelectedCanvas();
+        String selectedCanvas = getSelectedCanvas();
         RenderCanvasEnum canvasEnum = RenderCanvasEnum.getEnumForValue(selectedCanvas);
 
         clearCanvas();
@@ -108,31 +106,35 @@ public class BodyTrackerContainer {
         canvasPanel.add(canvas);
         canvasPanel.validate();
 
-        controlsView.disableApplyButton();
+        controlsView.getApplyButton().setEnabled(false);
     }
 
-    public void showAvailablePorts(ArrayList<CommPortIdentifier> availablePorts) {
-        controlsView.showAvailablePorts(availablePorts);
+    public void fillAvailablePortsComboBox(ArrayList<String> availablePorts) {
+        controlsView.getAvailablePortsComboBox().removeAllItems();
+        for (String portName : availablePorts)
+            controlsView.getAvailablePortsComboBox().addItem(portName);
     }
 
     public String getSelectedPort() {
-        return controlsView.getSelectedPort();
+        return (String) controlsView.getAvailablePortsComboBox().getSelectedItem();
     }
 
-    public void displayError(String error) {
-        controlsView.displayError(error);
-    }
-
-    public void toggleControlPaneForArduinoConnected(boolean connected) {
-        controlsView.toggleControlPaneForArduinoConnected(connected);
+    public void enableConnectButton(boolean enable) {
+        controlsView.getConnectButton().setEnabled(enable);
+        controlsView.getCloseConnectionButton().setEnabled(!enable);
     }
 
     public void enableLoadFileButton(boolean enable) {
-        controlsView.enableLoadFileButton(enable);
+        controlsView.getLoadFromFileButton().setEnabled(enable);
     }
 
     public void enableStreamButton(boolean enable) {
-        controlsView.enableStreamButton(enable);
+        controlsView.getStreamButton().setEnabled(enable);
+        controlsView.getStopStreamingButton().setEnabled(!enable);
+    }
+
+    public void displayError(String error) {
+        controlsView.getLogsTextArea().setText(error);
     }
 
     // -------------------------------------------------------------------------
