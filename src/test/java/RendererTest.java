@@ -22,7 +22,7 @@ public class RendererTest {
     @Test
     public void parseSingleLineMessage() {
         String msg = "id 55 time 25262 x 352.6250 y -0.5625 z -100.1875 \n";
-        List<Sample> samples = Renderer.parseMessage(msg);
+        List<Sample> samples = Sample.parseMessage(msg);
 
         assertEquals(1, samples.size());
         Sample sample = samples.get(0);
@@ -38,7 +38,7 @@ public class RendererTest {
     public void parseMultiLineMessage() {
         String msg = "id 55 time 9299 x 359.9375 y -39.8750 z -22.6250\n" +
                      "id 155 time 19299 x 159.9375 y -139.8750 z -122.6250\n";
-        List<Sample> samples = Renderer.parseMessage(msg);
+        List<Sample> samples = Sample.parseMessage(msg);
 
         // X => yaw      Y => pitch      Z => roll  (may 23rd)
         assertEquals(2, samples.size());
@@ -62,7 +62,7 @@ public class RendererTest {
     public void excludesMalformedLines() {
         String msg = "id 55 time 9299 x 359.9375 y -39.8750 z -22.6250\n" +
                 "id 1:)55 time 19299 x 159.9375 y -139.8750 z -122.6250\n";
-        List<Sample> samples = Renderer.parseMessage(msg);
+        List<Sample> samples = Sample.parseMessage(msg);
 
         assertEquals(1, samples.size());
     }
@@ -72,7 +72,7 @@ public class RendererTest {
     public void emptyListOnNoValidSamples() {
         String msg = "?id 55 time 9299 x 359.9375 y -39.8750 z -22.6250\n" +
                 "id 1:)55 time 19299 x 159.9375 y -139.8750 z -122.6250\n";
-        List<Sample> samples = Renderer.parseMessage(msg);
+        List<Sample> samples = Sample.parseMessage(msg);
 
         assertEquals(0, samples.size());
     }
