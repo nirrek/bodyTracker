@@ -1,6 +1,7 @@
 import gnu.io.CommPortIdentifier;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ public class BodyTrackerContainer {
 
         // Layout the left and right canvases
         centerPanel = new JPanel(new FlowLayout());
+        //BoxLayout layout = new BoxLayout(centerPanel, BoxLayout.X_AXIS);
+        //centerPanel.setLayout(layout);
         leftPanel = new JPanel(new FlowLayout());
         rightPanel = new JPanel(new FlowLayout());
 
@@ -105,11 +108,27 @@ public class BodyTrackerContainer {
             case 1:
                 if (rightCanvas == null) {
                     System.out.println("View: right canvas is null");
-                    centerPanel.add(leftPanel);
+                    System.out.println("LEFT " + leftCanvas.getClass().toString());
+                    //leftPanel.removeAll();
+                    //leftPanel.setPreferredSize(new Dimension(640, 640));
+                    //leftPanel.add(mapCanvases.get(RenderCanvasEnum.Digital3DSketch));
+                    leftCanvas = new Digital3DSketch(640);
+                    leftCanvas.init();
+                    JPanel p = new JPanel(new FlowLayout());
+                    //p.setBorder(new EmptyBorder(10, 10, 10, 10));
+                    p.add(leftCanvas);
+                    centerPanel.add(p);
+                    //centerPanel.setPreferredSize(new Dimension(640, 640));
+                    //centerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
                     System.out.println("Number component centerPanel " + centerPanel.getComponentCount());
                 } else {
                     System.out.println("View: left canvas is null");
-                    centerPanel.add(rightPanel);
+                    System.out.println("RIGHT " + rightCanvas.getClass().toString());
+                    //rightPanel.removeAll();
+                    //rightPanel.add(mapCanvases.get(RenderCanvasEnum.Digital3DSketch));
+                    mapCanvases.get(RenderCanvasEnum.Digital3DSketch).init();
+                    centerPanel.add(mapCanvases.get(RenderCanvasEnum.Digital3DSketch));
+                    //centerPanel.setPreferredSize(new Dimension(640, 640));
                     System.out.println("Number component centerPanel " + centerPanel.getComponentCount());
                 }
                 break;
@@ -161,27 +180,57 @@ public class BodyTrackerContainer {
         rightCanvas = mapCanvases.get(enumRight);
         numberCanvasesDisplayed = 2;
 
-        layoutCanvases();
+        centerPanel.removeAll();
+
+        leftCanvas.destroy();
+        leftCanvas = mapCanvases.get(RenderCanvasEnum.SideView2D);
+        leftCanvas.init();
+        JPanel p = new JPanel(new FlowLayout());
+        leftPanel.removeAll();
+        leftPanel.add(leftCanvas);
+        centerPanel.add(leftPanel);
+
+        rightCanvas.destroy();
+        rightCanvas = mapCanvases.get(RenderCanvasEnum.Digital3DSketch);
+        rightCanvas.init();
+        JPanel p2 = new JPanel(new FlowLayout());
+        rightPanel.removeAll();
+        rightPanel.add(rightCanvas);
+        centerPanel.add(rightPanel);
+
+        //layoutCanvases();
     }
 
     public void displayOneCanvas() {
         String selectionLeft = canvasSelectionView.getSelectedLeftCanvas();
         String selectionRight = canvasSelectionView.getSelectedRightCanvas();
 
+        RenderCanvasEnum canvasEnum;
+
+        centerPanel.removeAll();
 
         if (!selectionLeft.equals("None")) {
-            RenderCanvasEnum leftCanvasEnum = RenderCanvasEnum.getEnumForValue(selectionLeft);
-            leftCanvas = mapCanvases.get(leftCanvasEnum);
+            canvasEnum = RenderCanvasEnum.getEnumForValue(selectionLeft);
+            //leftCanvas = mapCanvases.get(canvasEnum);
             rightCanvas = null;
+            leftCanvas = new Digital3DSketch(640);
+            leftCanvas.init();
+            JPanel p = new JPanel(new FlowLayout());
+            p.add(leftCanvas);
+            centerPanel.add(p);
         } else {
-            RenderCanvasEnum rightCanvasEnum = RenderCanvasEnum.getEnumForValue(selectionRight);
+            canvasEnum = RenderCanvasEnum.getEnumForValue(selectionRight);
             leftCanvas = null;
-            rightCanvas = mapCanvases.get(rightCanvasEnum);
+            //rightCanvas = mapCanvases.get(rightCanvasEnum);
+            rightCanvas = new Digital3DSketch(640);
+            rightCanvas.init();
+            JPanel p = new JPanel(new FlowLayout());
+            p.add(rightCanvas);
+            centerPanel.add(p);
         }
-
         numberCanvasesDisplayed = 1;
 
-        layoutCanvases();
+        //layoutCanvases();
     }
 
     // -------------------------------------------------------------------------
@@ -232,8 +281,12 @@ public class BodyTrackerContainer {
     }
 
     public void finalRender() {
-        leftCanvas.finalRender();
-        rightCanvas.finalRender();
+        if (leftCanvas != null) {
+            leftCanvas.finalRender();
+        }
+        if (rightCanvas != null) {
+            rightCanvas.finalRender();
+        }
     }
 
     public Container getContainer() {

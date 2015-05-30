@@ -190,8 +190,13 @@ public class Renderer {
         System.out.println("new sample added to model");
         Arm leftArm = model.getNextSample().getLeftArm();
 
-        view.getLeftCanvas().drawArm(leftArm, "front");
-        view.getRightCanvas().drawArm(leftArm, "side");
+        if (view.getLeftCanvas() != null) {
+            view.getLeftCanvas().drawArm(leftArm, "front");
+        }
+
+        if (view.getRightCanvas() != null) {
+            view.getRightCanvas().drawArm(leftArm, "side");
+        }
 
     }
 
