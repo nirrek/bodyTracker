@@ -49,8 +49,8 @@ public class BodyTrackerContainer {
     private void setCanvasWidthAndHeight() {
         Dimension effectiveScreenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().
                 getMaximumWindowBounds().getSize();
-        int screenWidth = effectiveScreenSize.width;
-        int screenHeight = effectiveScreenSize.height;
+        int screenWidth = Math.min(1920, effectiveScreenSize.width);
+        int screenHeight = Math.min(1080 ,effectiveScreenSize.height);
         int controlWidth = getControlsView().getPanel().getPreferredSize().width;
         canvasWidth = (screenWidth - controlWidth - 30);
         canvasHeight = screenHeight - 25 - 20;
@@ -67,11 +67,14 @@ public class BodyTrackerContainer {
                 new Digital3DSketch(canvasWidth, canvasHeight));
         mapCanvases.put(RenderCanvasEnum.Digital2DSketch,
                 new Digital2DSketch(canvasWidth, canvasHeight));
+        mapCanvases.put(RenderCanvasEnum.RenderGenerativeArt,
+        		new RenderGenerativeArt(canvasWidth, canvasHeight));
 
         mapCanvases.get(RenderCanvasEnum.FrontView2D).init();
         mapCanvases.get(RenderCanvasEnum.SideView2D).init();
         mapCanvases.get(RenderCanvasEnum.Digital3DSketch).init();
         mapCanvases.get(RenderCanvasEnum.Digital2DSketch).init();
+        mapCanvases.get(RenderCanvasEnum.RenderGenerativeArt).init();
     }
 
     // -------------------------------------------------------------------------

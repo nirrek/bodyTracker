@@ -6,7 +6,8 @@ public enum RenderCanvasEnum {
     FrontView2D("2D Front View"),
     SideView2D("2D Side View"),
     Digital3DSketch("Digital 3D Sketch"),
-    Digital2DSketch("Digital 2D Sketch");
+    Digital2DSketch("Digital 2D Sketch"),
+    RenderGenerativeArt("Render Generative Art");
 
     private String value;
 
@@ -28,6 +29,8 @@ public enum RenderCanvasEnum {
                 return RenderCanvasEnum.Digital3DSketch;
             case "Digital 2D Sketch":
                 return RenderCanvasEnum.Digital2DSketch;
+            case "Render Generative Art":
+            	return RenderCanvasEnum.RenderGenerativeArt;
             default:
                 return RenderCanvasEnum.None;
         }

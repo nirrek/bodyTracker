@@ -39,6 +39,7 @@ public class Digital2DSketch extends RenderCanvas{
 	}
 
 	public void setup()  {
+		
 		frameRate(240);
 		size(canvasWidth, canvasHeight);
 
@@ -99,7 +100,7 @@ public class Digital2DSketch extends RenderCanvas{
 		line0.render(240,31,166, lineAlpha);
 		line1.calcPoints(x, y);
 		line1.render(156,96,235, lineAlpha);
-		line2.calcPoints((float)to.getX(), (float)to.getY());
+		line2.calcPoints(x, y);
 		line2.render(159,209,252, lineAlpha);
 
 		if (smoothFade) {
