@@ -6,14 +6,27 @@ apply plugin: 'application'
 applicationName = 'ClothMotion'
 version = '1.0'
 
+applicationDefaultJvmArgs = ['-Djava.library.path=MY_APP_HOME/lib']
+
 mainClassName = "BodyTracker"
 
 sourceCompatibility = 1.8  // Use Java 8
 
 distZip {
-    archiveName applicationName + '-' + version + '.zip'
+    into(applicationName + '-' + version + '/lib') {
+        from './lib'
+        include '*'
+    }
+    archiveName = applicationName + '-' + version + '.zip'
 }
 
+startScripts {
+    classpath.add(sourceSets.main.runtimeClasspath)
+    doLast {
+        unixScript.text = unixScript.text.replace('MY_APP_HOME', '$APP_HOME')
+        windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%~dp0..')
+    }
+}
 
 repositories {
     mavenCentral()
