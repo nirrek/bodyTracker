@@ -3,9 +3,17 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'application'
 
+applicationName = 'ClothMotion'
+version = '1.0'
+
+mainClassName = "BodyTracker"
 
 sourceCompatibility = 1.8  // Use Java 8
-version = '1.0'
+
+distZip {
+    archiveName applicationName + '-' + version + '.zip'
+}
+
 
 repositories {
     mavenCentral()
