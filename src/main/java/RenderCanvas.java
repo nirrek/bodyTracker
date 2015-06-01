@@ -12,15 +12,17 @@ public abstract class RenderCanvas extends PApplet {
 	int canvasWidth;
 	int canvasHeight;
 	protected Point2D rebasePoint;
+	protected boolean init;
 	
 
 	public RenderCanvas(int canvasWidth, int canvasHeight) {
 		this.canvasWidth = canvasWidth;
 		this.canvasHeight = canvasHeight;
-		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight/3);
+		this.rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
 	}
 
 	public void clearCanvas() {
+		this.init = true;
 		background(0);
 		redraw();
 	}

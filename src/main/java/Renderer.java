@@ -31,6 +31,9 @@ public class Renderer {
 
     // The thread listening to inbound serial messages
     private Thread serialListener;
+    
+    //Use to slow down rendering for 3D digital sketch
+    private int count = 0;
 
     /**
      * Constructors a new renderer that is bound to the given model and view.
@@ -166,9 +169,19 @@ public class Renderer {
     	Arm leftArm = model.getNextSample().getLeftArm();
 
     	if (view.getCanvas() != null) {
+    		/* front 2d view canvas */
     		if (view.getCanvas() instanceof Render2DFront) {
     			view.getCanvas().drawArm(leftArm, "front");
-    		} else {
+    			/* digital 3d canvas - want to slow down sampling */
+    		} else if (view.getCanvas() instanceof Digital3DSketch) {
+    			System.out.println("Count: " + count);
+   
+    			if (count % 5 == 0) {
+    				System.out.println("Should be rendering: " + count);
+    				view.getCanvas().drawArm(leftArm, "side");
+    			}
+    			count++;
+    		}	else { /* regular canvas */
     			view.getCanvas().drawArm(leftArm, "side");
     		}
     	}
@@ -187,6 +200,8 @@ public class Renderer {
 
     // 'Start' button handler
     private void connectButtonClicked() {
+    	
+    	count = 0;
         portName = view.getSelectedPort();
 
         if (portName == null) {
@@ -211,6 +226,7 @@ public class Renderer {
 
     // 'Load File' button handler
     private void loadFileButtonClicked() {
+    	count = 0;
         JFileChooser fileChooser = new JFileChooser();
         File selectedFile;
 
@@ -265,6 +281,8 @@ public class Renderer {
     // 'Stream from Arduino' button handler
     private void streamFromArduinoButtonClicked() {
 
+    	count = 0;
+    	
         // stop any preexisting listener
         stopSerialListener();
 
@@ -282,6 +300,7 @@ public class Renderer {
 
     // 'Stop Streaming' button handler
     private void stopStreamingButtonClicked() {
+    	count = 0;
         stopSerialListener();
         updateUIForModelProcessingReadings(false);
         view.finalRender();
@@ -289,18 +308,19 @@ public class Renderer {
 
     // Clear canvases button handler
     private void clearCanvases() {
+    	count = 0;
         view.clearCanvas();
     }
     
     // Save Canvases button handler
     private void saveCanvases() {
+    	count = 0;
     	view.saveCanvas();
     } 
 
     // Apply button handler
     private void changeCanvases() {
-         // Check if the user has selected different rendering options for the left canvas
-        // and/or the right canvas
+        // Check if the user has selected different rendering options for the left canvas
         if (!view.getSelectedCanvas().equals("None")) {
             view.changeCanvasToUserSelection();
         } else{

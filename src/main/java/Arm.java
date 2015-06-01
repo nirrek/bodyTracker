@@ -25,6 +25,7 @@ public class Arm {
 		elbow = new Point3D(EX + shoulder.getX(), EY + shoulder.getY(), EZ + shoulder.getZ());
 		wrist = new Point3D(EX + WX + shoulder.getX(), EY + WY + shoulder.getY(), EZ + WZ + shoulder.getZ());
 		this.leftArm = left;
+		
 	}
 
 	/**
@@ -75,4 +76,5 @@ public class Arm {
 	public Point3D wristPos(){
 		return wrist;
 	}
+	
 }

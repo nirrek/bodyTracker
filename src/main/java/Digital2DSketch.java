@@ -1,22 +1,21 @@
 import javafx.geometry.Point2D;
-import processing.core.PApplet;
 import processing.core.PImage;
-import processing.opengl.*;
 
+/**
+ * @author sketch applet by Aris Bezas - modified by Lisa
+ * from www.openprocessing.org
+ */
 public class Digital2DSketch extends RenderCanvas{
 
-	boolean miden, smoothFade;
-	boolean xar=true;
-
-	// Sound Input Variables
-	float amp1, freq1, amp2, freq2, ampout, freqout;
-	float ElegxosAmp;
+	boolean miden, smoothFade, render;
 
 	SketchLine  line0, line1, line2;
 	float x1, y1, x2, y2;
 	PImage cur;
+	float xCo;
+	float yCo;
 
-	int stoixeia = 30, lineAlpha = 50;
+	int stoixeia = 30, lineAlpha = 50, count;
 
 	//  Color Variables
 	int colorL=255,strokeL, strokeValue = 20, strokeBackground = 5;
@@ -32,16 +31,21 @@ public class Digital2DSketch extends RenderCanvas{
 	float[] aposbesi = new float[stoixeia];
 	float[] deltaX = new float[stoixeia];
 	float[] deltaY = new float[stoixeia];
-	float fxMouse, fyMouse;
 
 	public Digital2DSketch(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
+		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2);
+		render = false;
+		/* ROMAIN TO CHECK */
+		System.out.println("Canvas width: " + canvasWidth +
+				" Canvas Height : " + canvasHeight);
 	}
 
 	public void setup()  {
 		
 		frameRate(240);
 		size(canvasWidth, canvasHeight);
+		count = 3;
 
 
 		line0 = new SketchLine(30);
@@ -60,72 +64,67 @@ public class Digital2DSketch extends RenderCanvas{
 			elastikotita[i] = (float) (0.2*(.07*(i+1)));
 			aposbesi[i] = (float) (0.55-(0.02*i));
 		}
+		
+		
 	}
 
 	public void draw() {
-		  myLine();
-		  noFill();
-		  if (mousePressed == true)  { 
-		    line0.calcPoints(mouseX, mouseY);
-			line0.render(240,31,166, lineAlpha);
-		    line1.calcPoints(mouseX, mouseY);
-			line1.render(156,96,235, lineAlpha);
-		    line2.calcPoints(mouseX, mouseY);
-		    line2.render(159,209,252, lineAlpha);
-		  } else {
-		      line0.calcPoints(mouseX, mouseY);
-				line0.render(240,31,166, 0);
-		    line1.calcPoints(mouseX, mouseY);
-			line1.render(156,96,235, 0);
-		    line2.calcPoints(mouseX, mouseY);
-		    line2.render(159,209,252, 0);
-		   
-		  }
-		  if (smoothFade) {
-		    fill(0,12);
-		    rect(-10,-10,width,height);
-		  }
-	}
-
-	public void render(Point2D from, Point2D to)  {
-	
-		float x = (float)to.getX() * 3;
-		float y = (float)to.getY() * 3;
-		
 		noFill();
-		myLine(x, y);
-	
+		
+		if (render == false ) {
+			/* Configure the starting point for the sketch */
+			  line0.calcPointsStart(canvasWidth/2, canvasHeight/2);
+			  line1.calcPointsStart(canvasWidth/2, canvasHeight/2);
+			  line2.calcPointsStart(canvasWidth/2, canvasHeight/2); 
+		}
 
-		line0.calcPoints(x, y);
-		line0.render(240,31,166, lineAlpha);
-		line1.calcPoints(x, y);
-		line1.render(156,96,235, lineAlpha);
-		line2.calcPoints(x, y);
-		line2.render(159,209,252, lineAlpha);
+		if (render == true)  { 
+			line0.calcPoints(xCo, yCo);
+			line0.render(240,31,166, lineAlpha);
+			line1.calcPoints(xCo, yCo);
+			line1.render(156,96,235, lineAlpha);
+			line2.calcPoints(xCo, yCo);
+			line2.render(159,209,252, lineAlpha);
+		} else {
+			line0.calcPoints(xCo, yCo);
+			line0.render(240,31,166, 0);
+			line1.calcPoints(xCo, yCo);
+			line1.render(156,96,235, 0);
+			line2.calcPoints(xCo, yCo);
+			line2.render(159,209,252, 0);
+		}
 
 		if (smoothFade) {
 			fill(0,12);
-			rect(-10,-10,width,height);
+			rect(0,0,canvasWidth,canvasHeight);
 		}
+	}
+
+	/* Can use count to scale the to/from points  - currently not scaled as
+	 * canvas size is limited. */
+	public void render(Point2D from, Point2D to)  {
+		
+		render = true;		
+//		xCo = (float)to.getX() * count ;
+//		yCo = (float)to.getY() * count ;
+		
+		xCo = (float)to.getX() ;
+		yCo = (float)to.getY() ;
+		
+//		count ++;
+//		
+//		if(count > 9) {
+//			count = 3;
+//		}
 	}
 	
-	void myLine(){
-		for (int i=0; i<stoixeia; i++){
-			x[i] = mouseX;// move worm
-			y[i] = mouseY;
-		}
-		strokeL = strokeValue;
-		noFill();
-		drawline();
 
-	}
 
-	void myLine(float xCord, float yCord){
+	void myLine(float xCord, float yCord) {
 
 		for (int i=0; i<stoixeia; i++){
 			x[i] = xCord;
 			y[i] = yCord;
-
 		}
 
 		strokeL = strokeValue;
@@ -136,14 +135,11 @@ public class Digital2DSketch extends RenderCanvas{
 
 
 	void drawline(){
-		fxMouse = mouseX;
-		fyMouse = mouseY;
+		beginShape();
 		for (int i=0; i<5; i++){
 			if (i==0){
-				deltaX[i] = (fxMouse - x[i]);
-				deltaY[i] = (fyMouse - y[i]);
-				if (mousePressed && xar)  {  
-				}
+				deltaX[i] = (10 - x[i]);
+				deltaY[i] = (10 - y[i]);
 
 			}
 			else {
@@ -163,31 +159,11 @@ public class Digital2DSketch extends RenderCanvas{
 		endShape();
 	}
 
-/*
-
-	public void mouseReleased()  {	 
-		line0.calcPointsStart(ARM_LENGTH/2, ARM_LENGTH/2);
-	}
-
-	public void mousePressed()  {
-		line0.calcPointsStart(ARM_LENGTH/2, ARM_LENGTH/2);
-		line1.calcPointsStart(ARM_LENGTH/2, ARM_LENGTH/2);
-		line2.calcPointsStart(ARM_LENGTH/2, ARM_LENGTH/2); 
-	} */
-
-
-
 
 	public void keyPressed(){
-		if (key == 'z') {
-		}
-		if (key == 'b') {
-			background(0);
-		} 
 		if (key == 's') {
 			smoothFade = !smoothFade;
 		} 
-
 	}
 
 
