@@ -32,9 +32,6 @@ public class Renderer {
     // The thread listening to inbound serial messages
     private Thread serialListener;
 
-    // A boolean value indicating if data are currently
-    // streamed from Arduino, or loaded from file
-    private boolean modelIsProcessingNewReadings = false;
     /**
      * Constructors a new renderer that is bound to the given model and view.
      * @param modeler Produce a 3-Dimensional model of the user's limb in space
@@ -46,10 +43,11 @@ public class Renderer {
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
+        view.getConnectionView().addListener("refresh", event -> refreshButtonClicked());
+        view.getConnectionView().addListener("connect", event -> connectButtonClicked());
+        view.getConnectionView().addListener("closeConnection", event -> closeConnectionButtonClicked());
+
         view.getControlsView().addListener("applyChanges", event -> changeCanvases());
-        view.getControlsView().addListener("refresh", event -> refreshButtonClicked());
-        view.getControlsView().addListener("connect", event -> connectButtonClicked());
-        view.getControlsView().addListener("closeConnection", event -> closeConnectionButtonClicked());
         view.getControlsView().addListener("loadFile", event -> loadFileButtonClicked());
         view.getControlsView().addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         view.getControlsView().addListener("stopStreaming", event -> stopStreamingButtonClicked());
@@ -223,7 +221,6 @@ public class Renderer {
             return;
         }
 
-        modelIsProcessingNewReadings = true;
         updateUIForModelProcessingReadings(true);
 
         // TODO: make the thread a private class that extends thread
@@ -260,7 +257,6 @@ public class Renderer {
                 Thread.currentThread().interrupt();
             }
             view.finalRender();
-            modelIsProcessingNewReadings = false;
             updateUIForModelProcessingReadings(false);
         })).start();
         
@@ -272,7 +268,6 @@ public class Renderer {
         // stop any preexisting listener
         stopSerialListener();
 
-        modelIsProcessingNewReadings = true;
         updateUIForModelProcessingReadings(true);
 
         serialListener = new SerialListener((message) -> {
@@ -288,8 +283,7 @@ public class Renderer {
     // 'Stop Streaming' button handler
     private void stopStreamingButtonClicked() {
         stopSerialListener();
-        modelIsProcessingNewReadings = false;
-        updateUIForModelProcessingReadings(false); 
+        updateUIForModelProcessingReadings(false);
         view.finalRender();
     }
 
@@ -305,11 +299,7 @@ public class Renderer {
 
     // Apply button handler
     private void changeCanvases() {
-        if (modelIsProcessingNewReadings) {
-            view.displayError("Can't change rendering options while drawing happens.");
-        }
-
-        // Check if the user has selected different rendering options for the left canvas
+         // Check if the user has selected different rendering options for the left canvas
         // and/or the right canvas
         if (!view.getSelectedCanvas().equals("None")) {
             view.changeCanvasToUserSelection();

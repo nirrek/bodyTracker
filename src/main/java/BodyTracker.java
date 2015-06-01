@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 
 public class BodyTracker{
 
@@ -34,10 +35,7 @@ public class BodyTracker{
 			}
 		});
 
-		// TODO add css style sheet
-		//String cssUrl = this.getClass().getResource("style.css").toExternalForm();
-		//main.getStylesheets().add(cssUrl);
-
+		main.getContentPane().setBackground(Color.WHITE);
 		main.setVisible(true);
 	}
 
