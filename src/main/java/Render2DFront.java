@@ -17,7 +17,7 @@ public class Render2DFront extends RenderCanvas {
 
 	public Render2DFront(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
-		this.rebasePoint = new Point2D(canvasWidth/2 + 80, canvasHeight /3 - 120);
+		this.rebasePoint = new Point2D(canvasWidth/2 + 80, canvasHeight /2 - 120);
 	}
 
 	public void setup() {
@@ -50,6 +50,7 @@ public class Render2DFront extends RenderCanvas {
 			lines.remove(0);
 		}
 
+		/* Draw the past 3 lines to give the illusion of a 3 dimensional trace */
 		for ( int i = 0; i <= lines.size()-1; i++ ) {
 			Line l = lines.get(i);
 
@@ -81,7 +82,7 @@ public class Render2DFront extends RenderCanvas {
 		rectMode(CENTER);
 		ellipseMode(RADIUS);
 		xPos = width/2;
-		yPos = height/3;
+		yPos = height/2;
 		
 		noStroke();
 		fill(247, 201, 170);
@@ -102,13 +103,16 @@ public class Render2DFront extends RenderCanvas {
 		strokeWeight(45);
 		
 		//left arm
-		line(xPos - rectWidth/2, yPos - rectHeight/2 + 20, xPos - rectWidth/2 - 50, yPos + rectHeight/2 - 30);
+		line(xPos - rectWidth/2, yPos - rectHeight/2 + 20, 
+				xPos - rectWidth/2 - 50, yPos + rectHeight/2 - 30);
 		
 		//left leg
-		line(xPos - rectWidth/2 + 15, yPos + rectHeight/2 , xPos - rectWidth/2 - 50, yPos + rectHeight/2 + 220);
+		line(xPos - rectWidth/2 + 15, yPos + rectHeight/2 , 
+				xPos - rectWidth/2 - 50, yPos + rectHeight/2 + 220);
 
 		//right  leg
-		line(xPos + rectWidth/2 - 15, yPos + rectHeight/2 , xPos + rectWidth/2 + 50, yPos + rectHeight/2 + 220);
+		line(xPos + rectWidth/2 - 15, yPos + rectHeight/2 , 
+				xPos + rectWidth/2 + 50, yPos + rectHeight/2 + 220);
 	}
 
 

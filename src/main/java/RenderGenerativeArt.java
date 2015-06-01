@@ -10,7 +10,6 @@ public class RenderGenerativeArt extends RenderCanvas{
 
 	public RenderGenerativeArt(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
-		// TODO Auto-generated constructor stub
 	}
 
 	int currentTool = 1; // Set the default tool to be the first pattern
