@@ -49,11 +49,11 @@ public class BodyTrackerContainer {
     private void setCanvasWidthAndHeight() {
         Dimension effectiveScreenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().
                 getMaximumWindowBounds().getSize();
-        int screenWidth = Math.min(1920, effectiveScreenSize.width);
-        int screenHeight = Math.min(1080 ,effectiveScreenSize.height);
+        int windowWidth = Math.min(1920, effectiveScreenSize.width);
+        int windowHeight = Math.min(1080 ,effectiveScreenSize.height);
         int controlWidth = getControlsView().getPanel().getPreferredSize().width;
-        canvasWidth = (screenWidth - controlWidth - 30);
-        canvasHeight = screenHeight - 25 - 20;
+        canvasWidth = (windowWidth - controlWidth - 30);
+        canvasHeight = windowHeight - 25 - 20;
     }
 
     private void initMapCanvases() {
@@ -128,6 +128,7 @@ public class BodyTrackerContainer {
     }
 
     public void enableLoadFileButton(boolean enable) {
+        System.out.println(enable);
         controlsView.getLoadFromFileButton().setEnabled(enable);
     }
 
