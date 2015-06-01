@@ -46,12 +46,9 @@ public class ControlView extends EventEmitter {
         renderingOptionComboBox = new JComboBox<String>();
         fillRenderingOptionComboBox(renderingOptionComboBox);
         renderingOptionComboBox.setSelectedItem(RenderCanvasEnum.None.getValue());
-        renderingOptionComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    applyButton.setEnabled(true);
-                }
+        renderingOptionComboBox.addItemListener( (e) -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                applyButton.setEnabled(true);
             }
         });
 

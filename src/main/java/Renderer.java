@@ -255,10 +255,9 @@ public class Renderer {
                 Thread.currentThread().interrupt();
             }
             view.finalRender();
+            modelIsProcessingNewReadings = false;
+            updateUIForModelProcessingReadings(false);
         })).start();
-
-        modelIsProcessingNewReadings = false;
-        updateUIForModelProcessingReadings(false);
         
     }
 
