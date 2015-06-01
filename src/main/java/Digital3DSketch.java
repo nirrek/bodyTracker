@@ -1,58 +1,65 @@
 import javafx.geometry.Point2D;
 import processing.core.PImage;
 
+/**
+ * @author Peter de Jong attractor applet by Thor - modified by Lisa
+ * from www.openprocessing.org
+ */
 public class Digital3DSketch extends RenderCanvas {
 
 	public Digital3DSketch(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 	}
-	/**
-	 * Peter de Jong attractor applet by Thor Fr&#248;lich.<br>
-	 * <br>
-	 * Hold mouse button and move mouse to adjust variables.<br>
-	 * Release mouse button to render attractor in high quality.
-	 */
 	 
 	deJongAttractor dj;
 	boolean stop;
 	int stepCounter;
-	 
+
 	public void setup() {
-	  size(canvasWidth, canvasHeight);
-	  noFill();
-	  smooth();
-	  colorMode(HSB, 255);
-	  dj = new deJongAttractor();
-	  dj.reparam(0,0);
+		size(canvasWidth, canvasHeight);
+		noFill();
+		smooth();
+		colorMode(HSB, 255);
+		dj = new deJongAttractor();
+		dj.reparam(0,0);
+		background(0);
+		init = true;
 	}
-	 
+
 	public void draw() {
-	  if (!stop) {
-	    stepCounter++;
-	    if (stepCounter > 127) {
-	      stop = true;
-	      return;
-	    }
-	    dj.incrementalupdate();
-	  }
-	  image(dj.pi, 0, 0, width, height);
+		if (!init) {
+			if (!stop) {
+				stepCounter++;
+				if (stepCounter > 127) {
+					stop = true;
+					return;
+				}
+				dj.incrementalupdate();
+			}
+			image(dj.pi, 0, 0, width, height);
+		} else {
+			background(0);
+		}
 	}
-	
+
+
 	/* While still reading samples */
 	public void render(Point2D from, Point2D to) {
-	
-	  noLoop();
-	  stop = true;
-	  dj.reparam((float) to.getX(), (float) to.getY());
-	  redraw();
+
+		stepCounter = 0;
+		loop();
+		init = false;
+		stop = false;
+		dj.reparam((float) to.getX(), (float) to.getY());
+		redraw();
 	}
 
 	/* Finished reading samples */
 	public void finalRender() {
-	  loop();
-	  stop = false;
-	  stepCounter = 0;
-	  dj.updateloop();
+		loop();
+		stop = false;
+		stepCounter = 0;
+		dj.updateloop();
 	}
 
 
@@ -66,11 +73,13 @@ public class Digital3DSketch extends RenderCanvas {
 	 
 	  void construct(float x, float y) {
 	    //Produces the four variables to pass to the attractor
-	    float sensitivity = 0.017f;
-	    pa = map(x, 0, 600, -1, 1) * sensitivity;
-	    pb = map(y, 0, 600, -1, 1) * sensitivity;
-	    pc = map(x, 0, 600, 1, -1) * sensitivity;
-	    pd = map(y, 0, 600, 1, -1) * sensitivity;
+	    float sensitivity = 0.03f;
+	    float xx = -0.8f;
+	    System.out.println("X: " + x + " Y: " + y);
+	    pa = map(x, 0, 600*2, xx, 0.9f) * sensitivity;
+	    pb = map(y, 0, 600*3,xx, 0.8f) * sensitivity;
+	    pc = map(x, 0, 600*3, xx, 0.6f) * sensitivity;
+	    pd = map(y, 0, 600*3, xx, 0.6f) * sensitivity;
 	    oldx = width/2;
 	    oldy = height/2;
 	  }
@@ -122,7 +131,7 @@ public class Digital3DSketch extends RenderCanvas {
 	 
 	  void incrementalupdate() {
 	    //Loops the non-clearing update and plotting to produce low-noise render
-	    populate(16, false);
+	    populate(60, false);
 	    plot(0, false);
 	    redraw();
 	  }
@@ -131,7 +140,7 @@ public class Digital3DSketch extends RenderCanvas {
 	    //Fast reparametrization of variables
 	    dj.construct(x, y);
 	    dj.populate(1, true);
-	    dj.plot(100, true);
+	    dj.plot(50, true);
 	  }
 	 
 	  PImage plot(int f, boolean c) {
