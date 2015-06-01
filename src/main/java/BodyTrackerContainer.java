@@ -187,7 +187,7 @@ public class BodyTrackerContainer {
 
     public void saveCanvas() {
         if (canvas != null) {
-            canvas.save("Side");
+            canvas.save(getSelectedCanvas());
         }
     }
 
