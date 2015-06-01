@@ -165,11 +165,16 @@ public class Renderer {
     // -------------------------------------------------------------------------
 
     private void modelAddedNewSample() {
-        Arm leftArm = model.getNextSample().getLeftArm();
+    	Arm leftArm = model.getNextSample().getLeftArm();
 
-        if (view.getCanvas() != null) {
-            view.getCanvas().drawArm(leftArm, "front");
-        }
+    	if (view.getCanvas() != null) {
+    		if (view.getCanvas() instanceof Render2DFront) {
+    			view.getCanvas().drawArm(leftArm, "front");
+    		} else {
+    			view.getCanvas().drawArm(leftArm, "side");
+    		}
+    	}
+
     }
 
     // -------------------------------------------------------------------------
@@ -284,7 +289,8 @@ public class Renderer {
     private void stopStreamingButtonClicked() {
         stopSerialListener();
         modelIsProcessingNewReadings = false;
-        updateUIForModelProcessingReadings(false);
+        updateUIForModelProcessingReadings(false); 
+        view.finalRender();
     }
 
     // Clear canvases button handler

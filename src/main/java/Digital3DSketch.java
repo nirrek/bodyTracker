@@ -1,8 +1,6 @@
 import javafx.geometry.Point2D;
 import processing.core.PImage;
 
-
-
 public class Digital3DSketch extends RenderCanvas {
 
 	public Digital3DSketch(int canvasWidth, int canvasHeight) {

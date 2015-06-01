@@ -7,24 +7,24 @@ import processing.core.PApplet;
  */
 public abstract class RenderCanvas extends PApplet {
 
+	// The default length of the arm segment
+	protected static final int ARM_LENGTH = 300;
 	int canvasWidth;
 	int canvasHeight;
+	protected Point2D rebasePoint;
+	
 
 	public RenderCanvas(int canvasWidth, int canvasHeight) {
 		this.canvasWidth = canvasWidth;
 		this.canvasHeight = canvasHeight;
+		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight/3);
 	}
 
 	public void clearCanvas() {
-		background(83);
+		background(0);
 		redraw();
 	}
 
-
-	// The default length of the arm segment
-	protected static final int ARM_LENGTH = 300;
-
-	private Point2D rebasePoint = new Point2D(ARM_LENGTH, ARM_LENGTH);
 
 	public Point2D drawArm(Arm arm, String side) {
 		Point3D shoulder = new Point3D(0, 0, 0);

@@ -67,11 +67,14 @@ public class BodyTrackerContainer {
                 new Digital3DSketch(canvasWidth, canvasHeight));
         mapCanvases.put(RenderCanvasEnum.Digital2DSketch,
                 new Digital2DSketch(canvasWidth, canvasHeight));
+        mapCanvases.put(RenderCanvasEnum.RenderGenerativeArt,
+        		new RenderGenerativeArt(canvasWidth, canvasHeight));
 
         mapCanvases.get(RenderCanvasEnum.FrontView2D).init();
         mapCanvases.get(RenderCanvasEnum.SideView2D).init();
         mapCanvases.get(RenderCanvasEnum.Digital3DSketch).init();
         mapCanvases.get(RenderCanvasEnum.Digital2DSketch).init();
+        mapCanvases.get(RenderCanvasEnum.RenderGenerativeArt).init();
     }
 
     // -------------------------------------------------------------------------
