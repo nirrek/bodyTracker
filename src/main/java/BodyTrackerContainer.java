@@ -164,6 +164,8 @@ public class BodyTrackerContainer {
         canvasPanel.add(canvas);
         canvasPanel.validate();
 
+        canvas.drawModelWithArm();
+
         controlsView.getApplyButton().setEnabled(false);
     }
 

@@ -29,7 +29,9 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  resetCoordinates();
 		 
 	}
-	 
+
+	public void drawModelWithArm() {}
+
 	public void draw() {
 	   
 	  if (render) {

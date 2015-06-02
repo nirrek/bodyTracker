@@ -12,6 +12,9 @@ public class Render2DFront extends RenderCanvas {
 	int rectWidth = 160;
 	int rectHeight = 280;
 	int radius = 60;
+
+	int firstTime = 0;
+
 	 ArrayList<Line> lines;
 
 
@@ -25,17 +28,21 @@ public class Render2DFront extends RenderCanvas {
 		lines = new ArrayList<Line>();
 		
 		size(canvasWidth, canvasHeight);
-		
+	}
+
+	public void drawModelWithArm() {
 		drawModel();
-
 		//right arm
-		line(xPos + rectWidth/2, yPos - rectHeight/2 + 20, xPos + 
-				rectWidth/2 + 50, yPos + rectHeight/2 - 30);
-
+		line(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20, xPos +
+				rectWidth / 2 + 50, yPos + rectHeight / 2 - 30);
 	}
 
 	public void draw() {
-		noLoop();	
+		noLoop();
+		if (firstTime == 1) {
+			drawModelWithArm();
+		}
+		firstTime++;
 	}
 
 
@@ -83,7 +90,7 @@ public class Render2DFront extends RenderCanvas {
 		ellipseMode(RADIUS);
 		xPos = width/2;
 		yPos = height/2;
-		
+
 		noStroke();
 		fill(247, 201, 170);
 
@@ -98,7 +105,7 @@ public class Render2DFront extends RenderCanvas {
 		ellipse(xPos + 20, yPos - 215, 6, 6);
 		//mouth
 		rect(xPos, yPos - 175, 20, 4);
-		
+
 		stroke(247, 201, 170);
 		strokeWeight(45);
 		
@@ -111,8 +118,9 @@ public class Render2DFront extends RenderCanvas {
 				xPos - rectWidth/2 - 50, yPos + rectHeight/2 + 220);
 
 		//right  leg
-		line(xPos + rectWidth/2 - 15, yPos + rectHeight/2 , 
-				xPos + rectWidth/2 + 50, yPos + rectHeight/2 + 220);
+		line(xPos + rectWidth / 2 - 15, yPos + rectHeight / 2,
+				xPos + rectWidth / 2 + 50, yPos + rectHeight/2 + 220);
+
 	}
 
 

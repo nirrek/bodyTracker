@@ -26,6 +26,8 @@ public class Digital3DSketch extends RenderCanvas {
 		init = true;
 	}
 
+	public void drawModelWithArm() {}
+
 	public void draw() {
 		if (!init) {
 			if (!stop) {

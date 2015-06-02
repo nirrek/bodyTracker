@@ -65,6 +65,8 @@ public class Digital2DSketch extends RenderCanvas{
 		
 	}
 
+	public void drawModelWithArm() {}
+
 	public void draw() {
 		noFill();
 		
@@ -226,7 +228,7 @@ public class Digital2DSketch extends RenderCanvas{
 			}
 		}
 
-
+		public void drawModelWithArm() {}
 		void render(int colorRVar, int colorGVar, int colorBVar, int lineAlphaVar)  {
 			colorR = colorRVar;
 			colorG = colorGVar;
