@@ -12,29 +12,38 @@ public class Render2DSide extends RenderCanvas {
 	int rectWidth = 100;
 	int rectHeight = 280;
 	int radius = 60;
+
+	int firstTime = 0;
+
 	ArrayList<Line> lines;
 
 	public Render2DSide(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 		//set rebase point
 		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2 - 120);
+	//	this.rebasePoint = new Point2D(canvasWidth/2, yPos - rectHeight / 2 + 20);
 	}
 
 	public void setup() {
 		lines = new ArrayList<Line>();
 
 		size(canvasWidth, canvasHeight);
-		 
+	}
+
+	public void drawModelWithArm() {
 		drawModel();
-		
 		//draw right arm.
-		stroke(249,226,210);
-		line(xPos, yPos - rectHeight/2 + 20, xPos - rectWidth/5 , 
-				yPos + rectHeight/2 - 30);
+		stroke(249, 226, 210);
+		line(xPos, yPos - rectHeight / 2 + 20, xPos - rectWidth / 5,
+				yPos + rectHeight / 2 - 30);
 	}
 
 	public void draw() {
 		noLoop();
+		if (firstTime == 1) {
+			drawModelWithArm();
+		}
+		firstTime++;
 	}
 
 	public void render(Point2D from, Point2D to) {

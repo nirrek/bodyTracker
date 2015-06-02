@@ -13,7 +13,6 @@ public abstract class RenderCanvas extends PApplet {
 	int canvasHeight;
 	protected Point2D rebasePoint;
 	protected boolean init;
-	
 
 	public RenderCanvas(int canvasWidth, int canvasHeight) {
 		this.canvasWidth = canvasWidth;
@@ -58,7 +57,9 @@ public abstract class RenderCanvas extends PApplet {
 			return new Point2D(coord.getX(), coord.getY());
 		return new Point2D(coord.getZ(), coord.getY());
 	}
-	
+
+	public abstract void drawModelWithArm();
+
 	public abstract void render(Point2D from, Point2D to);
 	 
     public abstract void finalRender();

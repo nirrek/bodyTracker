@@ -61,7 +61,9 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  clearX = clearSize+200;
 	  clearY = clearSize/2;   
 	}
-	 
+
+	public void drawModelWithArm() {}
+
 	public void draw() {
 	  update(mouseX, mouseY);
 	   
