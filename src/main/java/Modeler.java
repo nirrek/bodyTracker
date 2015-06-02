@@ -108,7 +108,7 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 
 		// Upper arm
 		double upperX = shoulderToElbow * sine(roll) * sine(pitch); // Forwards/back
-		double upperY = (sign) * shoulderToElbow * sine(roll) * cosine(pitch); // Up down
+		double upperY = shoulderToElbow * sine(roll) * cosine(pitch); // Up down
 		double upperZ = (-sign) * shoulderToElbow * cosine(roll);			// Z being left/right
 
 		// Lower arm
