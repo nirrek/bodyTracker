@@ -14,125 +14,30 @@ public class RenderGenerativeArt extends RenderCanvas{
 
 	int currentTool = 1; // Set the default tool to be the first pattern
 	List<PVector> history;   // Define the history for pattern3
-	 
-	// Define the variables for the buttons
-	boolean patt1Over = false; // By default the mouse is not over the button
-	int patt1X, patt1Y; // Position of the button
-	int patt1Size = 30; // The size of the button
-	 
-	boolean patt2Over = false;
-	int patt2X, patt2Y;
-	int patt2Size = 30;
-	 
-	boolean patt3Over = false;
-	int patt3X, patt3Y;
-	int patt3Size = 30;
-	 
-	boolean patt4Over = false;
-	int patt4X, patt4Y;
-	int patt4Size = 30;
-	 
-	boolean patt5Over = false;
-	int patt5X, patt5Y;
-	int patt5Size = 30;
-	 
-	boolean clearOver = false;
-	int clearX, clearY;
-	int clearSize = 30;
+	boolean render = false;
+	float xCo;
+	float yCo;
+	float prevX;
+	float prevY;
+	int count;
 	 
 	 
 	public void setup() {
-	  size(800, 600);
+	  size(canvasWidth, canvasHeight);
 	  background(0);
 	  smooth();
-	  history  = new ArrayList<PVector> (); 
-	  
-	  // Set the positions of the buttons
-	  patt1X = patt1Size;
-	  patt1Y = patt1Size/2;
-	  patt2X = patt2Size+40;
-	  patt2Y = patt2Size/2;
-	  patt3X = patt3Size+80;
-	  patt3Y = patt3Size/2;
-	  patt4X = patt4Size+120;
-	  patt4Y = patt4Size/2;
-	  patt5X = patt5Size+160;
-	  patt5Y = patt5Size/2;  
-	  clearX = clearSize+200;
-	  clearY = clearSize/2;   
+	  resetCoordinates();
+		 
 	}
 
 	public void drawModelWithArm() {}
 
 	public void draw() {
-	  update(mouseX, mouseY);
 	   
-	  // set the colour of button
-	  if (patt1Over) {
-	    fill(color(204, 102, 0)); // Highlight if mouse is over button
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  // draw the button
-	  stroke(255);
-	  rect(patt1X, patt1Y, patt1Size, patt1Size); 
-	  fill(255);
-	  text("1", patt1X+10, patt1Y+20); 
-	   
-	  if (patt2Over) {
-	    fill(color(255, 0, 0)); // Highlight
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  stroke(255);
-	  rect(patt2X, patt2Y, patt2Size, patt2Size);
-	  fill(255);
-	  text("2", patt2X+10, patt2Y+20); 
-	  
-	  if (patt3Over) {
-	    fill(color(0, 255, 0)); // Highlight
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  stroke(255);
-	  rect(patt3X, patt3Y, patt3Size, patt3Size);
-	  fill(255);
-	  text("3", patt3X+10, patt3Y+20); 
-	 
-	  if (patt4Over) {
-	    fill(color(0, 0, 255)); // Highlight
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  stroke(255);
-	  rect(patt4X, patt4Y, patt4Size, patt4Size);  
-	  fill(255);
-	  text("4", patt4X+10, patt4Y+20); 
-	   
-	  if (patt5Over) {
-	    fill(color(0, 255, 255)); // Highlight
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  stroke(255);
-	  rect(patt5X, patt5Y, patt5Size, patt5Size);  
-	  fill(255);
-	  text("5", patt5X+10, patt5Y+20);   
-	 
-	  if (clearOver) {
-	    fill(color(51)); // Highlight
-	  } else {
-	    fill(color(0));  // Standard
-	  }
-	  stroke(255);
-	  rect(clearX, clearY, clearSize, clearSize);
-	  fill(255);
-	  text("C", clearX+10, clearY+20);
-	   
-	  if (mousePressed) {
+	  if (render) {
 	    switch(currentTool) {     
 	    case 1:     
-	      pattern1(mouseX, mouseY, 5, 18, color(204, 102, 0), color(0, 102, 153));
+	      pattern1(xCo, yCo, 5, 18, color(204, 102, 0), color(0, 102, 153));
 	      break;
 	    case 2:     
 	      pattern2();
@@ -148,6 +53,33 @@ public class RenderGenerativeArt extends RenderCanvas{
 	      break;             
 	    }
 	  }
+	}
+
+	@Override
+	public void render(Point2D from, Point2D to) {
+		render = true;
+		prevX = xCo;
+		prevY = yCo;
+		xCo = map((float) to.getX(), 0, 600, 0, canvasWidth);
+		yCo = map((float) to.getY(), 250, 600, 0, canvasHeight) *  0.7f ;
+		
+		System.out.println("XCo: " + xCo + " YCo: " + yCo);
+		
+		count ++;
+		
+		 if (count % 20 == 0) {
+			 count = 1;
+			 switch(currentTool) {
+			 case 5:
+				 currentTool = 1;
+				 break;
+			 case 2:
+				 history  = new ArrayList<PVector> ();
+		    default:
+		    	currentTool ++;
+		    	break;
+			 }	
+		 }
 	}
 	 
 	/*
@@ -191,7 +123,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  fill(fromC, 80);
 	  ellipse(x, y, r, r);
 	  stroke(fromC);
-	  ellipse(width-x, y, r, r);  // draw the mirror of the ellipse
+	//  ellipse(width-x, y, r, r);  // draw the mirror of the ellipse
 	  if (num > 0) {
 	    float newY = (float) (y + sin(random(0, TWO_PI)) * 12.0);   
 	    // recursive call
@@ -206,8 +138,8 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  // Randomise the colours during each frame
 	  stroke(random(0,255), random(0,255), random(0,255));
 	  strokeWeight(0.2f);
-	  line(mouseX, mouseY, pmouseX, pmouseY);
-	  line(width-mouseX, mouseY, width-pmouseX, mouseY); // Mirror
+	  line(xCo, yCo, prevX, prevY);
+//	  line(width-xCo, yCo, width-xCo, yCo); // Mirror
 	 
 	  for(int i = 0; i < history.size(); i++){
 	    PVector p = (PVector) history.get(i);
@@ -215,31 +147,50 @@ public class RenderGenerativeArt extends RenderCanvas{
 	    // Draw a line from the current mouse point to
 	    // the historical point if the distance is less
 	    // than 50
-	    if(dist(mouseX, mouseY, p.x, p.y) < 50){
-	      line(mouseX, mouseY, p.x + extra, p.y + extra);
+	    if(dist(xCo, yCo, p.x, p.y) < 50){
+	      line(xCo, yCo, p.x + extra, p.y + extra);
 	    }
 	    // repeat for the mirror line
-	    if(dist(width-mouseX, mouseY, p.x, p.y) < 50){
-	      line(width-mouseX, mouseY, p.x + extra, p.y + extra);
-	    }     
+//	    if(dist(width-xCo, yCo, p.x, p.y) < 50){
+//	      line(width-xCo, yCo, p.x + extra, p.y + extra);
+//	    }     
 	  }
 	   
 	  // Add the current point to the history
-	  history.add(new PVector(mouseX, mouseY));
-	  history.add(new PVector(width-mouseX, mouseY));
+	  history.add(new PVector(xCo, yCo));
+	  history.add(new PVector(width-xCo, yCo));
 	}
 	 
 	// pattern3 draws hundreds and thousands food dressing
 	public void pattern3(int offset) {
-	  strokeWeight(0.5f);
-	  for (int i = 0; i < 5; i++) {
-	    // Randomise the colours during each frame
-	    stroke(random(0,255), random(0,255), random(0,255));
-	    // Draw a line of various lengths at the mouse point 
-	    line(random(mouseX, mouseX+offset), random(mouseY, mouseY+offset),
-	         random(pmouseX, pmouseX+offset), random(pmouseY, pmouseY+offset));
-	    offset = offset+10;
-	  }
+//	  strokeWeight(0.5f);
+//	  for (int i = 0; i < 5; i++) {
+//	    // Randomise the colours during each frame
+//	    stroke(random(0,255), random(0,255), random(0,255));
+//	    // Draw a line of various lengths at the mouse point 
+//	    line(random(xCo, xCo+offset), random(yCo, yCo+offset),
+//	         random(prevX, prevX+offset), random(prevY, prevY+offset));
+		//	    offset = offset+10;
+		//	  }
+
+
+
+		float red = map(xCo, 0, canvasWidth, 0, 255);
+		float blue = map(yCo, 0, canvasWidth, 0, 255);
+		float green = dist(xCo, yCo, canvasWidth/2, canvasHeight/2);
+
+		float speed = dist(prevX, prevY, xCo, yCo);
+	//	float alpha = map(speed, 0, 20, 0, 5);
+		float lineWidth = map(speed, 0, 10, 10, 1);
+		lineWidth = constrain(lineWidth, 0, 10);//magic!!
+
+//		noStroke();
+//		fill(0, alpha);
+//		rect(0, 0, width, height);
+		stroke(red, green, blue, 255);
+		strokeWeight(lineWidth);
+		line(prevX, prevY, xCo, yCo);
+
 	}
 	 
 	// pattern4 draws circles that seem to fade in towards the middle
@@ -247,8 +198,8 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  noStroke();
 	  fill(random(0,255), random(0,255), random(0,255),10);
 	  // alter the width size
-	  float widthDistance = abs(width/2 - mouseX);
-	  ellipse(mouseX, mouseY, widthDistance, widthDistance);
+	  float widthDistance = abs(width/2 - xCo) * 0.4f ;
+	  ellipse(xCo,yCo, widthDistance, widthDistance);
 	}
 	 
 	// Code inspired by Mr Doob's project harmony.
@@ -256,11 +207,11 @@ public class RenderGenerativeArt extends RenderCanvas{
 	public void pattern5(){
 	  // Randomise the colours during each frame
 	  stroke(255);
-	  line(mouseX, mouseY, pmouseX, pmouseY);
+	  line(xCo, yCo, prevX, prevY);
 	 
 	  for(int i = 0; i < history.size(); i++){
 	    PVector p = (PVector) history.get(i);
-	    float d = dist(mouseX, mouseY, p.x, p.y);
+	    float d = dist(xCo, yCo, p.x, p.y);
 	    // Adjust the stroke weight according to the distance
 	    strokeWeight(1/d);
 	     
@@ -269,64 +220,36 @@ public class RenderGenerativeArt extends RenderCanvas{
 	    // than 25
 	    if(d < 25){
 	     if(random(10) < 5) // Skip some lines randomly
-	        line(mouseX, mouseY, p.x + 2, p.y + 2);
+	        line(xCo, yCo, p.x + 2, p.y + 2);
 	    }
 	  }
 	   
 	  // Add the current point to the history
-	  history.add(new PVector(mouseX, mouseY));
+	  history.add(new PVector(xCo, yCo));
 	  strokeWeight(0.2f);
 	}
 	 
-	// Update to check whether the mouse position is within one of the
-	// buttons
-	public void update(int x, int y) {
-	  patt1Over = overPattern(patt1X, patt1Y, patt1Size, patt1Size); 
-	  patt2Over = overPattern(patt2X, patt2Y, patt2Size, patt2Size);
-	  patt3Over = overPattern(patt3X, patt3Y, patt3Size, patt3Size);
-	  patt4Over = overPattern(patt4X, patt4Y, patt4Size, patt4Size);
-	  patt5Over = overPattern(patt5X, patt5Y, patt5Size, patt5Size);
-	  clearOver = overPattern(clearX, clearY, clearSize, clearSize);
-	}
-	 
-	// Switch the tool according to the button press
-	public void mousePressed() {
-	  if (patt1Over) {
-	    currentTool = 1;
-	  }else if (patt2Over) {
-	    currentTool = 2;
-	  }else if (patt3Over) {
-	    currentTool = 3;
-	  }else if (patt4Over) {
-	    currentTool = 4;
-	  } else if (patt5Over) {
-	    currentTool = 5; 
-	  } else if (clearOver) {
-	      background(0);    // clear the screen
-	  } 
-	}
-	 
-	// Function to check if the mouse click is within the boundaries of
-	// the button
-	public boolean overPattern(int x, int y, int width, int height)  {
-	  if (mouseX >= x && mouseX <= x+width &&
-	      mouseY >= y && mouseY <= y+height) {
-	    return true;
-	  } else {
-	    return false;
-	  }
-	}
-
-	@Override
-	public void render(Point2D from, Point2D to) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void finalRender() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void resetCoordinates() {
+		history  = new ArrayList<PVector> ();  
+		xCo = 0;
+		yCo = 0;
+		prevX = 0;
+		prevY = 0;
+	}
+	
+	@Override
+	public void clearCanvas() {
+		this.init = true;
+		resetCoordinates();
+		background(0);
+		redraw();
 	}
 
 

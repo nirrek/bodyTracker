@@ -20,7 +20,13 @@ public class Render2DFront extends RenderCanvas {
 
 	public Render2DFront(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
-		this.rebasePoint = new Point2D(canvasWidth/2 + 80, canvasHeight /2 - 120);
+
+		xPos = width/2;
+		yPos = height/2;
+
+		this.rebasePoint = new Point2D(canvasWidth/2 + 80, canvasHeight /2 - 150);
+		//this.rebasePoint = new Point2D(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20);
+
 	}
 
 	public void setup() {
@@ -35,6 +41,7 @@ public class Render2DFront extends RenderCanvas {
 		//right arm
 		line(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20, xPos +
 				rectWidth / 2 + 50, yPos + rectHeight / 2 - 30);
+
 	}
 
 	public void draw() {
@@ -84,12 +91,13 @@ public class Render2DFront extends RenderCanvas {
 	private void drawModel() {
 		background(0);
 		smooth();
+
+		xPos = width/2;
+		yPos = height/2;
 		
 
 		rectMode(CENTER);
 		ellipseMode(RADIUS);
-		xPos = width/2;
-		yPos = height/2;
 
 		noStroke();
 		fill(247, 201, 170);
@@ -146,6 +154,5 @@ public class Render2DFront extends RenderCanvas {
 			redraw();
 		}
 	}
-
-
+	
 }
