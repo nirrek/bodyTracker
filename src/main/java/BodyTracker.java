@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 
 public class BodyTracker{
 
@@ -21,8 +22,12 @@ public class BodyTracker{
 		// Set size
 		setWindowSize(main);
 
+		// Retrieve images from resources
+		ImageIcon logoImage  = new ImageIcon(this.getClass().getClassLoader().getResource("logoTranslucent.png"));
+		ImageIcon refreshImage  = new ImageIcon(this.getClass().getClassLoader().getResource("refresh.png"));
+
 		// Pass container view and model to the Renderer
-		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane());
+		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane(), logoImage, refreshImage);
 		Modeler model = new Modeler();
 		Renderer rendererController = new Renderer(model, container);
 
@@ -34,11 +39,9 @@ public class BodyTracker{
 			}
 		});
 
-		// TODO add css style sheet
-		//String cssUrl = this.getClass().getResource("style.css").toExternalForm();
-		//main.getStylesheets().add(cssUrl);
-
+		main.getContentPane().setBackground(Color.WHITE);
 		main.setVisible(true);
+
 	}
 
 	/**

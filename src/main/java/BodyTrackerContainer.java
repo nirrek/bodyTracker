@@ -12,6 +12,8 @@ public class BodyTrackerContainer {
 
     private Container container;
 
+    private ConnectionView connectionView;
+
     private ControlView controlsView;
 
     private int canvasWidth;
@@ -21,27 +23,58 @@ public class BodyTrackerContainer {
     private JPanel canvasPanel;
     private RenderCanvas canvas;
 
-    public BodyTrackerContainer(Container contentPane) {
+    public BodyTrackerContainer(Container contentPane, ImageIcon logoImage, ImageIcon refreshImage) {
         container = contentPane;
-        initBodyTrackerGUI();
+        initBodyTrackerGUI(logoImage, refreshImage);
         setCanvasWidthAndHeight();
         initMapCanvases();
     }
 
-    private void initBodyTrackerGUI() {
+    private void initBodyTrackerGUI(ImageIcon logoImage, ImageIcon refreshImage) {
 
-        // Initiate the canvas selection panel and the control Panel
+        // Initiate the connection Panel
+        connectionView = new ConnectionView(refreshImage);
+
+        // Wrap the connection panel and a horizontal separator together
+        JPanel connectionPanelWrapper = new JPanel();
+        BoxLayout layout = new BoxLayout(connectionPanelWrapper, BoxLayout.Y_AXIS);
+        connectionPanelWrapper.setLayout(layout);
+        //connectionPanelWrapper.setBackground(StyleClass.COLOR_LIGHT_GREEN);
+        connectionPanelWrapper.setOpaque(false);
+        connectionPanelWrapper.add(connectionView.getPanel());
+        connectionPanelWrapper.add(new JSeparator(SwingConstants.HORIZONTAL));
+
+
+        // Initiate the control Panel
         controlsView = new ControlView();
-        JPanel controlPanelWrapper = new JPanel(new FlowLayout());
-        controlPanelWrapper.setAlignmentY(Component.TOP_ALIGNMENT);
-        controlPanelWrapper.add(controlsView.getPanel());
+
+        // Wrap the connection panel and a vertical separator together
+        JPanel controlPanelWrapper = new JPanel();
+        BoxLayout layout2 = new BoxLayout(controlPanelWrapper, BoxLayout.X_AXIS);
+        controlPanelWrapper.setLayout(layout2);
+        controlPanelWrapper.setOpaque(false);
+
+        JPanel wrapper = new JPanel(new FlowLayout());
+        wrapper.setOpaque(false);
+        wrapper.setAlignmentY(Component.TOP_ALIGNMENT);
+        wrapper.add(controlsView.getPanel());
+
+        controlPanelWrapper.add(new JSeparator(SwingConstants.VERTICAL));
+        controlPanelWrapper.add(wrapper);
 
         // Layout the canvas panel
-        canvasPanel = new JPanel();
-        canvasPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+        canvasPanel = new JPanel(new BorderLayout());
+        canvasPanel.setOpaque(false);
         canvasPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Add the canvas panel and the control Panel to the view container
+        JLabel logo = new JLabel(logoImage);
+        JPanel wrapperPanel = new JPanel(new GridBagLayout());
+        wrapperPanel.setOpaque(false);
+        wrapperPanel.add(logo);
+        canvasPanel.add(wrapperPanel);
+
+        // Add the canvas panel, the connection Panel, and the control Panel to the view container
+        container.add(connectionPanelWrapper, BorderLayout.NORTH);
         container.add(canvasPanel, BorderLayout.CENTER);
         container.add(controlPanelWrapper, BorderLayout.EAST);
     }
@@ -85,10 +118,32 @@ public class BodyTrackerContainer {
         return controlsView;
     }
 
+    public ConnectionView getConnectionView() {
+        return connectionView;
+    }
+
     public RenderCanvas getCanvas() {
         return canvas;
     }
 
+    // -------------------------------------------------------------------------
+    //      METHODS CONNECTION VIEW
+    // -------------------------------------------------------------------------
+
+    public void fillAvailablePortsComboBox(ArrayList<String> availablePorts) {
+        connectionView.getAvailablePortsComboBox().removeAllItems();
+        for (String portName : availablePorts)
+            connectionView.getAvailablePortsComboBox().addItem(portName);
+    }
+
+    public String getSelectedPort() {
+        return (String) connectionView.getAvailablePortsComboBox().getSelectedItem();
+    }
+
+    public void enableConnectButton(boolean enable) {
+        connectionView.getConnectButton().setEnabled(enable);
+        connectionView.getCloseConnectionButton().setEnabled(!enable);
+    }
 
     // -------------------------------------------------------------------------
     //      METHODS CONTROLS VIEW
@@ -112,21 +167,6 @@ public class BodyTrackerContainer {
         controlsView.getApplyButton().setEnabled(false);
     }
 
-    public void fillAvailablePortsComboBox(ArrayList<String> availablePorts) {
-        controlsView.getAvailablePortsComboBox().removeAllItems();
-        for (String portName : availablePorts)
-            controlsView.getAvailablePortsComboBox().addItem(portName);
-    }
-
-    public String getSelectedPort() {
-        return (String) controlsView.getAvailablePortsComboBox().getSelectedItem();
-    }
-
-    public void enableConnectButton(boolean enable) {
-        controlsView.getConnectButton().setEnabled(enable);
-        controlsView.getCloseConnectionButton().setEnabled(!enable);
-    }
-
     public void enableLoadFileButton(boolean enable) {
         System.out.println(enable);
         controlsView.getLoadFromFileButton().setEnabled(enable);
@@ -147,7 +187,7 @@ public class BodyTrackerContainer {
 
     public void saveCanvas() {
         if (canvas != null) {
-            canvas.save("Side");
+            canvas.save(getSelectedCanvas());
         }
     }
 

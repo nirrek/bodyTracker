@@ -36,9 +36,6 @@ public class Digital2DSketch extends RenderCanvas{
 		super(canvasWidth, canvasHeight);
 		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2);
 		render = false;
-		/* ROMAIN TO CHECK */
-		System.out.println("Canvas width: " + canvasWidth +
-				" Canvas Height : " + canvasHeight);
 	}
 
 	public void setup()  {

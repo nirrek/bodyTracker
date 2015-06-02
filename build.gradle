@@ -12,11 +12,13 @@ mainClassName = "BodyTracker"
 
 sourceCompatibility = 1.8  // Use Java 8
 
+
 distZip {
     into(applicationName + '-' + version + '/lib') {
         from './lib'
         include '*'
     }
+
     archiveName = applicationName + '-' + version + '.zip'
 }
 

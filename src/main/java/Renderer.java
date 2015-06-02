@@ -35,9 +35,6 @@ public class Renderer {
     //Use to slow down rendering for 3D digital sketch
     private int count = 0;
 
-    // A boolean value indicating if data are currently
-    // streamed from Arduino, or loaded from file
-    private boolean modelIsProcessingNewReadings = false;
     /**
      * Constructors a new renderer that is bound to the given model and view.
      * @param modeler Produce a 3-Dimensional model of the user's limb in space
@@ -49,10 +46,11 @@ public class Renderer {
 
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
+        view.getConnectionView().addListener("refresh", event -> refreshButtonClicked());
+        view.getConnectionView().addListener("connect", event -> connectButtonClicked());
+        view.getConnectionView().addListener("closeConnection", event -> closeConnectionButtonClicked());
+
         view.getControlsView().addListener("applyChanges", event -> changeCanvases());
-        view.getControlsView().addListener("refresh", event -> refreshButtonClicked());
-        view.getControlsView().addListener("connect", event -> connectButtonClicked());
-        view.getControlsView().addListener("closeConnection", event -> closeConnectionButtonClicked());
         view.getControlsView().addListener("loadFile", event -> loadFileButtonClicked());
         view.getControlsView().addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
         view.getControlsView().addListener("stopStreaming", event -> stopStreamingButtonClicked());
@@ -150,7 +148,12 @@ public class Renderer {
 
     private void updateUIForModelProcessingReadings(boolean isProcessingReadings) {
         view.enableLoadFileButton(!isProcessingReadings);
-        view.enableStreamButton(!isProcessingReadings);
+
+        if (serial != null) {
+            if (!isProcessingReadings && serial.isConnected()) {
+                view.enableStreamButton(!isProcessingReadings);
+            }
+        }
     }
 
     private void updateUIDisplaySerialPortsAvailable() {
@@ -214,6 +217,7 @@ public class Renderer {
             return;
         }
 
+        view.displayError("");
         updateUIForArduinoConnected(true);
     }
 
@@ -227,6 +231,14 @@ public class Renderer {
     // 'Load File' button handler
     private void loadFileButtonClicked() {
     	count = 0;
+
+        if (view.getSelectedCanvas().equals("None")) {
+            view.displayError("You must select a rendering style");
+            return;
+        }
+
+        view.displayError("");
+
         JFileChooser fileChooser = new JFileChooser();
         File selectedFile;
 
@@ -237,7 +249,6 @@ public class Renderer {
             return;
         }
 
-        modelIsProcessingNewReadings = true;
         updateUIForModelProcessingReadings(true);
 
         // TODO: make the thread a private class that extends thread
@@ -274,7 +285,6 @@ public class Renderer {
                 Thread.currentThread().interrupt();
             }
             view.finalRender();
-            modelIsProcessingNewReadings = false;
             updateUIForModelProcessingReadings(false);
         })).start();
         
@@ -284,11 +294,11 @@ public class Renderer {
     private void streamFromArduinoButtonClicked() {
 
     	count = 0;
-    	
+
         // stop any preexisting listener
         stopSerialListener();
 
-        modelIsProcessingNewReadings = true;
+        view.displayError("");
         updateUIForModelProcessingReadings(true);
 
         serialListener = new SerialListener((message) -> {
@@ -304,36 +314,34 @@ public class Renderer {
     // 'Stop Streaming' button handler
     private void stopStreamingButtonClicked() {
     	count = 0;
+        view.displayError("");
         stopSerialListener();
-        modelIsProcessingNewReadings = false;
-        updateUIForModelProcessingReadings(false); 
+        updateUIForModelProcessingReadings(false);
         view.finalRender();
     }
 
     // Clear canvases button handler
     private void clearCanvases() {
     	count = 0;
+        view.displayError("");
         view.clearCanvas();
     }
     
     // Save Canvases button handler
     private void saveCanvases() {
     	count = 0;
+        view.displayError("");
     	view.saveCanvas();
     } 
 
     // Apply button handler
     private void changeCanvases() {
-    	count = 0;
-    	
-        if (modelIsProcessingNewReadings) {
-            view.displayError("Can't change rendering options while drawing happens.");
-        }
+        count = 0;
 
         // Check if the user has selected different rendering options for the left canvas
-        // and/or the right canvas
         if (!view.getSelectedCanvas().equals("None")) {
             view.changeCanvasToUserSelection();
+            view.displayError("");
         } else{
             view.displayError("You must select a rendering style");
         }
