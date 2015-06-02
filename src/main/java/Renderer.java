@@ -174,12 +174,10 @@ public class Renderer {
     		/* front 2d view canvas */
     		if (view.getCanvas() instanceof Render2DFront) {
     			view.getCanvas().drawArm(leftArm, "front");
-    			/* digital 3d canvas - want to slow down sampling */
+    			/* digital 3d canvas - want to slow down sampling, so only
+    			 * using every 5 samples */
     		} else if (view.getCanvas() instanceof Digital3DSketch) {
-    			System.out.println("Count: " + count);
-   
     			if (count % 5 == 0) {
-    				System.out.println("Should be rendering: " + count);
     				view.getCanvas().drawArm(leftArm, "side");
     			}
     			count++;
