@@ -24,9 +24,8 @@ public class Render2DFront extends RenderCanvas {
 		xPos = width/2;
 		yPos = height/2;
 
-		this.rebasePoint = new Point2D(canvasWidth/2 + 80, canvasHeight /2 - 150);
-		//this.rebasePoint = new Point2D(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20);
-
+		//set rebase point to the drawing of the arm
+		this.rebasePoint = new Point2D(canvasWidth/2 - 80, canvasHeight /2 - 150);
 	}
 
 	public void setup() {
@@ -38,9 +37,9 @@ public class Render2DFront extends RenderCanvas {
 
 	public void drawModelWithArm() {
 		drawModel();
-		//right arm
-		line(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20, xPos +
-				rectWidth / 2 + 50, yPos + rectHeight / 2 - 30);
+		//left arm
+		line(xPos - rectWidth/2, yPos - rectHeight/2 + 20,
+				xPos - rectWidth/2 - 50, yPos + rectHeight/2 - 30);
 
 	}
 
@@ -116,10 +115,10 @@ public class Render2DFront extends RenderCanvas {
 
 		stroke(247, 201, 170);
 		strokeWeight(45);
-		
-		//left arm
-		line(xPos - rectWidth/2, yPos - rectHeight/2 + 20, 
-				xPos - rectWidth/2 - 50, yPos + rectHeight/2 - 30);
+
+		//right arm
+		line(xPos + rectWidth / 2, yPos - rectHeight / 2 + 20, xPos +
+				rectWidth / 2 + 50, yPos + rectHeight / 2 - 30);
 		
 		//left leg
 		line(xPos - rectWidth/2 + 15, yPos + rectHeight/2 , 
@@ -154,5 +153,5 @@ public class Render2DFront extends RenderCanvas {
 			redraw();
 		}
 	}
-	
+
 }

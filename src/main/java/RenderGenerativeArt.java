@@ -43,7 +43,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 	      pattern2();
 	      break;     
 	    case 3:
-	      pattern3(10);
+	      pattern3();
 	      break;   
 	    case 4:
 	      pattern4();
@@ -162,7 +162,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 	}
 	 
 	// pattern3 draws hundreds and thousands food dressing
-	public void pattern3(int offset) {
+	public void pattern3() {
 //	  strokeWeight(0.5f);
 //	  for (int i = 0; i < 5; i++) {
 //	    // Randomise the colours during each frame

@@ -145,14 +145,14 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	// TODO: (Kerrin) might be better to rename Sample => SensorReading
 
 	/**
-	 * Adds a new arm position when only a left arm sample is available.
+	 * Adds a new arm position when only a right arm sample is available.
 	 * Right now the shirt is only using a single sensor, so we want the modeler
 	 * to work under those conditions as well.
-	 * @param leftArmSample The sensor reading for the left arm.
+	 * @param leftArmSample The sensor reading for the right arm.
 	 */
-	public void newSensorReading(Sample leftArmSample) {
-		Arm leftArm = computeNewArmPosition(leftArmSample, true);
-		BothArms arms = new BothArms(leftArm, null);
+	public void newSensorReading(Sample rightArmSample) {
+		Arm rightArm = computeNewArmPosition(rightArmSample, false);
+		BothArms arms = new BothArms(null, rightArm);
 		pastArms.add(arms);
 		this.emit(NEW_SAMPLE);
 	}
