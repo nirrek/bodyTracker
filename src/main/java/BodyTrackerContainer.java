@@ -23,17 +23,17 @@ public class BodyTrackerContainer {
     private JPanel canvasPanel;
     private RenderCanvas canvas;
 
-    public BodyTrackerContainer(Container contentPane) {
+    public BodyTrackerContainer(Container contentPane, ImageIcon logoImage, ImageIcon refreshImage) {
         container = contentPane;
-        initBodyTrackerGUI();
+        initBodyTrackerGUI(logoImage, refreshImage);
         setCanvasWidthAndHeight();
         initMapCanvases();
     }
 
-    private void initBodyTrackerGUI() {
+    private void initBodyTrackerGUI(ImageIcon logoImage, ImageIcon refreshImage) {
 
         // Initiate the connection Panel
-        connectionView = new ConnectionView();
+        connectionView = new ConnectionView(refreshImage);
 
         // Wrap the connection panel and a horizontal separator together
         JPanel connectionPanelWrapper = new JPanel();
@@ -66,7 +66,7 @@ public class BodyTrackerContainer {
         canvasPanel = new JPanel(new BorderLayout());
         canvasPanel.setOpaque(false);
         canvasPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        ImageIcon logoImage = new ImageIcon("img/logo_translucent.png");
+
         JLabel logo = new JLabel(logoImage);
         JPanel wrapperPanel = new JPanel(new GridBagLayout());
         wrapperPanel.setOpaque(false);

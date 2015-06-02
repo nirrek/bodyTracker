@@ -22,8 +22,12 @@ public class BodyTracker{
 		// Set size
 		setWindowSize(main);
 
+		// Retrieve images from resources
+		ImageIcon logoImage  = new ImageIcon(this.getClass().getClassLoader().getResource("logoTranslucent.png"));
+		ImageIcon refreshImage  = new ImageIcon(this.getClass().getClassLoader().getResource("refresh.png"));
+
 		// Pass container view and model to the Renderer
-		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane());
+		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane(), logoImage, refreshImage);
 		Modeler model = new Modeler();
 		Renderer rendererController = new Renderer(model, container);
 
@@ -37,6 +41,7 @@ public class BodyTracker{
 
 		main.getContentPane().setBackground(Color.WHITE);
 		main.setVisible(true);
+
 	}
 
 	/**

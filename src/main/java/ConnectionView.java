@@ -14,7 +14,7 @@ public class ConnectionView extends EventEmitter {
     private JButton connectButton;
     private JButton closeConnectionButton;
 
-    public ConnectionView() {
+    public ConnectionView(ImageIcon refreshImage) {
 
         // Create a new Panel
         FlowLayout layout = new FlowLayout();
@@ -33,7 +33,7 @@ public class ConnectionView extends EventEmitter {
         availablePortsComboBox.setForeground(StyleClass.COLOR_DARK_GREY);
         availablePortsComboBox.setPreferredSize(new Dimension(300, availablePortsComboBox.getPreferredSize().height));
 
-        JButton refreshButton = new JButton("Refresh");
+        JButton refreshButton = new JButton(refreshImage);
         refreshButton.setFont(StyleClass.FONT_TEXT);
         refreshButton.setForeground(StyleClass.COLOR_DARK_GREY);
         refreshButton.addActionListener(event -> this.emit("refresh"));
