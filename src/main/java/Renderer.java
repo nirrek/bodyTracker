@@ -35,6 +35,8 @@ public class Renderer {
     //Use to slow down rendering for 3D digital sketch
     private int count = 0;
 
+    private boolean serialConnected = false;
+
     /**
      * Constructors a new renderer that is bound to the given model and view.
      * @param modeler Produce a 3-Dimensional model of the user's limb in space
@@ -84,7 +86,7 @@ public class Renderer {
      * clean-up necessary state.
      */
     public void unmount() {
-        view.destroyCanvas();
+        view.destroyCanvases();
         stopSerialListener();
         closeConnection();
     }
@@ -140,21 +142,6 @@ public class Renderer {
     // -------------------------------------------------------------------------
     //      UI CONTROL METHODS
     // -------------------------------------------------------------------------
-
-    private void updateUIForArduinoConnected(boolean isConnected) {
-        view.enableConnectButton(!isConnected);
-        view.enableStreamButton(isConnected);
-    }
-
-    private void updateUIForModelProcessingReadings(boolean isProcessingReadings) {
-        view.enableLoadFileButton(!isProcessingReadings);
-
-        if (serial != null) {
-            if (!isProcessingReadings && serial.isConnected()) {
-                view.enableStreamButton(!isProcessingReadings);
-            }
-        }
-    }
 
     private void updateUIDisplaySerialPortsAvailable() {
         ArrayList<String> portNames = new ArrayList<>();
@@ -215,17 +202,27 @@ public class Renderer {
         if (!connect()) {
             view.displayError("Can not connect to port " + portName);
             return;
+
         }
 
         view.displayError("");
-        updateUIForArduinoConnected(true);
+        serialConnected = true;
+        view.enableConnectButton(false);
+        view.enableCloseConnectionButton(true);
+        view.enableStreamButton(true);
+        view.enableStopStreamingButtons(false);
     }
 
     // 'Stop' button handler
     private void closeConnectionButtonClicked() {
         stopSerialListener();
         closeConnection();
-        updateUIForArduinoConnected(false);
+
+        serialConnected = false;
+        view.enableConnectButton(true);
+        view.enableCloseConnectionButton(false);
+        view.enableStreamButton(false);
+        view.enableStopStreamingButtons(false);
     }
 
     // 'Load File' button handler
@@ -249,7 +246,9 @@ public class Renderer {
             return;
         }
 
-        updateUIForModelProcessingReadings(true);
+        view.enableLoadFileButton(false);
+        view.enableStreamButton(false);
+        view.enableStopStreamingButtons(false);
 
         // TODO: make the thread a private class that extends thread
         // Spawn a new thread for reading from the file
@@ -289,7 +288,13 @@ public class Renderer {
                 Thread.currentThread().interrupt();
             }
             view.finalRender();
-            updateUIForModelProcessingReadings(false);
+
+            view.enableLoadFileButton(true);
+            if (serialConnected) {
+                view.enableStreamButton(true);
+                view.enableStopStreamingButtons(false);
+            }
+
         })).start();
         
     }
@@ -303,7 +308,11 @@ public class Renderer {
         stopSerialListener();
 
         view.displayError("");
-        updateUIForModelProcessingReadings(true);
+
+        view.enableCloseConnectionButton(false);
+        view.enableLoadFileButton(false);
+        view.enableStreamButton(false);
+        view.enableStopStreamingButtons(true);
 
         serialListener = new SerialListener((message) -> {
             List<Sample> samples = Sample.parseMessage(message);
@@ -320,7 +329,12 @@ public class Renderer {
     	count = 0;
         view.displayError("");
         stopSerialListener();
-        updateUIForModelProcessingReadings(false);
+
+        view.enableCloseConnectionButton(true);
+        view.enableLoadFileButton(true);
+        view.enableStreamButton(true);
+        view.enableStopStreamingButtons(false);
+
         view.finalRender();
     }
 
@@ -335,7 +349,17 @@ public class Renderer {
     private void saveCanvases() {
     	count = 0;
         view.displayError("");
-    	view.saveCanvas();
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setDialogTitle("Choose a folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().toString();
+            view.saveCanvas(path);
+        }
+
     } 
 
     // Apply button handler
@@ -387,7 +411,12 @@ public class Renderer {
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
-                updateUIForArduinoConnected(false);
+
+                view.enableCloseConnectionButton(false);
+                view.enableLoadFileButton(false);
+                view.enableStreamButton(false);
+                view.enableStopStreamingButtons(false);
+
                 view.displayError("Connection with Arduino was interrupted");
             }
         }
