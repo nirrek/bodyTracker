@@ -142,7 +142,10 @@ public class BodyTrackerContainer {
 
     public void enableConnectButton(boolean enable) {
         connectionView.getConnectButton().setEnabled(enable);
-        connectionView.getCloseConnectionButton().setEnabled(!enable);
+    }
+
+    public void enableCloseConnectionButton(boolean enable) {
+        connectionView.getCloseConnectionButton().setEnabled(enable);
     }
 
     // -------------------------------------------------------------------------
@@ -170,13 +173,15 @@ public class BodyTrackerContainer {
     }
 
     public void enableLoadFileButton(boolean enable) {
-        System.out.println(enable);
         controlsView.getLoadFromFileButton().setEnabled(enable);
     }
 
     public void enableStreamButton(boolean enable) {
         controlsView.getStreamButton().setEnabled(enable);
-        controlsView.getStopStreamingButton().setEnabled(!enable);
+    }
+
+    public void enableStopStreamingButtons(boolean enable) {
+        controlsView.getStopStreamingButton().setEnabled(enable);
     }
 
     public void displayError(String error) {
@@ -187,9 +192,9 @@ public class BodyTrackerContainer {
     //      METHODS CANVASES
     // -------------------------------------------------------------------------
 
-    public void saveCanvas() {
+    public void saveCanvas(String path) {
         if (canvas != null) {
-            canvas.save(getSelectedCanvas());
+            canvas.save(path+"/"+getSelectedCanvas());
         }
     }
 
@@ -199,8 +204,8 @@ public class BodyTrackerContainer {
         }
     }
 
-    public void destroyCanvas() {
-        if (canvas != null) {
+    public void destroyCanvases() {
+        for (RenderCanvas canvas : mapCanvases.values()) {
             canvas.destroy();
         }
     }
