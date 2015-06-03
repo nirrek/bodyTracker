@@ -20,7 +20,7 @@ public class Render2DSide extends RenderCanvas {
 	public Render2DSide(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 		//set rebase point for the arm to be rendered
-		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2 - 150);
+		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2 - 120);
 	}
 
 	public void setup() {

@@ -223,7 +223,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 
 	@Override
 	public void finalRender() {
-		// TODO Auto-generated method stub
+		//Auto-generated method stub
 		
 	}
 	

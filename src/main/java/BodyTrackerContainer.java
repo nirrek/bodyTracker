@@ -6,30 +6,60 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by romainjulien on 28/05/2015.
+ * The container view for the application.
+ * This class abstract the view hierarchy to the renderer.
  */
 public class BodyTrackerContainer {
 
+    // The container of the JFrame
     private Container container;
 
     private ConnectionView connectionView;
 
     private ControlView controlsView;
 
+    // A wrapper for the canvas, and at launch-time for the logo
+    private JPanel canvasPanel;
+
+    // The canvas used to render the movements. The canvas is actually a
+    // Processing applet embed in the application.
+    private RenderCanvas canvas;
     private int canvasWidth;
     private int canvasHeight;
+
+    // A mapping of the classes name to their corresponding instance
     private Map<RenderCanvasEnum, RenderCanvas> mapCanvases;
 
-    private JPanel canvasPanel;
-    private RenderCanvas canvas;
 
+    /**
+     * The constructor initiates all of the view components, and takes care
+     * of the layout of those components. It also instantiates the 5
+     * Processing applets that have been implemented to render the movements.
+     *
+     * @param contentPane: The content panel of the JFrame
+     * @param logoImage: The logo image
+     * @param refreshImage: The refresh icon
+     */
     public BodyTrackerContainer(Container contentPane, ImageIcon logoImage, ImageIcon refreshImage) {
         container = contentPane;
+
+        // Initiates all the components and do the layout
         initBodyTrackerGUI(logoImage, refreshImage);
+
+        // Set canvasWidth and canvasHeight private variables
         setCanvasWidthAndHeight();
+
+        // Initiates instances of the 5 Processing applets (instances of RenderCanvas)
+        // and map them to their class name
         initMapCanvases();
     }
 
+    /**
+     * Initiates all of the view components, and takes care of the layout of those components.
+     *
+     * @param logoImage: The logo as an IconImage
+     * @param refreshImage: The refresh icon as an ImageIcon
+     */
     private void initBodyTrackerGUI(ImageIcon logoImage, ImageIcon refreshImage) {
 
         // Initiate the connection Panel
@@ -78,16 +108,25 @@ public class BodyTrackerContainer {
         container.add(controlPanelWrapper, BorderLayout.EAST);
     }
 
+    /**
+     * Set the canvas width and height, by retrieving the size of the screen, and
+     * the preferred size of the control and the connection panels (we can do that here
+     * because the panels have been layed out and their preferred size have been set).
+     */
     private void setCanvasWidthAndHeight() {
         Dimension effectiveScreenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().
                 getMaximumWindowBounds().getSize();
         int windowWidth = Math.min(1920, effectiveScreenSize.width);
         int windowHeight = Math.min(1080 ,effectiveScreenSize.height);
         int controlWidth = getControlsView().getPanel().getPreferredSize().width;
-        canvasWidth = (windowWidth - controlWidth - 30);
-        canvasHeight = windowHeight - 25 - 20;
+        int connectionHeight = getConnectionView().getPanel().getPreferredSize().height;
+        canvasWidth = windowWidth - controlWidth - 30;
+        canvasHeight = windowHeight - connectionHeight - 25 - 20;
     }
 
+    /**
+     * Instantiates the 5 Processing applets that have been implemented to render the movements.
+     */
     private void initMapCanvases() {
         mapCanvases = new HashMap<>();
 
@@ -113,10 +152,16 @@ public class BodyTrackerContainer {
     //      GETTERS
     // -------------------------------------------------------------------------
 
+    /**
+     * @return the control view
+     */
     public ControlView getControlsView() {
         return controlsView;
     }
 
+    /**
+     * @return the connection view
+     */
     public ConnectionView getConnectionView() {
         return connectionView;
     }

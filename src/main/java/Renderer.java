@@ -52,12 +52,13 @@ public class Renderer {
         this.model = modeler;
         this.view = container;
 
+        // Add model listener
         model.addListener(Modeler.NEW_SAMPLE, p -> modelAddedNewSample());
 
+        // Add button listeners
         view.getConnectionView().addListener("refresh", event -> refreshButtonClicked());
         view.getConnectionView().addListener("connect", event -> connectButtonClicked());
         view.getConnectionView().addListener("closeConnection", event -> closeConnectionButtonClicked());
-
         view.getControlsView().addListener("applyChanges", event -> changeCanvases());
         view.getControlsView().addListener("loadFile", event -> loadFileButtonClicked());
         view.getControlsView().addListener("streamFromArduino", event -> streamFromArduinoButtonClicked());
@@ -67,6 +68,10 @@ public class Renderer {
 
         updateUIDisplaySerialPortsAvailable();
     }
+
+    // -------------------------------------------------------------------------
+    //      HELPER METHODS
+    // -------------------------------------------------------------------------
 
     /**
      * Establishes a new serial connection using, and stores the new Serial
@@ -231,7 +236,7 @@ public class Renderer {
     				view.getCanvas().drawArm(rightArm, "front");
     			}
     			count++;
-    		}	else { /* regular canvas */
+    		}	else { // regular canvas
     			view.getCanvas().drawArm(rightArm, "front");
     		}
     	}
@@ -251,7 +256,6 @@ public class Renderer {
     private void refreshButtonClicked() {
         resetAfterButtonClicked();
 
-        // TODO check if safe
         (new Thread(() -> {
             updateUIDisplaySerialPortsAvailable();
         })).start();
@@ -327,7 +331,7 @@ public class Renderer {
         File selectedFile = selectFile(1);
         if (selectedFile == null) return;
 
-
+        // Update the application and the buttons state
         modelIsProcessingReadings = true;
         updateUIButtons();
 
@@ -350,8 +354,10 @@ public class Renderer {
         } catch(InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
+        // Creates the final render in high quality for the digital 3D canvas
         view.finalRender();
 
+        // Update the application and the buttons state
         modelIsProcessingReadings = false;
         updateUIButtons();
 
@@ -375,6 +381,7 @@ public class Renderer {
         // stop any preexisting listener
         stopSerialListener();
 
+        // Update the application and the buttons state
         modelIsProcessingReadings = true;
         isStreaming = true;
         updateUIButtons();
@@ -398,13 +405,15 @@ public class Renderer {
     private void stopStreamingButtonClicked() {
         resetAfterButtonClicked();
 
+        // Creates the final render in high quality for the digital 3D canvas
+        view.finalRender();
+
         stopSerialListener();
 
+        // Update the application and the buttons state
         modelIsProcessingReadings = false;
         isStreaming = false;
         updateUIButtons();
-
-        view.finalRender();
     }
 
     /**
@@ -500,10 +509,12 @@ public class Renderer {
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
+                // Update application and button state
                 serialConnected = false;
                 modelIsProcessingReadings = false;
                 isStreaming = false;
                 updateUIButtons();
+
                 view.displayError("Connection with Arduino was interrupted");
             }
         }

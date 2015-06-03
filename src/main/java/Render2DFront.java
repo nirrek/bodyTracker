@@ -25,7 +25,7 @@ public class Render2DFront extends RenderCanvas {
 		yPos = height/2;
 
 		//set rebase point to the drawing of the arm
-		this.rebasePoint = new Point2D(canvasWidth/2 - 80, canvasHeight /2 - 150);
+		this.rebasePoint = new Point2D(canvasWidth/2 - 80, canvasHeight /2 - 120);
 	}
 
 	public void setup() {
