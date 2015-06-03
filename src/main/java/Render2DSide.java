@@ -17,19 +17,32 @@ public class Render2DSide extends RenderCanvas {
 
 	ArrayList<Line> lines;
 
+	 /**
+	  * This class is responsible from drawing the 2D side representation of
+	  * the arm
+	  * @param canvasWidth - Width of the canvas for rendering
+	  * @param canvasHeight - Height of the canvas for rendering
+	  */
 	public Render2DSide(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 		//set rebase point for the arm to be rendered
 		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2 - 120);
 	}
 
+	/**
+	 * This function performs initialisation steps. It is the first thing that
+	 * is called when a Render2DSide object is made. 
+	 */
 	public void setup() {
 		//use this array to store the previous lines drawn to give the illusion of a 3dimensional trace.
 		lines = new ArrayList<Line>();
 
 		size(canvasWidth, canvasHeight);
 	}
-
+	
+	/**
+	 * Draws the full model in it's initial state
+	 */
 	public void drawModelWithArm() {
 		drawModel();
 		//draw the arm
@@ -38,17 +51,25 @@ public class Render2DSide extends RenderCanvas {
 				yPos + rectHeight / 2 - 30);
 	}
 
+	/**
+	 * Initialises the canvas into default state when it is selected for the
+	 * first time.
+	 */
 	public void draw() {
 		noLoop();
-		/* only draw the model when the canvas is selected */
+		/* only draw the full model when the canvas is selected */
 		if (firstTime == 1) {
 			drawModelWithArm();
 		}
 		firstTime++;
 	}
 
+	/**
+	 * Draws the arm in the current position, as well as the previous 3 positions
+	 */
 	public void render(Point2D from, Point2D to) {
 
+		/* Draws the model without the arm that we are trying to render */
 		drawModel();
 
 		lines.add( new Line((float)from.getX(), (float)from.getY(), 
@@ -56,7 +77,7 @@ public class Render2DSide extends RenderCanvas {
 
 		/* Draw the past 3 lines to give the illusion of a 3 dimensional trace */
 		if (lines.size() > 4) {
-			lines.remove(0);
+			lines.remove(0); 
 		}
 
 		for ( int i = 0; i <= lines.size()-1; i++ ) {
@@ -82,6 +103,10 @@ public class Render2DSide extends RenderCanvas {
 
     }
 	
+	/**
+	 * Draws the anatomy of the model character on the screen, less the arm that
+	 * we a trying to render
+	 */  
 	private void drawModel() {
 		background(0);
 		smooth();
@@ -121,6 +146,10 @@ public class Render2DSide extends RenderCanvas {
 
     public void finalRender() {}
     
+    /**
+	 * This class is used to store the lines that have been drawn.
+	 * @author Lisa
+	 */
     class Line {
 		float fromX;
 		float fromY;
@@ -135,6 +164,7 @@ public class Render2DSide extends RenderCanvas {
 			
 		}
 		
+		/* Draws a specified line */
 		public void draw() {
 			strokeWeight(45);
 			line(fromX, fromY, toX, toY);

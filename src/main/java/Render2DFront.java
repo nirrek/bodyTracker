@@ -9,15 +9,19 @@ import javafx.geometry.Point2D;
 public class Render2DFront extends RenderCanvas {
 
 	int xPos, yPos;
-	int rectWidth = 160;
-	int rectHeight = 280;
-	int radius = 60;
+	int rectWidth = 160, rectHeight = 280;  //dimension for model's body
+	int radius = 60;  //radius of model's head
 
-	int firstTime = 0;
+	int firstTime = 0;  //initialisation process flag
 
-	 ArrayList<Line> lines;
+	 ArrayList<Line> lines;  //array to hold the lines of the 3 previous points
 
-
+	 /**
+	  * This class is responsible from drawing the 2D front representation of
+	  * the arm
+	  * @param canvasWidth - Width of the canvas for rendering
+	  * @param canvasHeight - Height of the canvas for rendering
+	  */
 	public Render2DFront(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 
@@ -25,16 +29,20 @@ public class Render2DFront extends RenderCanvas {
 		yPos = height/2;
 
 		//set rebase point to the drawing of the arm
-		this.rebasePoint = new Point2D(canvasWidth/2 - 80, canvasHeight /2 - 120);
+		this.rebasePoint = new Point2D(canvasWidth/2 - 80, canvasHeight /2 - 130);
 	}
 
+	/**
+	 * Performs initialisation steps for the PApplet.
+	 */
 	public void setup() {
-		
 		lines = new ArrayList<Line>();
-		
 		size(canvasWidth, canvasHeight);
 	}
 
+	/**
+	 * Draws the full model in it's initial state
+	 */
 	public void drawModelWithArm() {
 		drawModel();
 		//left arm
@@ -43,8 +51,13 @@ public class Render2DFront extends RenderCanvas {
 
 	}
 
+	/**
+	 * Initialises the canvas into default state when it is selected for the
+	 * first time.
+	 */
 	public void draw() {
 		noLoop();
+		/* only draw the full model when the canvas is selected */
 		if (firstTime == 1) {
 			drawModelWithArm();
 		}
@@ -52,13 +65,18 @@ public class Render2DFront extends RenderCanvas {
 	}
 
 
+	/**
+	 * Draws the arm in the current position, as well as the previous 3 positions
+	 */
 	public void render(Point2D from, Point2D to) {
 
+		/* Draws the model without the arm that we are trying to render */
 		drawModel();
 
 		lines.add( new Line((float)from.getX(), (float)from.getY(), 
 				(float)to.getX(), (float)to.getY()));
 
+		/* Remove the last trace as a new render point is added */
 		if (lines.size() > 4) {
 			lines.remove(0);
 		}
@@ -87,6 +105,11 @@ public class Render2DFront extends RenderCanvas {
 
 	}
 
+	/**
+	 * Draws the anatomy of the model character on the screen, less the arm that
+	 * we a trying to render
+	 */  
+	
 	private void drawModel() {
 		background(0);
 		smooth();
@@ -133,6 +156,10 @@ public class Render2DFront extends RenderCanvas {
 
 	public void finalRender() {}
 	
+	/**
+	 * This class is used to store the lines that have been drawn.
+	 * @author Lisa
+	 */
 	class Line {
 		float fromX;
 		float fromY;
@@ -147,6 +174,7 @@ public class Render2DFront extends RenderCanvas {
 			
 		}
 		
+		/* Draws a specified line */
 		public void draw() {
 			strokeWeight(45);
 			line(fromX, fromY, toX, toY);

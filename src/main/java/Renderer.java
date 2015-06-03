@@ -220,13 +220,14 @@ public class Renderer {
     // -------------------------------------------------------------------------
 
     /**
-     * TODO: Lisa
+     * This method is called when a new sample is added. It invokes drawArm()
+     * which renders using the current position of the arm.
      */
     private void modelAddedNewSample() {
     	Arm rightArm = model.getNextSample().getRightArm();
 
     	if (view.getCanvas() != null) {
-    		/* front 2d view canvas */
+    		/* side 2d view canvas */
     		if (view.getCanvas() instanceof Render2DSide) {
     			view.getCanvas().drawArm(rightArm, "side");
     			/* digital 3d canvas - want to slow down sampling, so only
@@ -373,11 +374,13 @@ public class Renderer {
 
 
         serialListener = new SerialListener((message) -> {
-            List<Sample> samples = Sample.parseMessage(message);
+        	List<Sample> samples = Sample.parseMessage(message);
 
-            if (!samples.isEmpty()) {
-                model.newSensorReading(samples.get(0));
-            }
+        	if (!samples.isEmpty()) {
+        		if (samples.get(0).getID() == 2) {
+        			model.newSensorReading(samples.get(0));
+        		}
+        	}
         });
         serialListener.start();
     }
