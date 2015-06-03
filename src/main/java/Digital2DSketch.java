@@ -65,6 +65,15 @@ public class Digital2DSketch extends RenderCanvas{
 		
 	}
 
+	@Override
+	public void clearCanvas() {
+		this.init = true;
+		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2);
+		background(0);
+		render = false;
+		redraw();
+	}
+
 	public void drawModelWithArm() {}
 
 	public void draw() {
@@ -152,11 +161,10 @@ public class Digital2DSketch extends RenderCanvas{
 
 
 	public void keyPressed(){
-		if (key == 's') {
+		if (key == 'f') {
 			smoothFade = !smoothFade;
 		} 
 	}
-
 
 
 	class  SketchLine  {

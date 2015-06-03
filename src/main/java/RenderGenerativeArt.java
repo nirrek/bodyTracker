@@ -20,6 +20,8 @@ public class RenderGenerativeArt extends RenderCanvas{
 	float prevX;
 	float prevY;
 	int count;
+    boolean smoothFade;
+    int previousTool = 0;
 	 
 	 
 	public void setup() {
@@ -50,9 +52,18 @@ public class RenderGenerativeArt extends RenderCanvas{
 	      break; 
 	    case 5:
 	      pattern5();
-	      break;             
+	      break;
+			case 6:
+				pattern6();
+				break;
 	    }
+
 	  }
+
+        if (smoothFade) {
+            fill(0,12);
+            rect(0,0,canvasWidth,canvasHeight);
+        }
 	}
 
 	@Override
@@ -62,8 +73,6 @@ public class RenderGenerativeArt extends RenderCanvas{
 		prevY = yCo;
 		xCo = map((float) to.getX(), 0, 600, 0, canvasWidth);
 		yCo = map((float) to.getY(), 250, 600, 0, canvasHeight) *  0.7f ;
-		
-		System.out.println("XCo: " + xCo + " YCo: " + yCo);
 		
 		count ++;
 		
@@ -81,36 +90,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 			 }	
 		 }
 	}
-	 
-	/*
-	  Functions to switch the drawing tool
-	 */
-	public void keyPressed() {
-	  switch(key){
-	    case '1':
-	      currentTool = 1;
-	      break;
-	    case '2':
-	      currentTool = 2;
-	      break;
-	    case '3':
-	      history  = new ArrayList<PVector> (); 
-	      currentTool = 3;
-	      break;
-	    case '4':
-	      currentTool = 4;
-	      break;
-	    case '5':
-	      currentTool = 5;
-	      break;       
-	    case 'c':
-	    case DELETE:
-	    case BACKSPACE:
-	      background(0);    // clear the screen
-	      history  = new ArrayList<PVector> ();  // reset history array
-	      break;      
-	  }  
-	}
+
 	 
 	/*
 	 Drawing tools
@@ -158,10 +138,30 @@ public class RenderGenerativeArt extends RenderCanvas{
 	   
 	  // Add the current point to the history
 	  history.add(new PVector(xCo, yCo));
-	  history.add(new PVector(width-xCo, yCo));
+	  history.add(new PVector(width - xCo, yCo));
 	}
-	 
-	// pattern3 draws hundreds and thousands food dressing
+
+    public void keyPressed(){
+        if (key == 'f') {
+            smoothFade = !smoothFade;
+        }
+
+        if (key == 's') {
+
+            System.out.println(currentTool);
+            System.out.println(previousTool);
+
+            if (currentTool == 6 ) {
+                currentTool = previousTool;
+            } else {
+                previousTool = currentTool;
+                currentTool = 6;
+            }
+        }
+    }
+
+
+    // pattern3 draws hundreds and thousands food dressing
 	public void pattern3() {
 
 
@@ -170,9 +170,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 		float blue = map(yCo, 0, canvasWidth, 0, 255);
 		float green = dist(xCo, yCo, canvasWidth/2, canvasHeight/2);
 
-		float speed = dist(prevX, prevY, xCo, yCo);
-		float lineWidth = map(speed, 0, 10, 10, 1);
-		lineWidth = constrain(lineWidth, 0, 10);//magic!!
+		float lineWidth = random(3, 8);
 
 		stroke(red, green, blue, 255);
 		strokeWeight(lineWidth);
@@ -186,7 +184,7 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  fill(random(0,255), random(0,255), random(0,255),10);
 	  // alter the width size
 	  float widthDistance = abs(width/2 - xCo) * 0.4f ;
-	  ellipse(xCo,yCo, widthDistance, widthDistance);
+	  ellipse(xCo, yCo, widthDistance, widthDistance);
 	}
 	 
 	// Code inspired by Mr Doob's project harmony.
@@ -215,6 +213,12 @@ public class RenderGenerativeArt extends RenderCanvas{
 	  history.add(new PVector(xCo, yCo));
 	  strokeWeight(0.2f);
 	}
+
+    //draw invisible line.
+    public void pattern6() {
+        stroke(255,255,255,0);
+        line(xCo, yCo, prevX, prevY);
+    }
 	 
 
 	@Override
