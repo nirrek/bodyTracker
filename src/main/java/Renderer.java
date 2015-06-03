@@ -346,21 +346,6 @@ public class Renderer {
                 }
             }
         }, selectedFile)).start();
-
-        //Finished reading from file
-        //Need to pause & wait for the process to render the last reading
-        try {
-            Thread.sleep(500);
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-        // Creates the final render in high quality for the digital 3D canvas
-        view.finalRender();
-
-        // Update the application and the buttons state
-        modelIsProcessingReadings = false;
-        updateUIButtons();
-
     }
 
     /**
@@ -554,7 +539,7 @@ public class Renderer {
                 // the application thread. This is required due to the fact
                 // that the Swing GUI is NOT THREADSAFE.
                 SwingUtilities.invokeLater(() -> callback.accept(line));
-                if (Thread.interrupted()) return;
+                if (Thread.interrupted()) break;
 
                 try {
                     Thread.sleep(100); // simulate events coming in
@@ -562,6 +547,20 @@ public class Renderer {
                     e.printStackTrace();
                 }
             }
+
+            //Finished reading from file
+            //Need to pause & wait for the process to render the last reading
+            try {
+                Thread.sleep(500);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            // Creates the final render in high quality for the digital 3D canvas
+            view.finalRender();
+
+            // Update the application and the buttons state
+            modelIsProcessingReadings = false;
+            updateUIButtons();
         }
     }
 }
