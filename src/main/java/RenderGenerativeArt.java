@@ -161,28 +161,19 @@ public class RenderGenerativeArt extends RenderCanvas{
 	 * http://www.mrdoob.com/projects/harmony/
 	 */
 	public void pattern4(){
+
 		/* Randomise the colours during each frame */
-		stroke(255);
-		line(xCo, yCo, prevX, prevY);
+		float red = random(0,255);
+		float green = random(0,255);
+		float blue = random(0,255);
 
-		for(int i = 0; i < history.size(); i++){
-			PVector p = (PVector) history.get(i);
-			float d = dist(xCo, yCo, p.x, p.y);
-			/* Adjust the stroke weight according to the distance */
-			strokeWeight(1/d);
 
-			/* Draw a line from the current point to
-	       the historical point if the distance is less
-	       than 25 */
-			if(d < 25){
-				if(random(10) < 5) /* Skip some lines randomly */
-					line(xCo, yCo, p.x + 2, p.y + 2);
-			}
-		}
+		float lineWidth = random(1, 8);
 
-		/* Add the current point to the history */
-		history.add(new PVector(xCo, yCo));
-		strokeWeight(0.2f);
+		stroke(red, green, blue, 255);
+		strokeWeight(lineWidth);
+		line(prevX, prevY, xCo, yCo);
+
 	}
 
 	/**
