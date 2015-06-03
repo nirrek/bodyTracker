@@ -81,7 +81,7 @@ public class Serial {
      * it receives one.
      * @throws IOException If reading the inputstream fails. If the device
      *                     is removed, this will be thrown.
-     * @return The next message received. If
+     * @return The next message received. If any.
      */
     public String getNextMessage() throws IOException {
         StringBuilder message = new StringBuilder();

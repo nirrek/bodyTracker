@@ -116,6 +116,32 @@ public class Renderer {
     }
 
     /**
+     * Opens a modal dialog window allowing user to select a file or a folder
+     * on the computer.
+     *
+     * @param type: 0 if user needs to select a folder, 1 if user needs to
+     *            select a file
+     *
+     * @return The selected file/folder, or null if the user haven't selected anything
+     */
+    private File selectFile(int type) {
+        File selectedFile = null;
+
+        JFileChooser chooser = new JFileChooser();
+
+        if (type == 0) { // select a folder
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+        }
+
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            selectedFile = chooser.getSelectedFile();
+        }
+
+        return selectedFile;
+    }
+
+    /**
      * Fetches a list of all available serial ports.
      * Once the Arduino is connected, the port it is connected to will appear in
      * this list.
@@ -123,7 +149,6 @@ public class Renderer {
      * This function is called when application is launched, and when user press
      * the 'Refresh' button.
      *
-     * @author Kerrin
      * @return A list of available serial ports.
      */
     private static ArrayList<CommPortIdentifier> getAvailableSerialPorts() {
@@ -148,7 +173,9 @@ public class Renderer {
     }
 
     /**
-     * Clear the error logs and reset the count value to 0
+     * Method called every time a button is clicked.
+     *
+     * Clear the error logs and reset the count value to 0.
      */
     private void resetAfterButtonClicked() {
         count = 0;
@@ -188,7 +215,7 @@ public class Renderer {
     // -------------------------------------------------------------------------
 
     /**
-     * 
+     * TODO: Lisa
      */
     private void modelAddedNewSample() {
     	Arm rightArm = model.getNextSample().getRightArm();
@@ -215,14 +242,28 @@ public class Renderer {
     //      VIEW EVENT LISTENERS
     // -------------------------------------------------------------------------
 
-    // 'Refresh' button handler
+    /**
+     * Method to handle when the refresh (available ports) button is clicked.
+     * The method that retrieves the available ports is called in a new Thread.
+     *
+     * Display the ports currently available.
+     */
     private void refreshButtonClicked() {
         resetAfterButtonClicked();
-        updateUIDisplaySerialPortsAvailable();
+
+        // TODO check if safe
+        (new Thread(() -> {
+            updateUIDisplaySerialPortsAvailable();
+        })).start();
     }
 
 
-    // 'Start' button handler
+    /**
+     * Method to handle when the 'Connect' button is clicked
+     *
+     * Establish a connection with the Arduino. Display appropriate error message
+     * if a connection can't or shouldn't be established just now.
+     */
     private void connectButtonClicked() {
 
         resetAfterButtonClicked();
@@ -245,22 +286,35 @@ public class Renderer {
 
         }
 
+        // Update the application and the buttons state
         serialConnected = true;
         updateUIButtons();
     }
 
-    // 'Stop' button handler
+    /**
+     * Method to handle when the 'Close Connection' button is clicked
+     *
+     * Stop the serial listener and close the serial connection.
+     */
     private void closeConnectionButtonClicked() {
         resetAfterButtonClicked();
 
         stopSerialListener();
         closeConnection();
 
+        // Update the application and the buttons state
         serialConnected = false;
         updateUIButtons();
     }
 
-    // 'Load File' button handler
+    /**
+     * Method to handle when the 'Load File' button is clicked
+     *
+     * If a rendering style has been selected, it opens a modal dialog window
+     * for the user to select a file to read.
+     * Opens a new thread to process the values in the files and render the
+     * positions of the arm using the model listener.
+     */
     private void loadFileButtonClicked() {
 
         resetAfterButtonClicked();
@@ -270,66 +324,45 @@ public class Renderer {
             return;
         }
 
-        JFileChooser fileChooser = new JFileChooser();
-        File selectedFile;
+        File selectedFile = selectFile(1);
+        if (selectedFile == null) return;
 
-        int returnVal = fileChooser.showOpenDialog(view.getContainer());
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
-        } else {
-            return;
-        }
 
         modelIsProcessingReadings = true;
         updateUIButtons();
 
-        // TODO: make the thread a private class that extends thread
         // Spawn a new thread for reading from the file
-        (new Thread(() -> {
-            Scanner s = null;
-            try {
-                s = new Scanner(selectedFile);
-            } catch (FileNotFoundException e) { e.printStackTrace(); }
-            if (s == null) return;
+        (new FileLoader((line) -> {
+            List<Sample> samples = Sample.parseMessage(line);
 
-            while (s.hasNextLine()) {
-                String line = s.nextLine();
-                if (line.equals("$")) continue; // message boundary
-
-                List<Sample> samples = Sample.parseMessage(line);
-                if (!samples.isEmpty()) {
-                    try {
-                        Thread.sleep(100); // simulate events coming in
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    //only process the samples from the bNo
-                    if (samples.get(0).getID() == 2) {
-                        SwingUtilities.invokeLater(() -> {
-                            model.newSensorReading(samples.get(0));
-                        });
-                    }
+            if (!samples.isEmpty()) {
+                //only process the samples from the bNo
+                if (samples.get(0).getID() == 2) {
+                    model.newSensorReading(samples.get(0));
                 }
             }
+        }, selectedFile)).start();
 
-            //Finished reading from file
-            //Need to pause & wait for the process to render the last reading
-            try {
-                Thread.sleep(500);               
-            } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-            view.finalRender();
+        //Finished reading from file
+        //Need to pause & wait for the process to render the last reading
+        try {
+            Thread.sleep(500);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        view.finalRender();
 
-            modelIsProcessingReadings = false;
-            updateUIButtons();
+        modelIsProcessingReadings = false;
+        updateUIButtons();
 
-        })).start();
-        
     }
 
-    // 'Stream from Arduino' button handler
+    /**
+     * Method to handle when the 'Stream From ClothMotion' button is clicked
+     *
+     * If a rendering style has been selected, it starts a new Serial Listener (new thread)
+     * to process the values sent from the Arduino using the model listener.
+     */
     private void streamFromArduinoButtonClicked() {
 
         resetAfterButtonClicked();
@@ -357,7 +390,11 @@ public class Renderer {
         serialListener.start();
     }
 
-    // 'Stop Streaming' button handler
+    /**
+     * Method to handle when the 'Stop Streaming' button is clicked.
+     *
+     * Close the serial listener used to process values received from the Arduino.
+     */
     private void stopStreamingButtonClicked() {
         resetAfterButtonClicked();
 
@@ -370,7 +407,11 @@ public class Renderer {
         view.finalRender();
     }
 
-    // Clear canvases button handler
+    /**
+     * Method to handle when the 'Clear Canvas' button is clicked.
+     *
+     * Clear the canvas currently shown on screen.
+     */
     private void clearCanvases() {
         resetAfterButtonClicked();
 
@@ -381,33 +422,37 @@ public class Renderer {
             view.displayError("You must select a rendering style");
         }
     }
-    
-    // Save Canvases button handler
+
+    /**
+     * Method to handle when the 'Save Canvas' button is clicked.
+     *
+     * Save a JPG of the canvas currently shown on screen. The first time
+     * the button is pressed, a modal dialog window appears for the user to choose
+     * the destination folder. The path is then saved and will be reused each time
+     * the user wants to save a file afterward.
+     */
     private void saveCanvases() {
         resetAfterButtonClicked();
 
         // Check if the user has selected a rendering style
-        if (!view.getSelectedCanvas().equals("None")) {
-            if (destinationPathSavedFile == null) {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setDialogTitle("Choose a folder");
-                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                chooser.setAcceptAllFileFilterUsed(false);
-
-                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    destinationPathSavedFile = chooser.getSelectedFile().toString();
-                }
-            }
-
-            view.saveCanvas(destinationPathSavedFile);
-
-        } else{
+        if (view.getSelectedCanvas().equals("None")) {
             view.displayError("You must select a rendering style");
+            return;
         }
 
+        // Get the destination folder if it is the first time user is saving a canvas
+        if (destinationPathSavedFile == null) {
+            destinationPathSavedFile = selectFile(0).toString();
+        }
+
+        view.saveCanvas(destinationPathSavedFile);
     }
 
-    // Apply button handler
+    /**
+     * Method to handle when the 'Apply' (change rendering style) button is clicked.
+     *
+     * Change the canvas displayed on screen to the one selected by the user.
+     */
     private void changeCanvases() {
         resetAfterButtonClicked();
 
@@ -450,15 +495,61 @@ public class Renderer {
 
                     // Add the callback invokation to the an event queue on
                     // the application thread. This is required due to the fact
-                    // that the JavaFX Scene graph is NOT THREADSAFE.
+                    // that the Swing GUI is NOT THREADSAFE.
                     SwingUtilities.invokeLater(() -> callback.accept(message));
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
                 serialConnected = false;
+                modelIsProcessingReadings = false;
+                isStreaming = false;
                 updateUIButtons();
-
                 view.displayError("Connection with Arduino was interrupted");
+            }
+        }
+    }
+
+    /**
+     * FileLoader thread reads new messages from the Serial and dispatches
+     * them to the provided callback.
+     */
+    private class FileLoader extends Thread {
+        // Callback to be executed when a new message arrives.
+        private Consumer<String> callback;
+        private Scanner scanner = null;
+        /**
+         * Instantiates a new FileLoader thread. The callback provided
+         * will be invoked every time a new line is read.
+         *
+         * @param callback The callback to be invoked when a line has been processed.
+         *                 The callback is passed a single message string argument.
+         */
+        FileLoader(Consumer<String> callback, File selectedFile) {
+            this.callback = callback;
+            try {
+                this.scanner = new Scanner(selectedFile);
+            } catch (FileNotFoundException e) { e.printStackTrace(); }
+        }
+
+        @Override
+        public void run() {
+            if (scanner == null) return;
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.equals("$")) continue; // message boundary
+
+                // Add the callback invokation to the an event queue on
+                // the application thread. This is required due to the fact
+                // that the Swing GUI is NOT THREADSAFE.
+                SwingUtilities.invokeLater(() -> callback.accept(line));
+                if (Thread.interrupted()) return;
+
+                try {
+                    Thread.sleep(100); // simulate events coming in
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

@@ -113,7 +113,7 @@ public class ControlView extends EventEmitter {
         sectionTitleStream.setForeground(StyleClass.COLOR_DARK_GREY);
         addToGrid(sectionTitleStream, 12, 0, 3, GridBagConstraints.HORIZONTAL, 0);
 
-        streamButton = new JButton("Start Streaming From Arduino");
+        streamButton = new JButton("Start Streaming From ClothMotion");
         streamButton.setFont(StyleClass.FONT_TEXT_HIGHLIGHT);
         streamButton.setForeground(StyleClass.COLOR_DARK_GREY);
         streamButton.addActionListener(event -> this.emit("streamFromArduino"));
