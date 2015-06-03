@@ -101,8 +101,6 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		return Math.sin(Math.toRadians(angleInDegrees));
 	}
 
-	// TODO: (Kerrin) might be better to rename Sample => SensorReading
-
 	/**
 	 * Adds a new arm position when only a right arm sample is available.
 	 * Right now the shirt is only using a single sensor, so we want the modeler
@@ -116,8 +114,6 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		this.emit(NEW_SAMPLE);
 	}
 
-	// TODO decide how we determine left/right sample in the client code
-	// for this method. Possibly just a hardcoded mapping from sensorId => side
 	/**
 	 * Adds an arm position to the modeler for a new time slice from the
 	 * specified sensor readings.

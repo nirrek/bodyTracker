@@ -15,6 +15,10 @@ public class Digital3DSketch extends RenderCanvas {
 	boolean stop;
 	int stepCounter;
 
+	/**
+	 * This function performs initialisation steps. It is the first thing that
+	 * is called when a Digital3DSketch object is made. 
+	 */
 	public void setup() {
 		size(canvasWidth, canvasHeight);
 		noFill();

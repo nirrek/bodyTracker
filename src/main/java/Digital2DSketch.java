@@ -7,20 +7,14 @@ import processing.core.PImage;
  */
 public class Digital2DSketch extends RenderCanvas{
 
-	boolean miden, smoothFade, render;
+	boolean smoothFade, render;
 
 	SketchLine  line0, line1, line2;
 	float x1, y1, x2, y2;
 	PImage cur;
-	float xCo;
-	float yCo;
+	float xCo, yCo;
 
 	int stoixeia = 30, lineAlpha = 50, count;
-
-	//  Color Variables
-	int colorL=255,strokeL, strokeValue = 20, strokeBackground = 5;
-	int paintCount = 0, alphaSform;
-	int r0,g0,b0,r1,g1,b1;
 
 	// Physics Variables
 	float[] x = new float[stoixeia];
@@ -32,12 +26,22 @@ public class Digital2DSketch extends RenderCanvas{
 	float[] deltaX = new float[stoixeia];
 	float[] deltaY = new float[stoixeia];
 
+	/**
+	 * This class draws a 2 dimensional digital sketch based on the position
+	 * of the arm.
+	  * @param canvasWidth - Width of the canvas for rendering
+	  * @param canvasHeight - Height of the canvas for rendering
+	 */
 	public Digital2DSketch(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
 		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2);
 		render = false;
 	}
 
+	/**
+	 * This function performs initialisation steps. It is the first thing that
+	 * is called when a Digital2DSketch object is made. 
+	 */
 	public void setup()  {
 		
 		frameRate(240);
@@ -68,22 +72,25 @@ public class Digital2DSketch extends RenderCanvas{
 	@Override
 	public void clearCanvas() {
 		this.init = true;
-		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2);
+		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /4);
 		background(0);
 		render = false;
 		redraw();
 	}
 
-	public void drawModelWithArm() {}
 
+	/**
+	 * This method is called after setup() and loops infinitely for the 
+	 * duration of the program.
+	 */
 	public void draw() {
 		noFill();
 		
 		if (render == false ) {
 			/* Configure the starting point for the sketch */
-			  line0.calcPointsStart(canvasWidth/2, canvasHeight/2);
-			  line1.calcPointsStart(canvasWidth/2, canvasHeight/2);
-			  line2.calcPointsStart(canvasWidth/2, canvasHeight/2); 
+			  line0.calcPointsStart(canvasWidth/2, canvasHeight/4);
+			  line1.calcPointsStart(canvasWidth/2, canvasHeight/4);
+			  line2.calcPointsStart(canvasWidth/2, canvasHeight/4); 
 		}
 
 		if (render == true)  { 
@@ -102,64 +109,27 @@ public class Digital2DSketch extends RenderCanvas{
 			line2.render(159,209,252, 0);
 		}
 
+		/* If smooth fade is selected, put a black rectangle with low opacity
+		 * onto the canvas. */
 		if (smoothFade) {
 			fill(0,12);
 			rect(0,0,canvasWidth,canvasHeight);
 		}
 	}
 
-	/* Can use count to scale the to/from points  - currently not scaled as
-	 * canvas size is limited. */
-	public void render(Point2D from, Point2D to)  {
-		
+	/* This method changes the coordinates of the line which is to be rendered
+	 * in the draw function */
+	public void render(Point2D from, Point2D to)  {	
 		render = true;
+		xCo = (float)to.getX() * 1.7f - 50;
+		yCo = (float)to.getY() * 1.2f - 300 ; 
 		
-		xCo = (float)to.getX() ;
-		yCo = (float)to.getY() ;
-	}
-	
-
-
-	void myLine(float xCord, float yCord) {
-
-		for (int i=0; i<stoixeia; i++){
-			x[i] = xCord;
-			y[i] = yCord;
-		}
-
-		strokeL = strokeValue;
-
-		noFill();
-		drawline();
 	}
 
-
-	void drawline(){
-		beginShape();
-		for (int i=0; i<5; i++){
-			if (i==0){
-				deltaX[i] = (10 - x[i]);
-				deltaY[i] = (10 - y[i]);
-
-			}
-			else {
-				deltaX[i] = (x[i-1]-x[i]);
-				deltaY[i] = (y[i-1]-y[i]);
-			}
-			deltaX[i] *= elastikotita[i];    // create elastikotita effect
-			deltaY[i] *= elastikotita[i];
-			epitaxinsiX[i] += deltaX[i];
-			epitaxinsiY[i] += deltaY[i];
-			x[i] += epitaxinsiX[i];// move it
-			y[i] += epitaxinsiY[i];
-			vertex(x[i],y[i]);
-			epitaxinsiX[i] *= aposbesi[i];    // slow down elastikotita
-			epitaxinsiY[i] *= aposbesi[i];
-		}
-		endShape();
-	}
-
-
+	/**
+	 * When the f key is pressed on the keyboard, the fade effect option is 
+	 * toggled.
+	 */
 	public void keyPressed(){
 		if (key == 'f') {
 			smoothFade = !smoothFade;
@@ -228,7 +198,7 @@ public class Digital2DSketch extends RenderCanvas{
 			}
 		}
 
-		public void drawModelWithArm() {}
+		
 		void render(int colorRVar, int colorGVar, int colorBVar, int lineAlphaVar)  {
 			colorR = colorRVar;
 			colorG = colorGVar;
@@ -245,11 +215,7 @@ public class Digital2DSketch extends RenderCanvas{
 
 	}
 
-
-
-	@Override
-	public void finalRender() {
-		// Auto-generated method stub
-	}
+	public void drawModelWithArm() {}
+	public void finalRender() {}
 
 }
