@@ -32,10 +32,16 @@ public class Renderer {
     // The thread listening to inbound serial messages
     private Thread serialListener;
     
-    //Use to slow down rendering for 3D digital sketch
+    // Use to slow down rendering for 3D digital sketch
     private int count = 0;
 
+    // Use to decide which button should be enabled, depending on the state of the application
     private boolean serialConnected = false;
+    private boolean modelIsProcessingReadings = false;
+    private boolean isStreaming = false;
+
+    // The destination path to the folder where JPG will be saved
+    private String destinationPathSavedFile = null;
 
     /**
      * Constructors a new renderer that is bound to the given model and view.
@@ -86,7 +92,9 @@ public class Renderer {
      * clean-up necessary state.
      */
     public void unmount() {
+        // Kill the Applets
         view.destroyCanvases();
+        // Close existing serial and stop the Serial Listener
         stopSerialListener();
         closeConnection();
     }
@@ -129,7 +137,7 @@ public class Renderer {
                     thePort.close();
                     availablePorts.add(port);
                 } catch (PortInUseException e) {
-                    //System.out.println("Port, "  + port.getName() + ", is in use.");
+                    // Do nothing, the port is used
                 } catch (Exception e) {
                     System.err.println("Failed to open port " +  port.getName());
                     e.printStackTrace();
@@ -139,10 +147,21 @@ public class Renderer {
         return availablePorts;
     }
 
+    /**
+     * Clear the error logs and reset the count value to 0
+     */
+    private void resetAfterButtonClicked() {
+        count = 0;
+        view.displayError("");
+    }
+
     // -------------------------------------------------------------------------
     //      UI CONTROL METHODS
     // -------------------------------------------------------------------------
 
+    /**
+     * Display the serial ports available in the GUI combo box
+     */
     private void updateUIDisplaySerialPortsAvailable() {
         ArrayList<String> portNames = new ArrayList<>();
 
@@ -153,10 +172,24 @@ public class Renderer {
         view.fillAvailablePortsComboBox(portNames);
     }
 
+    /**
+     * Enable or disable the buttons depending on the state of the application
+     */
+    private void updateUIButtons() {
+        view.enableConnectButton(!serialConnected);
+        view.enableCloseConnectionButton(serialConnected && !modelIsProcessingReadings);
+        view.enableLoadFileButton(!modelIsProcessingReadings);
+        view.enableStreamButton(serialConnected && !modelIsProcessingReadings);
+        view.enableStopStreamingButtons(serialConnected && modelIsProcessingReadings && isStreaming);
+    }
+
     // -------------------------------------------------------------------------
     //      MODEL EVENT LISTENERS
     // -------------------------------------------------------------------------
 
+    /**
+     * 
+     */
     private void modelAddedNewSample() {
     	Arm leftArm = model.getNextSample().getLeftArm();
 
@@ -184,14 +217,21 @@ public class Renderer {
 
     // 'Refresh' button handler
     private void refreshButtonClicked() {
+        resetAfterButtonClicked();
         updateUIDisplaySerialPortsAvailable();
     }
 
 
     // 'Start' button handler
     private void connectButtonClicked() {
-    	
-    	count = 0;
+
+        resetAfterButtonClicked();
+
+        if (modelIsProcessingReadings) {
+            view.displayError("Wait until the file finished loading");
+            return;
+        }
+
         portName = view.getSelectedPort();
 
         if (portName == null) {
@@ -199,42 +239,36 @@ public class Renderer {
             return;
         }
 
-        if (!connect()) {
+        if (!connect() ) {
             view.displayError("Can not connect to port " + portName);
             return;
 
         }
 
-        view.displayError("");
         serialConnected = true;
-        view.enableConnectButton(false);
-        view.enableCloseConnectionButton(true);
-        view.enableStreamButton(true);
-        view.enableStopStreamingButtons(false);
+        updateUIButtons();
     }
 
     // 'Stop' button handler
     private void closeConnectionButtonClicked() {
+        resetAfterButtonClicked();
+
         stopSerialListener();
         closeConnection();
 
         serialConnected = false;
-        view.enableConnectButton(true);
-        view.enableCloseConnectionButton(false);
-        view.enableStreamButton(false);
-        view.enableStopStreamingButtons(false);
+        updateUIButtons();
     }
 
     // 'Load File' button handler
     private void loadFileButtonClicked() {
-    	count = 0;
+
+        resetAfterButtonClicked();
 
         if (view.getSelectedCanvas().equals("None")) {
             view.displayError("You must select a rendering style");
             return;
         }
-
-        view.displayError("");
 
         JFileChooser fileChooser = new JFileChooser();
         File selectedFile;
@@ -246,9 +280,8 @@ public class Renderer {
             return;
         }
 
-        view.enableLoadFileButton(false);
-        view.enableStreamButton(false);
-        view.enableStopStreamingButtons(false);
+        modelIsProcessingReadings = true;
+        updateUIButtons();
 
         // TODO: make the thread a private class that extends thread
         // Spawn a new thread for reading from the file
@@ -285,11 +318,8 @@ public class Renderer {
             }
             view.finalRender();
 
-            view.enableLoadFileButton(true);
-            if (serialConnected) {
-                view.enableStreamButton(true);
-                view.enableStopStreamingButtons(false);
-            }
+            modelIsProcessingReadings = false;
+            updateUIButtons();
 
         })).start();
         
@@ -298,17 +328,20 @@ public class Renderer {
     // 'Stream from Arduino' button handler
     private void streamFromArduinoButtonClicked() {
 
-    	count = 0;
+        resetAfterButtonClicked();
+
+        if (view.getSelectedCanvas().equals("None")) {
+            view.displayError("You must select a rendering style");
+            return;
+        }
 
         // stop any preexisting listener
         stopSerialListener();
 
-        view.displayError("");
+        modelIsProcessingReadings = true;
+        isStreaming = true;
+        updateUIButtons();
 
-        view.enableCloseConnectionButton(false);
-        view.enableLoadFileButton(false);
-        view.enableStreamButton(false);
-        view.enableStopStreamingButtons(true);
 
         serialListener = new SerialListener((message) -> {
             List<Sample> samples = Sample.parseMessage(message);
@@ -322,50 +355,61 @@ public class Renderer {
 
     // 'Stop Streaming' button handler
     private void stopStreamingButtonClicked() {
-    	count = 0;
-        view.displayError("");
+        resetAfterButtonClicked();
+
         stopSerialListener();
 
-        view.enableCloseConnectionButton(true);
-        view.enableLoadFileButton(true);
-        view.enableStreamButton(true);
-        view.enableStopStreamingButtons(false);
+        modelIsProcessingReadings = false;
+        isStreaming = false;
+        updateUIButtons();
 
         view.finalRender();
     }
 
     // Clear canvases button handler
     private void clearCanvases() {
-    	count = 0;
-        view.displayError("");
-        view.clearCanvas();
+        resetAfterButtonClicked();
+
+        // Check if the user has selected a rendering style
+        if (!view.getSelectedCanvas().equals("None")) {
+            view.clearCanvas();
+        } else{
+            view.displayError("You must select a rendering style");
+        }
     }
     
     // Save Canvases button handler
     private void saveCanvases() {
-    	count = 0;
-        view.displayError("");
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Choose a folder");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(false);
+        resetAfterButtonClicked();
 
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            String path = chooser.getSelectedFile().toString();
-            view.saveCanvas(path);
+        // Check if the user has selected a rendering style
+        if (!view.getSelectedCanvas().equals("None")) {
+            if (destinationPathSavedFile == null) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Choose a folder");
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(false);
+
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    destinationPathSavedFile = chooser.getSelectedFile().toString();
+                }
+            }
+
+            view.saveCanvas(destinationPathSavedFile);
+
+        } else{
+            view.displayError("You must select a rendering style");
         }
 
-    } 
+    }
 
     // Apply button handler
     private void changeCanvases() {
-        count = 0;
+        resetAfterButtonClicked();
 
-        // Check if the user has selected different rendering options for the left canvas
+        // Check if the user has selected a rendering style
         if (!view.getSelectedCanvas().equals("None")) {
             view.changeCanvasToUserSelection();
-            view.displayError("");
         } else{
             view.displayError("You must select a rendering style");
         }
@@ -407,11 +451,8 @@ public class Renderer {
                     if (Thread.interrupted()) return;
                 }
             } catch (IOException e) {
-
-                view.enableCloseConnectionButton(false);
-                view.enableLoadFileButton(false);
-                view.enableStreamButton(false);
-                view.enableStopStreamingButtons(false);
+                serialConnected = false;
+                updateUIButtons();
 
                 view.displayError("Connection with Arduino was interrupted");
             }
