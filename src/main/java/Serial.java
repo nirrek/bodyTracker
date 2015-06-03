@@ -86,7 +86,6 @@ public class Serial {
     public String getNextMessage() throws IOException {
         StringBuilder message = new StringBuilder();
 
-        // TODO double check the EOS return value
         String line = in.readLine();
         while ((line != null)) {
             if (line.equals(messageBoundary)) break;

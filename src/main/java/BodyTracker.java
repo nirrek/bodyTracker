@@ -27,7 +27,7 @@ public class BodyTracker{
 		ImageIcon logoImage  = new ImageIcon(loader.getResource("logoTranslucent.png"));
 		ImageIcon refreshImage  = new ImageIcon(loader.getResource("refresh.png"));
 
-		// Pass container view and model to the Renderer
+		// Pass container view, images, and model to the Renderer
 		BodyTrackerContainer container = new BodyTrackerContainer(main.getContentPane(), logoImage, refreshImage);
 		Modeler model = new Modeler();
 		Renderer rendererController = new Renderer(model, container);

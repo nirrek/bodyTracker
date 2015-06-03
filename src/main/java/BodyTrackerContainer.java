@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * The container view for the application.
- * This class abstract the view hierarchy to the renderer.
+ * This class abstract the view hierarchy to the Renderer.
  */
 public class BodyTrackerContainer {
 
@@ -82,7 +82,7 @@ public class BodyTrackerContainer {
         BoxLayout layout2 = new BoxLayout(controlPanelWrapper, BoxLayout.X_AXIS);
         controlPanelWrapper.setLayout(layout2);
         controlPanelWrapper.setOpaque(false);
-
+        // A wrapper for the connection panel (for layout purposes: it moves the panel to the top)
         JPanel wrapper = new JPanel(new FlowLayout());
         wrapper.setOpaque(false);
         wrapper.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -96,11 +96,12 @@ public class BodyTrackerContainer {
         canvasPanel.setOpaque(false);
         canvasPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+        // Add the logo to the canvas panel, it will be removed as soon as the user select a canvas
         JLabel logo = new JLabel(logoImage);
-        JPanel wrapperPanel = new JPanel(new GridBagLayout());
-        wrapperPanel.setOpaque(false);
-        wrapperPanel.add(logo);
-        canvasPanel.add(wrapperPanel);
+        JPanel logoWrapper = new JPanel(new GridBagLayout());
+        logoWrapper.setOpaque(false);
+        logoWrapper.add(logo);
+        canvasPanel.add(logoWrapper);
 
         // Add the canvas panel, the connection Panel, and the control Panel to the view container
         container.add(connectionPanelWrapper, BorderLayout.NORTH);
@@ -116,16 +117,20 @@ public class BodyTrackerContainer {
     private void setCanvasWidthAndHeight() {
         Dimension effectiveScreenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().
                 getMaximumWindowBounds().getSize();
+
         int windowWidth = Math.min(1920, effectiveScreenSize.width);
         int windowHeight = Math.min(1080 ,effectiveScreenSize.height);
         int controlWidth = getControlsView().getPanel().getPreferredSize().width;
         int connectionHeight = getConnectionView().getPanel().getPreferredSize().height;
+
         canvasWidth = windowWidth - controlWidth - 30;
         canvasHeight = windowHeight - connectionHeight - 25 - 20;
     }
 
     /**
      * Instantiates the 5 Processing applets that have been implemented to render the movements.
+     * And stores them in a map. The Processing applets need to be initiated before the main
+     * windows appears visible on screen (if not, unexplained layout and rendering behaviors happen)
      */
     private void initMapCanvases() {
         mapCanvases = new HashMap<>();
@@ -166,6 +171,9 @@ public class BodyTrackerContainer {
         return connectionView;
     }
 
+    /**
+     * @return the current canvas
+     */
     public RenderCanvas getCanvas() {
         return canvas;
     }
@@ -174,20 +182,42 @@ public class BodyTrackerContainer {
     //      METHODS CONNECTION VIEW
     // -------------------------------------------------------------------------
 
+    /**
+     * Fill the combo box in connection view with the content of the
+     * given array.
+     *
+     * @param availablePorts An array of port names available for serial connection
+     */
     public void fillAvailablePortsComboBox(ArrayList<String> availablePorts) {
         connectionView.getAvailablePortsComboBox().removeAllItems();
         for (String portName : availablePorts)
             connectionView.getAvailablePortsComboBox().addItem(portName);
     }
 
+    /**
+     * Get the item (String) currently selected on the combo box
+     * in connection view.
+     *
+     * @return The name of the port selected
+     */
     public String getSelectedPort() {
         return (String) connectionView.getAvailablePortsComboBox().getSelectedItem();
     }
 
+    /**
+     * Enable/disable the 'Connect' button
+     *
+     * @param enable: true if the button should be enabled, and false otherwise
+     */
     public void enableConnectButton(boolean enable) {
         connectionView.getConnectButton().setEnabled(enable);
     }
 
+    /**
+     * Enable/disable the 'Close Connection' button
+     *
+     * @param enable: true if the button should be enabled, and false otherwise
+     */
     public void enableCloseConnectionButton(boolean enable) {
         connectionView.getCloseConnectionButton().setEnabled(enable);
     }
@@ -196,38 +226,76 @@ public class BodyTrackerContainer {
     //      METHODS CONTROLS VIEW
     // -------------------------------------------------------------------------
 
+    /**
+     * Return the name of the canvas currently selected in the combo box
+     * in the control view.
+     *
+     * @return The name of the canvas selected
+     */
     public String getSelectedCanvas() {
         return (String) controlsView.getRenderingOptionComboBox().getSelectedItem();
     }
 
+    /**
+     * This function is called after the user has selected a different canvas and pressed
+     * the 'Apply' button in the control view.
+     * For layout reasons, we need to clear the canvas panel first, then assign the private
+     * variable 'canvas' to the running instance of the selected canvas.
+     */
     public void changeCanvasToUserSelection() {
+        // Retrieve user selection
         String selectedCanvas = getSelectedCanvas();
         RenderCanvasEnum canvasEnum = RenderCanvasEnum.getEnumForValue(selectedCanvas);
 
+        // Clear the old canvas before making the switch
         clearCanvas();
 
+        // Add new canvas to the canvas panel
         canvasPanel.removeAll();
         canvas = mapCanvases.get(canvasEnum);
         canvasPanel.add(canvas);
         canvasPanel.validate();
 
+        // Draw the human (only applicable for the 2D Side & Front views)
         canvas.drawModelWithArm();
 
+        // Disable 'Apply' button until user make a new selection
         controlsView.getApplyButton().setEnabled(false);
     }
 
+    /**
+     * Enable/disable the 'Load File' button
+     *
+     * @param enable: true if the button should be enabled, and false otherwise
+     */
     public void enableLoadFileButton(boolean enable) {
         controlsView.getLoadFromFileButton().setEnabled(enable);
     }
 
+    /**
+     * Enable/disable the 'Start Streaming' button
+     *
+     * @param enable: true if the button should be enabled, and false otherwise
+     */
     public void enableStreamButton(boolean enable) {
         controlsView.getStreamButton().setEnabled(enable);
     }
 
+    /**
+     * Enable/disable the 'Stop Streaming' button
+     *
+     * @param enable: true if the button should be enabled, and false otherwise
+     */
     public void enableStopStreamingButtons(boolean enable) {
         controlsView.getStopStreamingButton().setEnabled(enable);
     }
 
+    /**
+     * Display an error message to the user in the text area at the bottom
+     * of the control view.
+     *
+     * @param error: The message to be displayed.
+     */
     public void displayError(String error) {
         controlsView.getLogsTextArea().setText(error);
     }
@@ -236,31 +304,44 @@ public class BodyTrackerContainer {
     //      METHODS CANVASES
     // -------------------------------------------------------------------------
 
+    /**
+     * Save the canvas currently on screen as a JPG. Save to the folder with
+     * absolute path 'path'.
+     *
+     * @param path The path to the folder where image is saved.
+     */
     public void saveCanvas(String path) {
         if (canvas != null) {
-            canvas.save(path+"/"+getSelectedCanvas());
+            canvas.save(path + "/" + getSelectedCanvas());
         }
     }
 
+    /**
+     * Clear the canvas, ie remove the drawings of the arm movements and
+     * display a black canvas.
+     */
     public void clearCanvas() {
         if (canvas != null) {
             canvas.clearCanvas();
         }
     }
 
+    /**
+     * Kill instances of the canvases in mapCanvases.
+     */
     public void destroyCanvases() {
         for (RenderCanvas canvas : mapCanvases.values()) {
             canvas.destroy();
         }
     }
 
+    /**
+     * Creates the final render in high quality (only applies to the 3D skecth)
+     */
     public void finalRender() {
         if (canvas != null) {
             canvas.finalRender();
         }
     }
 
-    public Container getContainer() {
-        return container;
-    }
 }
