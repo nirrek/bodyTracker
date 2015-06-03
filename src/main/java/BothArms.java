@@ -15,10 +15,16 @@
 			this.rightArm = rightArm;
 		}
 		
+		/**
+		 * Returns the left Arm object
+		 */
 		public Arm getLeftArm(){
 			return leftArm;
 		}
 		
+		/**
+		 * Returns the right Arm object
+		 */
 		public Arm getRightArm(){
 			return rightArm;
 		}

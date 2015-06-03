@@ -163,15 +163,6 @@ public class RenderGenerativeArt extends RenderCanvas{
 	 
 	// pattern3 draws hundreds and thousands food dressing
 	public void pattern3() {
-//	  strokeWeight(0.5f);
-//	  for (int i = 0; i < 5; i++) {
-//	    // Randomise the colours during each frame
-//	    stroke(random(0,255), random(0,255), random(0,255));
-//	    // Draw a line of various lengths at the mouse point 
-//	    line(random(xCo, xCo+offset), random(yCo, yCo+offset),
-//	         random(prevX, prevX+offset), random(prevY, prevY+offset));
-		//	    offset = offset+10;
-		//	  }
 
 
 
@@ -180,13 +171,9 @@ public class RenderGenerativeArt extends RenderCanvas{
 		float green = dist(xCo, yCo, canvasWidth/2, canvasHeight/2);
 
 		float speed = dist(prevX, prevY, xCo, yCo);
-	//	float alpha = map(speed, 0, 20, 0, 5);
 		float lineWidth = map(speed, 0, 10, 10, 1);
 		lineWidth = constrain(lineWidth, 0, 10);//magic!!
 
-//		noStroke();
-//		fill(0, alpha);
-//		rect(0, 0, width, height);
 		stroke(red, green, blue, 255);
 		strokeWeight(lineWidth);
 		line(prevX, prevY, xCo, yCo);

@@ -103,18 +103,10 @@ public class Digital2DSketch extends RenderCanvas{
 	 * canvas size is limited. */
 	public void render(Point2D from, Point2D to)  {
 		
-		render = true;		
-//		xCo = (float)to.getX() * count ;
-//		yCo = (float)to.getY() * count ;
+		render = true;
 		
 		xCo = (float)to.getX() ;
 		yCo = (float)to.getY() ;
-		
-//		count ++;
-//		
-//		if(count > 9) {
-//			count = 3;
-//		}
 	}
 	
 
