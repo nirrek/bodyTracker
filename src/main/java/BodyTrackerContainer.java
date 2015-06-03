@@ -39,7 +39,6 @@ public class BodyTrackerContainer {
         JPanel connectionPanelWrapper = new JPanel();
         BoxLayout layout = new BoxLayout(connectionPanelWrapper, BoxLayout.Y_AXIS);
         connectionPanelWrapper.setLayout(layout);
-        //connectionPanelWrapper.setBackground(StyleClass.COLOR_LIGHT_GREEN);
         connectionPanelWrapper.setOpaque(false);
         connectionPanelWrapper.add(connectionView.getPanel());
         connectionPanelWrapper.add(new JSeparator(SwingConstants.HORIZONTAL));

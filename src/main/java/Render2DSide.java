@@ -19,12 +19,12 @@ public class Render2DSide extends RenderCanvas {
 
 	public Render2DSide(int canvasWidth, int canvasHeight) {
 		super(canvasWidth, canvasHeight);
-		//set rebase point
+		//set rebase point for the arm to be rendered
 		this.rebasePoint = new Point2D(canvasWidth/2, canvasHeight /2 - 150);
-	//	this.rebasePoint = new Point2D(canvasWidth/2, yPos - rectHeight / 2 + 20);
 	}
 
 	public void setup() {
+		//use this array to store the previous lines drawn to give the illusion of a 3dimensional trace.
 		lines = new ArrayList<Line>();
 
 		size(canvasWidth, canvasHeight);
@@ -32,7 +32,7 @@ public class Render2DSide extends RenderCanvas {
 
 	public void drawModelWithArm() {
 		drawModel();
-		//draw right arm.
+		//draw the arm
 		stroke(249, 226, 210);
 		line(xPos, yPos - rectHeight / 2 + 20, xPos - rectWidth / 5,
 				yPos + rectHeight / 2 - 30);
@@ -40,6 +40,7 @@ public class Render2DSide extends RenderCanvas {
 
 	public void draw() {
 		noLoop();
+		/* only draw the model when the canvas is selected */
 		if (firstTime == 1) {
 			drawModelWithArm();
 		}
@@ -101,21 +102,21 @@ public class Render2DSide extends RenderCanvas {
 		rect(xPos, yPos - 150, 30, 30);
 		fill(0);
 		//eyes
-		ellipse(xPos - 50, yPos - 215, 9, 9);
+		ellipse(xPos + 50, yPos - 215, 9, 9);
 
 		//mouth
-		rect(xPos-  50, yPos - 175, 30, 4);
+		rect(xPos +  50, yPos - 175, 30, 4);
 		
 		stroke(247, 201, 170);
 		strokeWeight(45);
 		
 		//left leg
-		line(xPos - rectWidth/2 + 50, yPos + rectHeight/2 , 
-				xPos - rectWidth/2 - 10, yPos + rectHeight/2 + 230);
+		line(xPos - rectWidth/3 + 5  , yPos + rectHeight/2 ,
+				xPos - rectWidth/3 + 5 , yPos + rectHeight/2 + 230);
 
 		//right  leg
-		line(xPos + rectWidth/2 - 22, yPos + rectHeight/2 , 
-				xPos + rectWidth/2 - 20, yPos + rectHeight/2 + 230);
+		line(xPos - rectWidth/3 + 35, yPos + rectHeight/2 ,
+				xPos + rectWidth/2 , yPos + rectHeight/2 + 230);
 	}
 
     public void finalRender() {}

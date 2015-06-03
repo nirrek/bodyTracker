@@ -57,5 +57,9 @@ public class Sample {
 
         return samples;
     }
+
+    public int getID() {
+        return sensorId;
+    }
     
 }

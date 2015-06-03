@@ -191,21 +191,21 @@ public class Renderer {
      * 
      */
     private void modelAddedNewSample() {
-    	Arm leftArm = model.getNextSample().getLeftArm();
+    	Arm rightArm = model.getNextSample().getRightArm();
 
     	if (view.getCanvas() != null) {
     		/* front 2d view canvas */
-    		if (view.getCanvas() instanceof Render2DFront) {
-    			view.getCanvas().drawArm(leftArm, "front");
+    		if (view.getCanvas() instanceof Render2DSide) {
+    			view.getCanvas().drawArm(rightArm, "side");
     			/* digital 3d canvas - want to slow down sampling, so only
     			 * using every 5 samples */
     		} else if (view.getCanvas() instanceof Digital3DSketch) {
     			if (count % 5 == 0) {
-    				view.getCanvas().drawArm(leftArm, "side");
+    				view.getCanvas().drawArm(rightArm, "front");
     			}
     			count++;
     		}	else { /* regular canvas */
-    			view.getCanvas().drawArm(leftArm, "side");
+    			view.getCanvas().drawArm(rightArm, "front");
     		}
     	}
 
@@ -303,9 +303,13 @@ public class Renderer {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    SwingUtilities.invokeLater(() -> {
-                        model.newSensorReading(samples.get(0));
-                    });
+
+                    //only process the samples from the bNo
+                    if (samples.get(0).getID() == 2) {
+                        SwingUtilities.invokeLater(() -> {
+                            model.newSensorReading(samples.get(0));
+                        });
+                    }
                 }
             }
 

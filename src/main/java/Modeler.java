@@ -18,10 +18,8 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	private double shoulderToElbow;
 	private double startLeftPitch;
 	private double startLeftRoll;
-	//private double startLeftYaw;
 	private double startRightPitch;
 	private double startRightRoll;
-	//private double startRightYaw;
 	private Point3D leftShoulder;
 	private Point3D rightShoulder;
 
@@ -38,10 +36,8 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		shoulderToElbow = 300;//TODO:Make this dynamic
 		startLeftPitch = 0;//TODO: Make these inputs!
 		startLeftRoll = 0;//-90;
-		//startLeftYaw = 0;
 		startRightPitch = 0;//Shoulder forwards/backwards
 		startRightRoll = 0;//90;//Shoulder up/down
-		//startRightYaw = 0;//Theoretically unused
 		leftShoulder = new Point3D(0, 0, 0);//TODO: Dynamic again
 		rightShoulder = new Point3D(0, 0, 0);
 		BothArms currentArms = new BothArms(new Arm(leftShoulder, 0, -shoulderToElbow, 0, 0, -elbowToWrist, 0, true),
@@ -50,43 +46,6 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 
 		iterationUpTo = 0;
 	}
-
-	//TODO calibration step
-	//TODO work out position from orientation of sensors
-
-//	public void advanceIteration(double leftPitch, double leftRoll, double leftYaw, double rightPitch,
-//			double rightRoll, double rightYaw){
-//
-//		double currentLeftPitch = leftPitch - startLeftPitch;
-//		double currentLeftRoll = leftRoll - startLeftRoll;
-//		//double currentLeftYaw = leftYaw - startLeftYaw;
-//		double currentRightPitch = rightPitch - startRightPitch;
-//		double currentRightRoll = rightRoll - startRightRoll;
-//		//double currentRightYaw = rightYaw - startRightYaw;
-//
-//		double lEX = shoulderToElbow * sine(currentLeftRoll) * sine(currentLeftPitch);//Forwards/back
-//		double lEY = shoulderToElbow * sine(currentLeftRoll) * cosine(currentLeftPitch);//Up down
-//		double lEZ = shoulderToElbow * sine(currentLeftRoll);//Z being left/right
-//
-//		double rEX = shoulderToElbow * sine(currentRightRoll) * sine(currentRightPitch);
-//		double rEY = shoulderToElbow * sine(currentRightRoll) * cosine(currentRightPitch);
-//		double rEZ = -shoulderToElbow * sine(currentRightRoll);
-//
-//		double lWX = elbowToWrist * sine(-90) * sine(0);
-//		double lWY = -elbowToWrist * sine(-90) * cosine(0);
-//		double lWZ = elbowToWrist * cosine(-90);
-//
-//		double rWX = elbowToWrist * sine(-90) * sine(0);
-//		double rWY = elbowToWrist * sine(-90) * cosine(0);
-//		double rWZ = -elbowToWrist * cosine(-90);
-//
-//		Arm newLeftArm = new Arm(leftShoulder, lEX, lEY, lEZ, lWX, lWY, lWZ, true);
-//		Arm newRightArm = new Arm(rightShoulder, rEX, rEY, rEZ, rWX, rWY, rWZ, false);
-//		BothArms currentArms = new BothArms(newLeftArm, newRightArm);
-//		pastArms.add(currentArms);
-//
-//		this.emit(NEW_SAMPLE);
-//	}
 
 	/**
 	 * Computes an arm's position using the specified sensor sample. The new
@@ -108,7 +67,7 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 
 		// Upper arm
 		double upperX = shoulderToElbow * sine(roll) * sine(pitch); // Forwards/back
-		double upperY = (sign) * shoulderToElbow * sine(roll) * cosine(pitch); // Up down
+		double upperY = shoulderToElbow * sine(roll) * cosine(pitch); // Up down
 		double upperZ = (-sign) * shoulderToElbow * cosine(roll);			// Z being left/right
 
 		// Lower arm
@@ -145,14 +104,14 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 	// TODO: (Kerrin) might be better to rename Sample => SensorReading
 
 	/**
-	 * Adds a new arm position when only a left arm sample is available.
+	 * Adds a new arm position when only a right arm sample is available.
 	 * Right now the shirt is only using a single sensor, so we want the modeler
 	 * to work under those conditions as well.
-	 * @param leftArmSample The sensor reading for the left arm.
+	 * @param leftArmSample The sensor reading for the right arm.
 	 */
-	public void newSensorReading(Sample leftArmSample) {
-		Arm leftArm = computeNewArmPosition(leftArmSample, true);
-		BothArms arms = new BothArms(leftArm, null);
+	public void newSensorReading(Sample rightArmSample) {
+		Arm rightArm = computeNewArmPosition(rightArmSample, false);
+		BothArms arms = new BothArms(null, rightArm);
 		pastArms.add(arms);
 		this.emit(NEW_SAMPLE);
 	}
@@ -247,8 +206,9 @@ public class Modeler extends EventEmitter implements Iterable<BothArms> {
 		return pastArms.iterator();
 	}
 
-	// number of past arms calculated
-	// mainly used for unit testing
+	/**
+	 * Returns the number of arm calculations done so far
+	 */
 	public int pastArmsCount() {
 		return pastArms.size();
 	}

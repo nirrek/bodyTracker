@@ -62,7 +62,10 @@ public class ConnectionView extends EventEmitter {
     public JComboBox getAvailablePortsComboBox() { return availablePortsComboBox; }
     public JButton getConnectButton() { return connectButton; }
     public JButton getCloseConnectionButton() { return closeConnectionButton; }
-
+    
+    /**
+     * Return the JPanel assosiated with the view
+     */
     public JPanel getPanel() {
         return connectionPanel;
     }
